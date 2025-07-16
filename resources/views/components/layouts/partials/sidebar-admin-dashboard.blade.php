@@ -1,0 +1,27 @@
+<ul class="menu">
+    <li class="sidebar-title">Menu</li>
+
+    <li class="sidebar-item {{ Request::routeIs('admin.dashboard') ? 'active' : '' }}">
+        <!-- Arahkan ke rute dashboard admin yang benar -->
+        <a href="{{ route('admin.dashboard') }}" wire:navigate class='sidebar-link'>
+            <i class="bi bi-grid-fill"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+
+    {{-- Master Setting --}}
+    <!-- Gunakan 'admin.master-user.*' untuk mencocokkan SEMUA rute di dalam grup master-user -->
+    <li class="sidebar-item has-sub {{ Request::routeIs('admin.master-user.*') ? 'active' : '' }}">
+        <a href="#" class='sidebar-link'>
+            <i class="bi bi-person-gear"></i>
+            <span>Master Settings</span>
+        </a>
+
+        <ul class="submenu">
+            <!-- Gunakan nama rute yang benar: 'admin.master-user.users' -->
+            <li class="submenu-item">
+                <a href="{{ route('admin.master-user.users') }}" wire:navigate class="submenu-link">Config Settings</a>
+            </li>
+        </ul>
+    </li>
+</ul>

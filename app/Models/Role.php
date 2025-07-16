@@ -1,26 +1,47 @@
 <?php
 
-namespace App\Models\admin;
+namespace App\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Role extends Model
 {
     use HasFactory;
 
+    /**
+     * Menentukan bahwa model ini tidak menggunakan kolom timestamp (created_at & updated_at).
+     * Ini penting karena tabel 'roles' di migrasi Anda tidak memilikinya.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
+     * Atribut yang dapat diisi secara massal (mass assignable).
+     * Ini adalah daftar kolom yang boleh diisi saat membuat atau mengupdate data
+     * menggunakan metode seperti Role::create([...]).
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'nama',
-        'description'
+        'name',
+        'keterangan',
     ];
 
-    public function admins()
+    /**
+     * Mendefinisikan relasi "hasMany" (satu Role memiliki banyak User).
+     *
+     * Fungsi ini akan mengembalikan semua user yang memiliki role ini.
+     * Nama fungsi 'users' (plural) adalah konvensi untuk relasi hasMany.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function users(): HasMany
     {
-        return $this->hasMany(Admin::class, 'roles_id');
-    }
-    public function userRole()
-    {
+        // Parameter kedua ('roles_id') adalah nama foreign key di tabel 'users'.
+        // Kita perlu menentukannya secara eksplisit di sini.
         return $this->hasMany(User::class, 'roles_id');
     }
 }

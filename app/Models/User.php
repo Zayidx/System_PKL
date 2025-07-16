@@ -4,29 +4,32 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Atribut yang dapat diisi secara massal (mass assignable).
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'username',
         'email',
         'password',
+        'foto',
+        'roles_id', // Foreign key harus dimasukkan ke fillable agar bisa diisi saat create user
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * Atribut yang harus disembunyikan saat model diubah menjadi array atau JSON.
+     * Ini adalah langkah keamanan untuk mencegah data sensitif seperti password terekspos.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -34,15 +37,28 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Atribut yang harus di-cast ke tipe data tertentu.
+     * Di sini, kita memastikan bahwa setiap kali kita set atribut 'password',
+     * Laravel akan secara otomatis melakukan hashing.
      *
-     * @return array<string, string>
+     * @var array<string, string>
      */
-    protected function casts(): array
+    protected $casts = [
+        'password' => 'hashed',
+    ];
+
+    /**
+     * Mendefinisikan relasi "belongsTo" (satu User milik satu Role).
+     *
+     * Fungsi ini akan mengembalikan role dari user yang bersangkutan.
+     * Nama fungsi 'role' (singular) adalah konvensi untuk relasi belongsTo.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function role(): BelongsTo
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        // Parameter kedua ('roles_id') adalah nama foreign key di tabel 'users' ini.
+        // Parameter ketiga ('id') adalah primary key di tabel 'roles'.
+        return $this->belongsTo(Role::class, 'roles_id', 'id');
     }
 }

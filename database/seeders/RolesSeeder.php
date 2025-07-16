@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class RolesSeeder extends Seeder
 {
@@ -12,6 +13,22 @@ class RolesSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        // Menggunakan Query Builder untuk memasukkan data
+        // Ini adalah cara yang efisien untuk seeding data statis
+        DB::table('roles')->insert([
+            [
+                'name' => 'superadmin',
+                'keterangan' => 'Administrator Sistem',
+            ],
+            [
+                'name' => 'user',
+                'keterangan' => 'Pengguna Biasa',
+            ],
+            // Tambahkan role lain jika perlu
+            // [
+            //     'name' => 'Editor',
+            //     'keterangan' => 'Bisa mengedit konten',
+            // ],
+        ]);
     }
 }
