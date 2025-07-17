@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\OtpController;
+use App\Livewire\HomePage;
 use Illuminate\Support\Facades\Route;
 
 // Import semua komponen Livewire yang akan digunakan di rute
@@ -22,9 +23,7 @@ use App\Livewire\User\Dashboard as UserDashboard;
 */
 
 // Rute default, mengarahkan ke halaman login
-Route::get("/", function () {
-    return view("welcome");
-});
+    Route::get('/', HomePage::class)->name('homepage');
 
 // Grup untuk tamu (pengguna yang BELUM login)
 // Middleware 'guest' akan mengarahkan pengguna yang sudah login ke home/dashboard

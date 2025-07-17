@@ -106,7 +106,13 @@ class UserDashboard extends Component
         $this->isModalOpen = true;
     }
 
-    public function edit($id)
+/*************  ✨ Windsurf Command ⭐  *************/
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+/*******  aedcc3f4-77c3-4ee2-b6f4-882204c9672c  *******/    public function edit($id)
     {
         $user = User::findOrFail($id);
         $this->userId = $id;

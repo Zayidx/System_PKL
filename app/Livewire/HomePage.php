@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Livewire\User;
+namespace App\Livewire;
 
 use Illuminate\Support\Facades\Auth; // Import Auth facade
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-class Dashboard extends Component
+class HomePage extends Component
 {
-    #[Layout("components.layouts.layout-user-dashboard")]
+    #[Layout("components.layouts.layout-homepage")]
 
-    // Properti publik untuk menyimpan data pengguna
     public $user;
 
     /**
@@ -22,9 +21,8 @@ class Dashboard extends Component
         // Mengambil seluruh data pengguna yang terotentikasi
         $this->user = Auth::user();
     }
-
     public function render()
     {
-        return view('livewire.user.dashboard');
+        return view('livewire.home-page');
     }
 }
