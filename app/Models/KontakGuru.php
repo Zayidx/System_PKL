@@ -8,24 +8,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /*
 |--------------------------------------------------------------------------
-| Model: KepalaProgram
+| Model: KontakGuru
 |--------------------------------------------------------------------------
 */
-class KepalaProgram extends Model
+class KontakGuru extends Model
 {
     use HasFactory;
-    protected $table = 'kepala_program';
-    protected $primaryKey = 'nip_kepala_program';
+    protected $table = 'kontak_guru';
     public $timestamps = false;
-    protected $fillable = ['nip_guru', 'id_jurusan', 'nama_kepala_program'];
+    protected $fillable = ['id_guru', 'kontak'];
 
     public function guru(): BelongsTo
     {
-        return $this->belongsTo(Guru::class, 'nip_guru', 'nip_guru');
-    }
-
-    public function jurusan(): BelongsTo
-    {
-        return $this->belongsTo(Jurusan::class, 'id_jurusan', 'id_jurusan');
+        return $this->belongsTo(Guru::class, 'id_guru', 'nip_guru');
     }
 }

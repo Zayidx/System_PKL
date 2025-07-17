@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
         // 2. Buat User Admin (Superadmin)
         User::create([
             'username' => 'superadmin',
-            'email' => 'superadmin@example.com',
+            'email' => 'faridgaming15@gmail.com',
             'password' => Hash::make('password'), // Ganti dengan password yang aman
             'foto' => 'profile.jpg',
             'roles_id' => $adminRole->id, // Gunakan ID dari role superadmin

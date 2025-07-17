@@ -24,4 +24,16 @@
             </li>
         </ul>
     </li>
+    <li class="sidebar-item">
+        {{-- Form ini akan mengirim request POST ke route 'logout' saat link di dalamnya diklik --}}
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <a href="{{ route('logout') }}"
+               onclick="event.preventDefault(); this.closest('form').submit();"
+               class='sidebar-link'>
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Logout</span>
+            </a>
+        </form>
+    </li>
 </ul>

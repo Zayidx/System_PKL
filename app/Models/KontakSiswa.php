@@ -8,19 +8,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /*
 |--------------------------------------------------------------------------
-| Model: StaffHubin
+| Model: KontakSiswa
 |--------------------------------------------------------------------------
 */
-class StaffHubin extends Model
+class KontakSiswa extends Model
 {
     use HasFactory;
-    protected $table = 'staff_hubin';
-    protected $primaryKey = 'nip_staff';
+    protected $table = 'kontak_siswa';
     public $timestamps = false;
-    protected $fillable = ['user_id', 'nama_staff'];
+    protected $fillable = ['nis_siswa', 'kontak'];
 
-    public function user(): BelongsTo
+    public function siswa(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'id');
+        return $this->belongsTo(Siswa::class, 'nis_siswa', 'nis');
     }
 }

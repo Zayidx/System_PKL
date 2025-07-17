@@ -9,10 +9,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('perusahaan', function (Blueprint $table) {
+
             $table->tinyIncrements('id_perusahaan');
             $table->string('nama_perusahaan', 50);
             $table->text('alamat_perusahaan');
             $table->string('email_perusahaan', 50)->nullable();
+            $table->string('logo_perusahaan')->nullable();
         });
 
         Schema::create('pembimbing_perusahaan', function (Blueprint $table) {

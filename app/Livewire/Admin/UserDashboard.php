@@ -1,4 +1,13 @@
 <?php
+// =========================================================================================
+// FILE LOGIC LIVEWIRE: Komponen UserDashboard (Versi Perbaikan Lanjutan)
+// Path: app/Livewire/Admin/UserDashboard.php
+// ANALISIS PERUBAHAN:
+// 1. [PERBAIKAN] Aturan validasi untuk 'foto' diubah menjadi kondisional.
+//    - 'required' saat membuat user baru (untuk mengatasi error SQL).
+//    - 'nullable' saat mengedit user yang sudah ada.
+// 2. [PERBAIKAN] Menambahkan pesan validasi untuk 'foto.required'.
+// =========================================================================================
 
 namespace App\Livewire\Admin;
 
@@ -6,162 +15,205 @@ use Livewire\Component;
 use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Hash;
+use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\On;
 
+#[Layout("components.layouts.layout-admin-dashboard")]
 class UserDashboard extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, WithPagination;
+    protected $paginationTheme = 'bootstrap';
     #[Title("Manajemen User")]
-    #[Layout("components.layouts.layout-admin-dashboard")]
-    // Properti untuk state modal dan form
-    public $isModalOpen = false;
-    public $userId, $username, $email, $password, $foto, $existingFoto, $roles_id;
-    public $roles;
 
-    // Aturan validasi
+    public $isModalOpen = false;
+    public $userId, $username, $email, $password, $password_confirmation, $foto, $existingFoto;
+    
+    public $roles_id = null;
+
+    public $roles;
+    public $search = '';
+    public $perPage = 10;
+
     protected function rules()
     {
+        $passwordRule = $this->userId ? 'nullable|string|min:8|confirmed' : 'required|string|min:8|confirmed';
+        
+        // [PERBAIKAN] Foto wajib diisi saat membuat user baru (userId null), opsional saat edit.
+        $fotoRule = $this->userId ? 'nullable|image|max:2048' : 'required|image|max:2048';
+
         return [
             'username' => ['required', 'string', 'max:60', Rule::unique('users')->ignore($this->userId)],
             'email' => ['required', 'string', 'email', 'max:60', Rule::unique('users')->ignore($this->userId)],
-            'password' => $this->userId ? 'nullable|string|min:8' : 'required|string|min:8',
-            'foto' => $this->userId ? 'nullable|image|max:2048' : 'required|image|max:2048', // 2MB Max
+            'password' => $passwordRule,
+            'password_confirmation' => $this->userId ? 'nullable' : 'required_with:password',
+            'foto' => $fotoRule,
             'roles_id' => 'required|exists:roles,id',
         ];
     }
 
-    // Pesan validasi kustom
-    protected $messages = [
-        'username.required' => 'Username tidak boleh kosong.',
-        'email.required' => 'Email tidak boleh kosong.',
-        'email.email' => 'Format email tidak valid.',
-        'password.required' => 'Password tidak boleh kosong.',
-        'foto.required' => 'Foto tidak boleh kosong.',
-        'foto.image' => 'File harus berupa gambar.',
-        'roles_id.required' => 'Role harus dipilih.',
-    ];
+    protected function messages()
+    {
+        return [
+            'username.required' => 'Username wajib diisi.',
+            'username.unique' => 'Username ini sudah digunakan.',
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email ini sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'roles_id.required' => 'Peran (role) wajib dipilih.',
+            'foto.required' => 'Foto profil wajib diunggah.', // [PERBAIKAN] Pesan untuk foto wajib diisi.
+            'foto.image' => 'File harus berupa gambar.',
+            'foto.max' => 'Ukuran gambar maksimal 2MB.',
+        ];
+    }
 
-    // Method yang dipanggil saat komponen pertama kali dimuat
     public function mount()
     {
         $this->roles = Role::all();
     }
+    
+    public function updatingSearch()
+    {
+        $this->resetPage();
+    }
 
-    // Method untuk merender view komponen
     public function render()
     {
+        $searchTerm = '%' . $this->search . '%';
+        $users = User::with('role')
+            ->where(function ($query) use ($searchTerm) {
+                $query->where('username', 'like', $searchTerm)
+                      ->orWhere('email', 'like', $searchTerm);
+            })
+            ->latest()
+            ->paginate($this->perPage);
+
         return view('livewire.admin.user-dashboard', [
-            'users' => User::with('role')->latest()->get()
+            'users' => $users
         ]);
     }
 
-    // Membuka modal untuk membuat user baru
     public function create()
     {
         $this->resetForm();
         $this->isModalOpen = true;
     }
 
-    // Membuka modal untuk mengedit user
     public function edit($id)
     {
         $user = User::findOrFail($id);
         $this->userId = $id;
         $this->username = $user->username;
         $this->email = $user->email;
-        $this->password = ''; // Kosongkan password
+        $this->password = '';
+        $this->password_confirmation = '';
         $this->existingFoto = $user->foto ? Storage::url($user->foto) : null;
         $this->roles_id = $user->roles_id;
         $this->isModalOpen = true;
     }
 
-    // Menyimpan data (baik user baru maupun yang diedit)
     public function store()
     {
-        $this->validate();
+        $validatedData = $this->validate();
 
-        $data = [
-            'username' => $this->username,
-            'email' => $this->email,
-            'roles_id' => $this->roles_id,
-        ];
-
-        // Handle password jika diisi
-        if (!empty($this->password)) {
-            $data['password'] = $this->password; // Model akan hash otomatis
+        if ($this->userId == auth()->id()) {
+            $this->dispatch('swal:error', [
+                'message' => 'Aksi tidak diizinkan. Anda tidak dapat mengubah data diri sendiri di halaman ini.'
+            ]);
+            return;
         }
 
-        // Handle upload foto
+        if ($this->userId) {
+            $userToUpdate = User::findOrFail($this->userId);
+            if ($userToUpdate->role->name == 'superadmin' && $validatedData['roles_id'] != $userToUpdate->roles_id) {
+                $superadminCount = User::whereHas('role', function ($query) {
+                    $query->where('name', 'superadmin');
+                })->count();
+
+                if ($superadminCount <= 1) {
+                    $this->dispatch('swal:error', [
+                        'message' => 'Aksi Gagal! Tidak dapat mengubah peran superadmin terakhir.'
+                    ]);
+                    return;
+                }
+            }
+        }
+        
+        $data = [
+            'username' => $validatedData['username'],
+            'email' => $validatedData['email'],
+            'roles_id' => $validatedData['roles_id'],
+        ];
+        if (!empty($validatedData['password'])) {
+            $data['password'] = Hash::make($validatedData['password']);
+        }
         if ($this->foto) {
-            // Hapus foto lama jika ada (saat update)
             if ($this->userId && $this->existingFoto) {
                 $oldPath = str_replace('/storage/', '', $this->existingFoto);
                 Storage::disk('public')->delete($oldPath);
             }
             $data['foto'] = $this->foto->store('fotos', 'public');
         }
-
-        // Update atau Create
         User::updateOrCreate(['id' => $this->userId], $data);
         
-        // Kirim notifikasi sukses
-        $this->dispatch('swal:alert', [
-            'type' => 'success',
-            'title' => 'Sukses!',
-            'text' => $this->userId ? 'User berhasil diperbarui.' : 'User berhasil ditambahkan.'
+        $this->dispatch('swal:success', [
+            'message' => $this->userId ? 'Data user berhasil diperbarui.' : 'User baru berhasil ditambahkan.'
         ]);
 
         $this->closeModal();
     }
-    
-    // Konfirmasi sebelum menghapus
-    public function confirmDelete($id)
-    {
-        $this->dispatch('swal:confirm', [
-            'type' => 'warning',
-            'title' => 'Anda yakin?',
-            'text' => 'Data yang dihapus tidak dapat dikembalikan!',
-            'id' => $id
-        ]);
-    }
 
-    // Menghapus user setelah konfirmasi
-    public function delete($id)
+    #[On('destroy')]
+    public function destroy($id)
     {
+        if ($id == auth()->id()) {
+            $this->dispatch('swal:error', [
+                'message' => 'Aksi tidak diizinkan. Anda tidak dapat menghapus akun Anda sendiri.'
+            ]);
+            return;
+        }
+
         $user = User::findOrFail($id);
+
+        if ($user->role->name == 'superadmin') {
+            $superadminCount = User::whereHas('role', function ($query) {
+                $query->where('name', 'superadmin');
+            })->count();
+
+            if ($superadminCount <= 1) {
+                $this->dispatch('swal:error', [
+                    'message' => 'Aksi Gagal! Tidak dapat menghapus superadmin terakhir.'
+                ]);
+                return;
+            }
+        }
+
         if ($user->foto) {
             Storage::disk('public')->delete($user->foto);
         }
         $user->delete();
 
-        $this->dispatch('swal:alert', [
-            'type' => 'success',
-            'title' => 'Dihapus!',
-            'text' => 'User berhasil dihapus.'
+        $this->dispatch('swal:success', [
+            'message' => 'Data user berhasil dihapus.'
         ]);
     }
 
-    // Menutup modal dan mereset form
     public function closeModal()
     {
         $this->isModalOpen = false;
         $this->resetForm();
     }
 
-    // Fungsi helper untuk mereset properti form
     private function resetForm()
     {
-        $this->userId = null;
-        $this->username = '';
-        $this->email = '';
-        $this->password = '';
-        $this->foto = null;
-        $this->existingFoto = null;
-        $this->roles_id = '';
+        $this->reset(['userId', 'username', 'email', 'password', 'password_confirmation', 'foto', 'existingFoto', 'roles_id']);
         $this->resetErrorBag();
     }
 }

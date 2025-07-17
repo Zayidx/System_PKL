@@ -2,55 +2,44 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
+
 /*
 |--------------------------------------------------------------------------
-| Model: Prakerin
+| Model: Pengajuan
 |--------------------------------------------------------------------------
 |
-| Model ini merepresentasikan tabel `prakerin`.
-| Berisi data siswa yang sedang atau telah melaksanakan prakerin.
+| Model ini merepresentasikan tabel `pengajuan`.
+| Berisi data pengajuan prakerin yang dilakukan oleh siswa.
 |
 */
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
-class Prakerin extends Model
+class Pengajuan extends Model
 {
     use HasFactory;
 
-    protected $table = 'prakerin';
-    protected $primaryKey = 'id_prakerin';
-    public $timestamps = false; // Menonaktifkan timestamps
+    protected $table = 'pengajuan';
+    protected $primaryKey = 'id_pengajuan';
+    public $timestamps = true; // Mengaktifkan timestamps created_at dan updated_at
 
     protected $fillable = [
         'nis_siswa',
-        'nip_pembimbing_sekolah',
-        'id_pembimbing_perusahaan',
         'id_perusahaan',
         'nip_kepala_program',
-        'tanggal_mulai',
-        'tanggal_selesai',
-        'keterangan',
+        'nip_staff',
+        'status_pengajuan',
+        'bukti_penerimaan',
     ];
 
     // Relasi ke model Siswa
     public function siswa(): BelongsTo
     {
         return $this->belongsTo(Siswa::class, 'nis_siswa', 'nis');
-    }
-
-    // Relasi ke model PembimbingSekolah
-    public function pembimbingSekolah(): BelongsTo
-    {
-        return $this->belongsTo(PembimbingSekolah::class, 'nip_pembimbing_sekolah', 'nip_pembimbing_sekolah');
-    }
-
-    // Relasi ke model PembimbingPerusahaan
-    public function pembimbingPerusahaan(): BelongsTo
-    {
-        return $this->belongsTo(PembimbingPerusahaan::class, 'id_pembimbing_perusahaan', 'id_pembimbing');
     }
 
     // Relasi ke model Perusahaan
@@ -63,5 +52,11 @@ class Prakerin extends Model
     public function kepalaProgram(): BelongsTo
     {
         return $this->belongsTo(KepalaProgram::class, 'nip_kepala_program', 'nip_kepala_program');
+    }
+
+    // Relasi ke model StaffHubin
+    public function staffHubin(): BelongsTo
+    {
+        return $this->belongsTo(StaffHubin::class, 'nip_staff', 'nip_staff');
     }
 }

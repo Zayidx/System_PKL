@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\OtpController;
 use Illuminate\Support\Facades\Route;
 
 // Import semua komponen Livewire yang akan digunakan di rute
@@ -27,11 +28,8 @@ Route::get("/", function () {
 
 // Grup untuk tamu (pengguna yang BELUM login)
 // Middleware 'guest' akan mengarahkan pengguna yang sudah login ke home/dashboard
-Route::middleware('guest')->group(function () {
     Route::get('/login', Login::class)->name('login');
     Route::get('/register', Register::class)->name('register');
-});
-
 
 // Grup untuk pengguna yang SUDAH login
 // Middleware 'auth' memastikan hanya pengguna terotentikasi yang bisa mengakses
@@ -66,5 +64,8 @@ Route::middleware('auth')->group(function () {
         // Route::get('/profile', UserProfile::class)->name('profile');
 
     });
+
+    Route::post('/send-otp', [OtpController::class, 'sendOtp']);
+
 
 });
