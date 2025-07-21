@@ -20,7 +20,7 @@ class Siswa extends Model
     public $incrementing = false; // Karena primary key bukan auto-increment
     protected $keyType = 'string'; // Tipe data primary key adalah string
     public $timestamps = false;
-    protected $fillable = ['nis', 'user_id', 'id_kelas', 'id_jurusan', 'nama_siswa', 'tempat_lahir', 'tanggal_lahir', 'id_perusahaan'];
+    protected $fillable = ['nis', 'user_id', 'id_kelas', 'id_jurusan', 'nama_siswa', 'tempat_lahir', 'tanggal_lahir', 'id_perusahaan','kontak_siswa'];
 
     public function user(): BelongsTo
     {
@@ -42,10 +42,7 @@ class Siswa extends Model
         return $this->belongsTo(Perusahaan::class, 'id_perusahaan', 'id_perusahaan');
     }
 
-    public function kontak(): HasMany
-    {
-        return $this->hasMany(KontakSiswa::class, 'nis_siswa', 'nis');
-    }
+   
     
     public function pengajuan(): HasMany
     {

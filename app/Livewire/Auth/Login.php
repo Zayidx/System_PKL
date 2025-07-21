@@ -27,9 +27,10 @@ class Login extends Component
     {
         if (Auth::check()) {
             $user = Auth::user();
-            if ($user->role && $user->role->name === 'superadmin') {
+            // Cek apakah sudah di dashboard, jika belum redirect
+            if (request()->route()->getName() !== 'admin.dashboard' && $user->role && $user->role->name === 'superadmin') {
                 return $this->redirect(route('admin.dashboard'), navigate: true);
-            } elseif ($user->role && $user->role->name === 'user') {
+            } elseif (request()->route()->getName() !== 'user.dashboard' && $user->role && $user->role->name === 'user') {
                 return $this->redirect(route('user.dashboard'), navigate: true);
             }
         }
@@ -100,6 +101,9 @@ class Login extends Component
                     Auth::logout();
                     return $this->redirect(route('login'));
                 }
+            } else {
+                $this->addError('credentials', 'User tidak ditemukan.');
+                return;
             }
         }
         $this->addError('otp', 'Kode OTP tidak valid atau telah kedaluwarsa.');
@@ -107,7 +111,7 @@ class Login extends Component
 
     public function cancelOtp()
     {
-        $this->reset('otp', 'showOtpForm');
+        $this->reset('otp', 'showOtpForm', 'email', 'password');
         $this->resetErrorBag();
     }
 

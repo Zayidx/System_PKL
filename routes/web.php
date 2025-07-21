@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 // Import semua komponen Livewire yang akan digunakan di rute
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
+use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\UserDashboard as AdminUserManagement; // Alias agar lebih jelas
 use App\Livewire\User\Dashboard as UserDashboard;
@@ -29,6 +30,7 @@ use App\Livewire\User\Dashboard as UserDashboard;
 // Middleware 'guest' akan mengarahkan pengguna yang sudah login ke home/dashboard
     Route::get('/login', Login::class)->name('login');
     Route::get('/register', Register::class)->name('register');
+    Route::get('/forgot-password', ForgotPassword::class)->name('forgot-password');
 
 // Grup untuk pengguna yang SUDAH login
 // Middleware 'auth' memastikan hanya pengguna terotentikasi yang bisa mengakses

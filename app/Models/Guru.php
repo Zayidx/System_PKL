@@ -18,15 +18,12 @@ class Guru extends Model
     protected $table = 'guru';
     protected $primaryKey = 'nip_guru';
     public $timestamps = false;
-    protected $fillable = ['nama_guru'];
+    protected $fillable = ['nama_guru','kontak_guru'];
+
 
     public function kepalaProgram(): HasOne
     {
         return $this->hasOne(KepalaProgram::class, 'nip_guru', 'nip_guru');
     }
 
-    public function kontak(): HasMany
-    {
-        return $this->hasMany(KontakGuru::class, 'id_guru', 'nip_guru');
-    }
 }
