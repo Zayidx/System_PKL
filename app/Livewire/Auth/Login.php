@@ -27,12 +27,23 @@ class Login extends Component
     {
         if (Auth::check()) {
             $user = Auth::user();
-            // Cek apakah sudah di dashboard, jika belum redirect
-            if (request()->route()->getName() !== 'admin.dashboard' && $user->role && $user->role->name === 'superadmin') {
-                return $this->redirect(route('admin.dashboard'), navigate: true);
-            } elseif (request()->route()->getName() !== 'user.dashboard' && $user->role && $user->role->name === 'user') {
-                return $this->redirect(route('user.dashboard'), navigate: true);
+            if ($user->role) {
+                $roleName = $user->role->name;
+                // PERUBAHAN: Arahkan 'admin' dan 'superadmin' ke dashboard admin.
+                if ($roleName === 'admin' || $roleName === 'superadmin') {
+                    return $this->redirect(route('admin.dashboard'), navigate: true);
+                } 
+                // PERUBAHAN: Arahkan 'user' ke dashboard user.
+                elseif ($roleName === 'user') {
+                    return $this->redirect(route('user.dashboard'), navigate: true);
+                }
             }
+            
+            // Jika user sudah login tapi rolenya tidak sesuai (atau tidak punya role),
+            // maka logout paksa dan kembalikan ke halaman login.
+            Auth::logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
         }
     }
 
@@ -50,8 +61,16 @@ class Login extends Component
             'password' => 'required',
         ]);
 
-        if (Auth::validate(['email' => $this->email, 'password' => $this->password])) {
-            $this->sendOtp();
+        $credentials = ['email' => $this->email, 'password' => $this->password];
+        $user = User::where('email', $this->email)->first();
+
+        // PERUBAHAN: Cek kredensial DAN pastikan user memiliki role yang diizinkan.
+        if ($user && Auth::validate($credentials)) {
+            if ($user->role && in_array($user->role->name, ['admin', 'superadmin', 'user'])) {
+                $this->sendOtp();
+            } else {
+                $this->addError('credentials', 'Anda tidak memiliki hak akses untuk masuk.');
+            }
         } else {
             $this->addError('credentials', 'Gagal masuk, email atau password salah!');
         }
@@ -67,7 +86,7 @@ class Login extends Component
             Mail::to($this->email)->send(new LoginOtpMail($otpCode));
             $this->showOtpForm = true;
             $this->reset('password');
-            $this->dispatch('otp-sent'); // Kirim event ke frontend
+            $this->dispatch('otp-sent');
         } catch (\Exception $e) {
             $this->addError('credentials', 'Gagal mengirim OTP. Pastikan konfigurasi email benar.');
             report($e);
@@ -92,17 +111,22 @@ class Login extends Component
                 Redis::del($redisKey);
                 request()->session()->regenerate();
 
-                // Logika pengalihan berdasarkan role pengguna
-                if ($user->role && $user->role->name === 'superadmin') {
+                // PERUBAHAN: Logika pengalihan disederhanakan untuk 'admin'/'superadmin' dan 'user'.
+                $roleName = $user->role->name;
+                if ($roleName === 'admin' || $roleName === 'superadmin') {
                     return $this->redirect(route('admin.dashboard'), navigate: true);
-                } elseif ($user->role && $user->role->name === 'user') {
+                } 
+                elseif ($roleName === 'user') {
                     return $this->redirect(route('user.dashboard'), navigate: true);
-                } else {
+                } 
+                // Ini seharusnya tidak terjadi karena sudah dicek di attemptLogin, tapi sebagai pengaman.
+                else {
                     Auth::logout();
                     return $this->redirect(route('login'));
                 }
             } else {
-                $this->addError('credentials', 'User tidak ditemukan.');
+                // Seharusnya tidak terjadi, tapi sebagai pengaman.
+                $this->addError('credentials', 'User tidak ditemukan setelah verifikasi OTP.');
                 return;
             }
         }
@@ -115,10 +139,6 @@ class Login extends Component
         $this->resetErrorBag();
     }
 
-    /**
-     * [PERBAIKAN] Menambahkan kembali fungsi logout.
-     * Fungsi ini akan dipanggil oleh rute /logout.
-     */
     public function logout()
     {
         Auth::logout();

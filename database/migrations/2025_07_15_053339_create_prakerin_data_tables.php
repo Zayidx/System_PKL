@@ -9,11 +9,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('pengajuan', function (Blueprint $table) {
-            $table->tinyIncrements('id_pengajuan');
+            $table->increments('id_pengajuan');
             $table->string('nis_siswa', 10);
-            $table->unsignedTinyInteger('id_perusahaan');
-            $table->unsignedTinyInteger('nip_kepala_program');
-            $table->unsignedTinyInteger('nip_staff');
+            // PERBAIKAN: Menyesuaikan semua tipe data foreign key
+            $table->unsignedInteger('id_perusahaan');
+            $table->unsignedInteger('nip_kepala_program');
+            $table->unsignedInteger('nip_staff');
             $table->string('status_pengajuan', 11);
             $table->string('bukti_penerimaan');
             $table->timestamps();
@@ -25,12 +26,13 @@ return new class extends Migration
         });
 
         Schema::create('prakerin', function (Blueprint $table) {
-            $table->tinyIncrements('id_prakerin');
+            $table->increments('id_prakerin');
             $table->string('nis_siswa', 10);
-            $table->unsignedTinyInteger('nip_pembimbing_sekolah');
-            $table->unsignedSmallInteger('id_pembimbing_perusahaan');
-            $table->unsignedTinyInteger('id_perusahaan');
-            $table->unsignedTinyInteger('nip_kepala_program');
+            // PERBAIKAN: Menyesuaikan semua tipe data foreign key
+            $table->unsignedInteger('nip_pembimbing_sekolah');
+            $table->unsignedInteger('id_pembimbing_perusahaan');
+            $table->unsignedInteger('id_perusahaan');
+            $table->unsignedInteger('nip_kepala_program');
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
             $table->text('keterangan')->nullable();
@@ -43,8 +45,9 @@ return new class extends Migration
         });
 
         Schema::create('presensi_siswa', function (Blueprint $table) {
-            $table->tinyIncrements('id_presensi');
-            $table->unsignedSmallInteger('id_pembimbing_perusahaan');
+            $table->increments('id_presensi');
+            // PERBAIKAN: Menyesuaikan tipe data foreign key
+            $table->unsignedInteger('id_pembimbing_perusahaan');
             $table->date('tanggal_kehadiran');
             $table->time('jam_masuk');
             $table->time('jam_pulang');
@@ -56,10 +59,11 @@ return new class extends Migration
         });
 
         Schema::create('monitoring', function (Blueprint $table) {
-            $table->tinyIncrements('id_monitoring');
-            $table->unsignedTinyInteger('id_perusahaan');
-            $table->unsignedTinyInteger('nip_pembimbing_sekolah');
-            $table->unsignedTinyInteger('id_kepsek');
+            $table->increments('id_monitoring');
+            // PERBAIKAN: Menyesuaikan tipe data foreign key
+            $table->unsignedInteger('id_perusahaan');
+            $table->unsignedInteger('nip_pembimbing_sekolah');
+            $table->unsignedTinyInteger('id_kepsek'); // id_kepsek tetap tinyInteger
             $table->date('tanggal');
             $table->text('catatan');
             $table->string('verifikasi', 20);
@@ -70,16 +74,18 @@ return new class extends Migration
         });
 
         Schema::create('penilaian', function (Blueprint $table) {
-            $table->tinyIncrements('id_penilaian');
+            $table->increments('id_penilaian');
             $table->string('nis_siswa', 10);
-            $table->unsignedSmallInteger('id_pemb_perusahaan');
+            // PERBAIKAN: Menyesuaikan tipe data foreign key
+            $table->unsignedInteger('id_pemb_perusahaan');
 
             $table->foreign('nis_siswa')->references('nis')->on('siswa')->onDelete('cascade');
             $table->foreign('id_pemb_perusahaan')->references('id_pembimbing')->on('pembimbing_perusahaan')->onDelete('cascade');
         });
 
         Schema::create('nilai', function (Blueprint $table) {
-            $table->unsignedTinyInteger('id_penilaian');
+            // PERBAIKAN: Menyesuaikan tipe data foreign key
+            $table->unsignedInteger('id_penilaian');
             $table->unsignedTinyInteger('id_kompetensi');
             $table->tinyInteger('nilai');
 
@@ -89,8 +95,9 @@ return new class extends Migration
         });
 
         Schema::create('sertifikat', function (Blueprint $table) {
-            $table->tinyIncrements('id_sertifikat');
-            $table->unsignedTinyInteger('id_penilaian');
+            $table->increments('id_sertifikat');
+            // PERBAIKAN: Menyesuaikan tipe data foreign key
+            $table->unsignedInteger('id_penilaian');
             $table->string('file_sertifikat');
 
             $table->foreign('id_penilaian')->references('id_penilaian')->on('penilaian')->onDelete('cascade');

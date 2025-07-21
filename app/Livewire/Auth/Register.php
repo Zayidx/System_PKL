@@ -4,56 +4,56 @@ namespace App\Livewire\Auth;
 
 use App\Mail\RegistrationOtpMail;
 use App\Models\Role;
+use App\Models\Siswa;
 use App\Models\User;
+use App\Models\Kelas; // Pastikan model Kelas di-import
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redis;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
+#[Layout("components.layouts.layout-auth")]
+#[Title("Halaman Registrasi Siswa")]
 class Register extends Component
 {
-    #[Layout("components.layouts.layout-auth")]
-    #[Title("Halaman Registrasi")]
+    use WithFileUploads;
 
-    // Properti untuk form registrasi, termasuk konfirmasi password
-    public $email, $username, $password, $password_confirmation;
-
-    // Properti untuk form OTP
+    public $nis, $email, $username, $kontak_siswa, $password, $password_confirmation, $foto;
+    public $tempat_lahir, $tanggal_lahir;
     public $otp;
     public $showOtpForm = false;
 
-    /**
-     * Aturan validasi yang diperbarui.
-     * 'password' divalidasi dengan 'confirmed' yang secara otomatis
-     * akan memeriksa field 'password_confirmation'. Ini cara standar Laravel.
-     */
     protected function rules()
     {
         return [
+            'nis' => 'required|numeric|digits_between:8,12|unique:siswa,nis',
             'email' => 'required|email|max:100|unique:users,email',
             'username' => 'required|string|min:4|max:100',
-            'password' => 'required|string|min:6|confirmed', // 'confirmed' adalah kuncinya
+            'tempat_lahir' => 'required|string|max:50',
+            'tanggal_lahir' => 'required|date',
+            'kontak_siswa' => 'required|numeric|digits_between:10,15',
+            'password' => 'required|string|min:6|confirmed',
+            'foto' => 'required|image|max:2048',
         ];
     }
 
-    /**
-     * Pesan validasi kustom yang diperbaiki.
-     * Kita menargetkan 'password.confirmed' untuk pesan error-nya.
-     */
     protected $messages = [
-        'email.required' => 'Email wajib diisi.',
-        'email.email' => 'Format email tidak valid.',
+        'nis.required' => 'NIS wajib diisi.',
+        'nis.unique' => 'NIS ini sudah terdaftar.',
         'email.unique' => 'Email ini sudah terdaftar.',
         'username.required' => 'Nama lengkap wajib diisi.',
-        'username.min' => 'Nama lengkap minimal 4 karakter.',
+        'tempat_lahir.required' => 'Tempat lahir wajib diisi.',
+        'tanggal_lahir.required' => 'Tanggal lahir wajib diisi.',
+        'kontak_siswa.required' => 'Nomor telepon wajib diisi.',
         'password.required' => 'Password wajib diisi.',
         'password.min' => 'Password minimal 6 karakter.',
-        'password.confirmed' => 'Konfirmasi password tidak cocok.', // Pesan untuk validasi 'confirmed'
-        'otp.required' => 'Kode OTP wajib diisi.',
-        'otp.digits' => 'Kode OTP harus 6 digit angka.',
+        'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        'foto.required' => 'Foto profil wajib diunggah.',
     ];
 
     public function render()
@@ -63,7 +63,7 @@ class Register extends Component
 
     public function submitRegistrationDetails()
     {
-        $this->validate(); // Validasi akan memeriksa semua rules, termasuk 'password.confirmed'
+        $this->validate();
         $this->sendOtp();
     }
 
@@ -71,7 +71,7 @@ class Register extends Component
     {
         $otpCode = rand(100000, 999999);
         $redisKey = "otp_register:" . $this->email;
-        Redis::setex($redisKey, 300, $otpCode);
+        Redis::setex($redisKey, 300, $otpCode); // OTP berlaku 5 menit
 
         try {
             Mail::to($this->email)->send(new RegistrationOtpMail($otpCode));
@@ -79,8 +79,8 @@ class Register extends Component
             $this->resetErrorBag();
             $this->dispatch('otp-sent');
         } catch (\Exception $e) {
-            $this->addError('credentials', 'Gagal mengirim OTP. Pastikan konfigurasi email benar.');
-            report($e);
+            $this->addError('credentials', 'Gagal mengirim OTP. Pastikan konfigurasi email benar dan coba lagi.');
+            report($e); // Melaporkan error ke log untuk debugging
         }
     }
 
@@ -96,27 +96,72 @@ class Register extends Component
         $storedOtp = Redis::get($redisKey);
 
         if ($storedOtp && $storedOtp == $this->otp) {
-            $userRole = Role::where('name', 'user')->firstOrFail();
-            
-            $user = User::create([
-                'roles_id' => $userRole->id,
-                'username' => $this->username,
-                'email' => $this->email,
-                'password' => $this->password,
-            ]);
+            try {
+                // Menggunakan DB::transaction untuk memastikan semua query berhasil atau tidak sama sekali.
+                $user = DB::transaction(function () use ($redisKey) {
+                    // 1. Cari Role 'user'. Gagal jika tidak ditemukan.
+                    $userRole = Role::where('name', 'user')->firstOrFail();
 
-            Redis::del($redisKey);
-            Auth::login($user);
-            request()->session()->regenerate();
-            return $this->redirect(route('login'), navigate: true);
+                    // 2. Cari Kelas default 'N/A'. Ini asumsi, bisa disesuaikan.
+                    // Sebaiknya ada cara yang lebih baik untuk menentukan kelas awal.
+                    $defaultKelas = Kelas::where('nama_kelas', 'N/A')->first();
+                    if (!$defaultKelas) {
+                        // Jika kelas N/A tidak ada, berikan pesan error yang jelas.
+                        throw new \Exception('Konfigurasi kelas default (N/A) tidak ditemukan. Hubungi admin.');
+                    }
+
+                    // 3. Simpan foto ke storage dan dapatkan path-nya.
+                    $fotoPath = $this->foto->store('fotos/profil', 'public');
+
+                    // 4. Buat data di tabel 'users' terlebih dahulu.
+                    $newUser = User::create([
+                        'roles_id' => $userRole->id, // Menggunakan role 'user'
+                        'username' => $this->username,
+                        'email' => $this->email,
+                        'password' => Hash::make($this->password),
+                        'foto' => $fotoPath,
+                    ]);
+
+                    // 5. Buat data di tabel 'siswa' menggunakan ID dari user yang baru dibuat.
+                    Siswa::create([
+                        'nis' => $this->nis,
+                        'user_id' => $newUser->id, // Ini adalah kuncinya!
+                        'id_kelas' => $defaultKelas->id_kelas,
+                        'id_jurusan' => $defaultKelas->id_jurusan,
+                        'nama_siswa' => $this->username,
+                        'tempat_lahir' => $this->tempat_lahir,
+                        'tanggal_lahir' => $this->tanggal_lahir,
+                        'kontak_siswa' => $this->kontak_siswa,
+                    ]);
+
+                    // 6. Hapus OTP dari Redis setelah berhasil digunakan.
+                    Redis::del($redisKey);
+                    
+                    // 7. Kembalikan user yang baru dibuat untuk proses login.
+                    return $newUser;
+                });
+
+                // Setelah transaksi berhasil, loginkan user.
+                Auth::login($user);
+                request()->session()->regenerate();
+
+                // Redirect ke dashboard user setelah login berhasil.
+                return $this->redirect(route('user.dashboard'), navigate: true);
+
+            } catch (\Exception $e) {
+                // Jika terjadi error di dalam transaksi, tampilkan pesan.
+                $this->addError('credentials', 'Gagal membuat akun. Terjadi kesalahan pada server: ' . $e->getMessage());
+                report($e); // Laporkan error untuk dianalisis
+                return;
+            }
         }
+        
         $this->addError('otp', 'Kode OTP tidak valid atau telah kedaluwarsa.');
     }
 
     public function cancelOtp()
     {
-        // [PERBAIKAN] Menambahkan password_confirmation ke dalam reset
-        $this->reset('otp', 'showOtpForm', 'email', 'username', 'password', 'password_confirmation');
+        $this->reset(['nis', 'email', 'username', 'kontak_siswa', 'password', 'password_confirmation', 'foto', 'tempat_lahir', 'tanggal_lahir', 'otp', 'showOtpForm']);
         $this->resetErrorBag();
     }
 }

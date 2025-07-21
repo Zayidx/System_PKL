@@ -1,15 +1,21 @@
 <?php
 
 use App\Http\Controllers\OtpController;
+use App\Livewire\Admin\GuruDashboard;
+use App\Livewire\Admin\KelasDashboard;
+use App\Livewire\Admin\PerusahaanDashboard;
+use App\Livewire\Admin\SiswaDashboard;
 use App\Livewire\HomePage;
 use Illuminate\Support\Facades\Route;
 
 // Import semua komponen Livewire yang akan digunakan di rute
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
-use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
+use App\Livewire\Admin\JurusanDashboard;
 use App\Livewire\Admin\UserDashboard as AdminUserManagement; // Alias agar lebih jelas
+use App\Livewire\Admin\WaliKelasDashboard;
+use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\User\Dashboard as UserDashboard;
 
 /*
@@ -30,8 +36,7 @@ use App\Livewire\User\Dashboard as UserDashboard;
 // Middleware 'guest' akan mengarahkan pengguna yang sudah login ke home/dashboard
     Route::get('/login', Login::class)->name('login');
     Route::get('/register', Register::class)->name('register');
-    Route::get('/forgot-password', ForgotPassword::class)->name('forgot-password');
-
+  Route::get('/forgot-password', ForgotPassword::class)->name('forgot-password');
 // Grup untuk pengguna yang SUDAH login
 // Middleware 'auth' memastikan hanya pengguna terotentikasi yang bisa mengakses
 Route::middleware('auth')->group(function () {
@@ -46,13 +51,15 @@ Route::middleware('auth')->group(function () {
         
         Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
 
-        // Grup untuk data master (contoh: manajemen user oleh admin)
-        // Diberi prefix 'master-user' dan nama 'master-user.'
-        Route::prefix('master-user')->name('master-user.')->group(function () {
-            // Nama rute ini adalah 'users', sehingga nama lengkapnya 'admin.master-user.users'
-            Route::get('/users', AdminUserManagement::class)->name('users');
-            // Tambahkan rute master data lainnya di sini...
-        });
+     Route::prefix('master-data')->name('master.')->group(function () {
+    Route::get('/users', AdminUserManagement::class)->name('users'); // Nama lengkap: admin.master.users
+    Route::get('/perusahaan', action: PerusahaanDashboard::class)->name('perusahaan'); // Nama lengkap: admin.master.perusahaan
+    Route::get('/siswa', SiswaDashboard::class)->name('siswa');
+    Route::get('/kelas', KelasDashboard::class)->name('kelas');
+    Route::get('/jurusan', JurusanDashboard::class)->name('jurusan');
+        Route::get('/guru', GuruDashboard::class)->name('guru');
+        Route::get('/walikelas', WaliKelasDashboard::class)->name('walikelas');
+});
     });
 
 

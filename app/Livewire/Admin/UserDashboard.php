@@ -112,7 +112,7 @@ class UserDashboard extends Component
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
-/*******  aedcc3f4-77c3-4ee2-b6f4-882204c9672c  *******/    public function edit($id)
+/*******  aedcc3f4-77c3-4ee2-b6f4-882204c9672c    *******/  public function edit($id)
     {
         $user = User::findOrFail($id);
         $this->userId = $id;

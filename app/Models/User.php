@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -13,7 +14,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * Atribut yang dapat diisi secara massal (mass assignable).
+     * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
@@ -22,12 +23,11 @@ class User extends Authenticatable
         'email',
         'password',
         'foto',
-        'roles_id', // Foreign key harus dimasukkan ke fillable agar bisa diisi saat create user
+        'roles_id', // Foreign key harus ada di fillable
     ];
 
     /**
-     * Atribut yang harus disembunyikan saat model diubah menjadi array atau JSON.
-     * Ini adalah langkah keamanan untuk mencegah data sensitif seperti password terekspos.
+     * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
      */
@@ -37,9 +37,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Atribut yang harus di-cast ke tipe data tertentu.
-     * Di sini, kita memastikan bahwa setiap kali kita set atribut 'password',
-     * Laravel akan secara otomatis melakukan hashing.
+     * The attributes that should be cast.
      *
      * @var array<string, string>
      */
@@ -48,17 +46,27 @@ class User extends Authenticatable
     ];
 
     /**
-     * Mendefinisikan relasi "belongsTo" (satu User milik satu Role).
-     *
-     * Fungsi ini akan mengembalikan role dari user yang bersangkutan.
-     * Nama fungsi 'role' (singular) adalah konvensi untuk relasi belongsTo.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * Mendefinisikan relasi "belongsTo" ke model Role.
+     * Satu User pasti memiliki satu Role.
      */
     public function role(): BelongsTo
     {
-        // Parameter kedua ('roles_id') adalah nama foreign key di tabel 'users' ini.
-        // Parameter ketiga ('id') adalah primary key di tabel 'roles'.
         return $this->belongsTo(Role::class, 'roles_id', 'id');
+    }
+
+    /**
+     * BARU: Mendefinisikan relasi "hasOne" ke model Siswa.
+     * Ini berarti satu User berelasi dengan satu data Siswa.
+     * Sangat berguna untuk memanggil data siswa, contoh: auth()->user()->siswa->nis
+     */
+    public function siswa(): HasOne
+    {
+        // Parameter kedua ('user_id') adalah foreign key di tabel 'siswa'.
+        // Parameter ketiga ('id') adalah primary key di tabel 'users' ini.
+        return $this->hasOne(Siswa::class, 'user_id', 'id');
+    }
+     public function guru(): HasOne
+    {
+        return $this->hasOne(Guru::class, 'user_id', 'id');
     }
 }

@@ -24,11 +24,11 @@ class RolesSeeder extends Seeder
                 'name' => 'user',
                 'keterangan' => 'Pengguna Biasa',
             ],
-            // Tambahkan role lain jika perlu
-            // [
-            //     'name' => 'Editor',
-            //     'keterangan' => 'Bisa mengedit konten',
-            // ],
+           
+            [
+                'name' => 'walikelas',
+                'keterangan' => 'Wali Kelas',
+            ],
         ]);
     }
 }

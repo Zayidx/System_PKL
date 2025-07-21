@@ -29,6 +29,7 @@ class Perusahaan extends Model
         'alamat_perusahaan',
         'email_perusahaan',
         'logo_perusahaan',
+        'kontak_perusahaan', 
     ];
 
     // Relasi ke model PembimbingPerusahaan

@@ -1,18 +1,42 @@
+<!-- File: resources/views/livewire/auth/register.blade.php -->
 <div id="auth-left">
     <a href="#" class="mb-4 logo">
         <i class="fas fa-graduation-cap"></i> InfoPKL
     </a>
     
     @if (!$showOtpForm)
-        {{-- TAMPILAN FORM REGISTRASI AWAL --}}
-        <h1 class="mt-5 auth-title">Buat Akun Baru</h1>
-        <p class="mb-5 auth-subtitle pe-5">Isi data berikut untuk mendaftar. Gratis! 🚀</p>
+        {{-- TAMPILAN FORM REGISTRASI AWAL (Tidak ada perubahan) --}}
+        <h1 class="mt-5 auth-title">Buat Akun Siswa</h1>
+        <p class="mb-5 auth-subtitle pe-5">Isi data berikut untuk mendaftar sebagai siswa.</p>
         
-        {{-- [PERBAIKAN] Menambahkan 'novalidate' untuk menonaktifkan validasi bawaan browser --}}
         <form wire:submit='submitRegistrationDetails' novalidate>
             @if ($errors->has('credentials'))
                 <div class="mb-3 alert alert-danger">{{ $errors->first('credentials') }}</div>
             @endif
+
+            <div class="mb-4 form-group position-relative has-icon-left">
+                <input required type="text" inputmode="numeric" wire:model.blur='nis' class="form-control form-control-xl @error('nis') is-invalid @enderror" placeholder="Nomor Induk Siswa (NIS)">
+                <div class="form-control-icon"><i class="bi bi-person-badge"></i></div>
+                @error('nis')<div class="invalid-feedback"><i class="bx bx-radio-circle"></i> {{ $message }}</div>@enderror
+            </div>
+
+            <div class="mb-4 form-group position-relative has-icon-left">
+                <input required type="text" wire:model.blur='username' class="form-control form-control-xl @error('username') is-invalid @enderror" placeholder="Nama Lengkap">
+                <div class="form-control-icon"><i class="bi bi-person"></i></div>
+                @error('username')<div class="invalid-feedback"><i class="bx bx-radio-circle"></i> {{ $message }}</div>@enderror
+            </div>
+            
+            <div class="mb-4 form-group position-relative has-icon-left">
+                <input required type="text" wire:model.blur='tempat_lahir' class="form-control form-control-xl @error('tempat_lahir') is-invalid @enderror" placeholder="Tempat Lahir">
+                <div class="form-control-icon"><i class="bi bi-geo-alt"></i></div>
+                @error('tempat_lahir')<div class="invalid-feedback"><i class="bx bx-radio-circle"></i> {{ $message }}</div>@enderror
+            </div>
+
+            <div class="mb-4 form-group position-relative has-icon-left">
+                <input required type="date" wire:model.blur='tanggal_lahir' class="form-control form-control-xl @error('tanggal_lahir') is-invalid @enderror" placeholder="Tanggal Lahir">
+                <div class="form-control-icon"><i class="bi bi-calendar-date"></i></div>
+                @error('tanggal_lahir')<div class="invalid-feedback"><i class="bx bx-radio-circle"></i> {{ $message }}</div>@enderror
+            </div>
 
             <div class="mb-4 form-group position-relative has-icon-left">
                 <input required type="email" wire:model.blur='email' class="form-control form-control-xl @error('email') is-invalid @enderror" placeholder="Email">
@@ -21,21 +45,30 @@
             </div>
 
             <div class="mb-4 form-group position-relative has-icon-left">
-                <input required type="text" wire:model.blur='username' class="form-control form-control-xl @error('username') is-invalid @enderror" placeholder="Nama Lengkap">
-                <div class="form-control-icon"><i class="bi bi-person"></i></div>
-                @error('username')<div class="invalid-feedback"><i class="bx bx-radio-circle"></i> {{ $message }}</div>@enderror
+                <input required type="text" inputmode="tel" wire:model.blur='kontak_siswa' class="form-control form-control-xl @error('kontak_siswa') is-invalid @enderror" placeholder="Nomor Telepon (WA)">
+                <div class="form-control-icon"><i class="bi bi-phone"></i></div>
+                @error('kontak_siswa')<div class="invalid-feedback"><i class="bx bx-radio-circle"></i> {{ $message }}</div>@enderror
             </div>
 
             <div class="mb-4 form-group position-relative has-icon-left">
                 <input required type="password" wire:model.blur='password' class="form-control form-control-xl @error('password') is-invalid @enderror" placeholder="Password">
                 <div class="form-control-icon"><i class="bi bi-shield-lock"></i></div>
-                {{-- Pesan error untuk password sekarang akan muncul di sini --}}
                 @error('password')<div class="invalid-feedback"><i class="bx bx-radio-circle"></i> {{ $message }}</div>@enderror
             </div>
 
-            <div class="mb-3 form-group position-relative has-icon-left">
+            <div class="mb-4 form-group position-relative has-icon-left">
                 <input required type="password" wire:model.blur='password_confirmation' class="form-control form-control-xl" placeholder="Konfirmasi Password">
                 <div class="form-control-icon"><i class="bi bi-shield-lock"></i></div>
+            </div>
+
+            <div class="mb-3 form-group">
+                <label for="foto" class="form-label">Foto Profil (Wajib)</label>
+                <input type="file" class="form-control @error('foto') is-invalid @enderror" id="foto" wire:model="foto">
+                @error('foto') <div class="invalid-feedback"><i class="bx bx-radio-circle"></i> {{ $message }}</div> @enderror
+                <div wire:loading wire:target="foto" class="text-muted mt-1 small">Mengunggah...</div>
+                @if ($foto)
+                    <img src="{{ $foto->temporaryUrl() }}" class="img-thumbnail mt-2" style="max-height: 150px;" alt="Preview">
+                @endif
             </div>
 
             <button type="submit" class="mt-3 shadow-lg btn btn-primary btn-block btn-lg" wire:loading.attr="disabled">
@@ -51,24 +84,39 @@
         <h1 class="mt-5 auth-title">Verifikasi Email Anda</h1>
         <p class="mb-5 auth-subtitle pe-5">Kami telah mengirimkan kode OTP ke email <strong>{{ $email }}</strong>. Satu langkah lagi!</p>
         
-        <div x-data="{ countdown: 60, timerRunning: true }"
-             x-init="
-                timer = setInterval(() => {
-                    if (countdown > 0) { countdown--; } else { clearInterval(timer); timerRunning = false; }
-                }, 1000);
-             "
-             @otp-sent.window="
-                countdown = 60; 
-                timerRunning = true; 
-                clearInterval(timer); 
-                timer = setInterval(() => {
-                    if (countdown > 0) { countdown--; } else { clearInterval(timer); timerRunning = false; }
-                }, 1000);
-             ">
+        <!-- FIX: Logika Alpine.js diperbaiki agar tidak konflik dengan Livewire -->
+        <div x-data="{
+                countdown: 300,
+                timer: null,
+                startTimer() {
+                    this.countdown = 300;
+                    clearInterval(this.timer); // Hapus timer lama jika ada
+                    this.timer = setInterval(() => {
+                        if (this.countdown > 0) {
+                            this.countdown--;
+                        } else {
+                            clearInterval(this.timer);
+                        }
+                    }, 1000);
+                },
+                get timerRunning() {
+                    return this.countdown > 0;
+                },
+                get formattedTime() {
+                    const minutes = Math.floor(this.countdown / 60);
+                    const seconds = this.countdown % 60;
+                    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }"
+             x-init="startTimer()"
+             @otp-sent.window="startTimer()">
             
             <form wire:submit='verifyOtpAndCreateUser'>
                 @if ($errors->has('otp'))
                     <div class="mb-3 alert alert-danger">{{ $errors->first('otp') }}</div>
+                @endif
+                @if ($errors->has('credentials'))
+                    <div class="mb-3 alert alert-danger">{{ $errors->first('credentials') }}</div>
                 @endif
 
                 <div class="mb-4 form-group position-relative has-icon-left">
@@ -85,7 +133,7 @@
 
             <div class="mt-4 text-center">
                 <template x-if="timerRunning">
-                    <p class="text-muted">Kirim ulang kode dalam <span x-text="countdown" class="fw-bold"></span> detik</p>
+                    <p class="text-muted">Kirim ulang kode dalam <span x-text="formattedTime" class="fw-bold"></span></p>
                 </template>
                 <template x-if="!timerRunning">
                     <p class="text-muted">Tidak menerima kode? <a href="#" wire:click.prevent="resendOtp" class="font-bold">Kirim Ulang</a></p>

@@ -24,16 +24,5 @@
     </li>
     --}}
     
-    <li class="sidebar-item">
-        {{-- Tombol Logout yang berfungsi untuk semua role --}}
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <a href="{{ route('logout') }}"
-               onclick="event.preventDefault(); this.closest('form').submit();"
-               class='sidebar-link'>
-                <i class="bi bi-box-arrow-right"></i>
-                <span>Logout</span>
-            </a>
-        </form>
-    </li>
+    <livewire:auth.logout>
 </ul>
