@@ -17,13 +17,31 @@ class KepalaProgram extends Model
     protected $table = 'kepala_program';
     protected $primaryKey = 'nip_kepala_program';
     public $timestamps = false;
-    protected $fillable = ['nip_guru', 'id_jurusan', 'nama_kepala_program'];
 
-    public function guru(): BelongsTo
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'user_id',      // Ditambahkan untuk relasi
+        'id_jurusan',
+        'nama_kepala_program'
+    ];
+    
+    /**
+     * Relasi ke model User (akun kepala program)
+     * @return BelongsTo<User, KepalaProgram>
+     */
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Guru::class, 'nip_guru', 'nip_guru');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * Relasi ke model Jurusan
+     * @return BelongsTo<Jurusan, KepalaProgram>
+     */
     public function jurusan(): BelongsTo
     {
         return $this->belongsTo(Jurusan::class, 'id_jurusan', 'id_jurusan');

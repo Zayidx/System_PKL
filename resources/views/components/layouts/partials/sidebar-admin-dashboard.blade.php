@@ -36,7 +36,22 @@
               <li class="submenu-item {{ Request::routeIs('admin.master.walikelas') ? 'active' : '' }}">
                 <a href="{{ route('admin.master.walikelas') }}" wire:navigate class="submenu-link">Pengelolaan walikelas</a>
             </li>
-            
+              </li>
+              <li class="submenu-item {{ Request::routeIs('admin.master.pembimbing-perusahaan') ? 'active' : '' }}">
+                <a href="{{ route('admin.master.pembimbing-perusahaan') }}" wire:navigate class="submenu-link">Pengelolaan pembimbing-perusahaan</a>
+            </li>
+            <li class="submenu-item {{ Request::routeIs('admin.master.pembimbing-sekolah') ? 'active' : '' }}">
+                <a href="{{ route('admin.master.pembimbing-sekolah') }}" wire:navigate class="submenu-link">Pengelolaan pembimbing-sekolah</a>
+            </li>
+                <li class="submenu-item {{ Request::routeIs('admin.master.staff-hubin') ? 'active' : '' }}">
+                <a href="{{ route('admin.master.staff-hubin') }}" wire:navigate class="submenu-link">Pengelolaan staff-hubin</a>
+            </li>
+             <li class="submenu-item {{ Request::routeIs('admin.master.kepala-program') ? 'active' : '' }}">
+                <a href="{{ route('admin.master.kepala-program') }}" wire:navigate class="submenu-link">Pengelolaan kepala-program</a>
+            </li>
+             <li class="submenu-item {{ Request::routeIs('admin.master.kepala-sekolah') ? 'active' : '' }}">
+                <a href="{{ route('admin.master.kepala-sekolah') }}" wire:navigate class="submenu-link">Pengelolaan kepala-sekolah</a>
+            </li>
         </ul>
     </li>
 

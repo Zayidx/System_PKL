@@ -19,6 +19,10 @@ class PembimbingSekolah extends Model
     public $timestamps = false;
     protected $fillable = ['user_id', 'nama_pembimbing_sekolah'];
 
+    /**
+     * Relasi ke model User (akun pembimbing sekolah)
+     * @return BelongsTo<User, PembimbingSekolah>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');

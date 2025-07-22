@@ -23,6 +23,7 @@ return new class extends Migration
             // PERBAIKAN: Menggunakan increments() agar konsisten.
             $table->increments('id_pembimbing');
             // PERBAIKAN: Tipe data disesuaikan dengan primary key di 'perusahaan'.
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->unsignedInteger('id_perusahaan');
             $table->string('nama', 75);
             $table->string('no_hp', 17);

@@ -17,12 +17,19 @@ class Guru extends Model
     // BARU: 'user_id' ditambahkan ke fillable
     protected $fillable = ['nip_guru', 'user_id', 'nama_guru', 'kontak_guru'];
 
-    // BARU: Definisikan relasi bahwa satu Guru 'dimiliki oleh' satu User
+    /**
+     * Relasi ke model User (akun guru)
+     * @return BelongsTo<User, Guru>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * Relasi ke model KepalaProgram
+     * @return HasOne<KepalaProgram>
+     */
     public function kepalaProgram(): HasOne
     {
         return $this->hasOne(KepalaProgram::class, 'nip_guru', 'nip_guru');

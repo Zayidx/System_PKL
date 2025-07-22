@@ -13,6 +13,12 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\JurusanDashboard;
+use App\Livewire\Admin\KepalaProgramDashboard;
+use App\Livewire\Admin\KepalaSekolahDashboard;
+use App\Livewire\Admin\PembimbingPerusahaan;
+use App\Livewire\Admin\PembimbingPerusahaanDashboard;
+use App\Livewire\Admin\PembimbingSekolahDashboard;
+use App\Livewire\Admin\StaffHubinDashboard;
 use App\Livewire\Admin\UserDashboard as AdminUserManagement; // Alias agar lebih jelas
 use App\Livewire\Admin\WaliKelasDashboard;
 use App\Livewire\Auth\ForgotPassword;
@@ -59,6 +65,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/jurusan', JurusanDashboard::class)->name('jurusan');
         Route::get('/guru', GuruDashboard::class)->name('guru');
         Route::get('/walikelas', WaliKelasDashboard::class)->name('walikelas');
+        Route::get('/pembimbing-perusahaan', PembimbingPerusahaanDashboard::class)->name('pembimbing-perusahaan');
+         Route::get('/pembimbing-sekolah', PembimbingSekolahDashboard::class)->name('pembimbing-sekolah');
+          Route::get('/staff-hubin', StaffHubinDashboard::class)->name('staff-hubin');
+          Route::get('/kepala-sekolah', KepalaSekolahDashboard::class)->name('kepala-sekolah');
+          Route::get('/kepala-program', KepalaProgramDashboard::class)->name('kepala-program');
+
 });
     });
 

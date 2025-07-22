@@ -20,47 +20,44 @@ return new class extends Migration
         });
 
         Schema::create('guru', function (Blueprint $table) {
-            // PERBAIKAN: Menggunakan increments() agar konsisten dan bisa menampung lebih banyak data.
-            $table->increments('nip_guru'); // Menghasilkan UNSIGNED INTEGER
+            $table->increments('nip_guru');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('nama_guru', 60);
             $table->string('kontak_guru', 17);
         });
 
+        // PERBAIKAN TOTAL PADA TABEL KEPALA PROGRAM
         Schema::create('kepala_program', function (Blueprint $table) {
-            // PERBAIKAN: Menggunakan increments() agar konsisten.
             $table->increments('nip_kepala_program');
-            // PERBAIKAN KRITIS: Tipe data disamakan menjadi unsignedInteger() agar cocok dengan primary key di tabel 'guru'.
-            $table->unsignedInteger('nip_guru');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->unsignedTinyInteger('id_jurusan');
             $table->string('nama_kepala_program', 60);
 
-            $table->foreign('nip_guru')->references('nip_guru')->on('guru')->onDelete('cascade');
             $table->foreign('id_jurusan')->references('id_jurusan')->on('jurusan')->onDelete('cascade');
         });
 
         Schema::table('jurusan', function (Blueprint $table) {
-            // PERBAIKAN: Tipe data disesuaikan dengan primary key di 'kepala_program'.
             $table->unsignedInteger('kepala_program')->nullable();
             $table->foreign('kepala_program')->references('nip_kepala_program')->on('kepala_program')->onDelete('set null');
         });
 
         Schema::create('staff_hubin', function (Blueprint $table) {
-            // PERBAIKAN: Menggunakan increments() agar konsisten.
             $table->increments('nip_staff');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('nama_staff', 60);
         });
 
+        // PERBAIKAN KRITIS PADA TABEL KEPALA SEKOLAH
         Schema::create('kepala_sekolah', function (Blueprint $table) {
             $table->tinyIncrements('id_kepsek');
+            // BARU: Tambahkan foreign key ke tabel users
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->string('nama_kepala_sekolah', 60);
             $table->string('jabatan', 60);
             $table->string('nip_kepsek', 60);
         });
 
         Schema::create('wali_kelas', function (Blueprint $table) {
-            // PERBAIKAN: Menggunakan increments() agar konsisten.
             $table->increments('nip_wali_kelas');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('nama_wali_kelas', 60);
@@ -70,7 +67,6 @@ return new class extends Migration
             $table->tinyIncrements('id_kelas');
             $table->string('nama_kelas', 15);
             $table->string('tingkat_kelas', 5);
-            // PERBAIKAN: Tipe data disesuaikan dengan primary key di 'wali_kelas'.
             $table->unsignedInteger('nip_wali_kelas');
             $table->unsignedTinyInteger('id_jurusan');
             $table->unsignedTinyInteger('id_angkatan');
@@ -95,7 +91,6 @@ return new class extends Migration
         });
 
         Schema::create('pembimbing_sekolah', function (Blueprint $table) {
-            // PERBAIKAN: Menggunakan increments() agar konsisten.
             $table->increments('nip_pembimbing_sekolah');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('nama_pembimbing_sekolah', 60);

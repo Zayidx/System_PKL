@@ -91,35 +91,57 @@
     @livewireScripts
     @stack('scripts')
 
+    <script>
+        function getThemeMode() {
+            return document.documentElement.getAttribute('data-bs-theme') || 'light';
+        }
+        function getSwalThemeOptions() {
+            const mode = getThemeMode();
+            if (mode === 'dark') {
+                return {
+                    background: '#161B22',
+                    color: '#c9d1d9',
+                    confirmButtonColor: '#435ebe',
+                    cancelButtonColor: '#30363d',
+                };
+            } else {
+                return {
+                    background: '#fff',
+                    color: '#212529',
+                    confirmButtonColor: '#435ebe',
+                    cancelButtonColor: '#e0e0e0',
+                };
+            }
+        }
+    </script>
     {{-- [DIADOPSI] Script Listener SweetAlert dengan Tema Gelap --}}
     <script>
         document.addEventListener('livewire:init', () => {
-            // Listener untuk notifikasi sukses
             Livewire.on('swal:success', event => {
+                const theme = getSwalThemeOptions();
                 Swal.fire({
                     title: 'Berhasil!',
                     text: event.message,
                     icon: 'success',
-                    background: '#161B22', // Warna dari tema gelap
-                    color: '#c9d1d9',      // Warna dari tema gelap
+                    background: theme.background,
+                    color: theme.color,
                     confirmButtonText: 'Tutup',
-                    confirmButtonColor: '#435ebe' // Warna primer Mazer
+                    confirmButtonColor: theme.confirmButtonColor
                 });
             });
-
-            // Listener untuk konfirmasi hapus
             Livewire.on('swal:confirm', event => {
+                const theme = getSwalThemeOptions();
                 Swal.fire({
                     title: 'Anda Yakin?',
                     text: "Tindakan ini tidak dapat dibatalkan!",
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
-                    cancelButtonColor: '#30363d',
+                    cancelButtonColor: theme.cancelButtonColor,
                     confirmButtonText: 'Ya, hapus!',
                     cancelButtonText: 'Batal',
-                    background: '#161B22', // Warna dari tema gelap
-                    color: '#c9d1d9',      // Warna dari tema gelap
+                    background: theme.background,
+                    color: theme.color,
                 }).then((result) => {
                     if (result.isConfirmed) {
                         Livewire.dispatch(event.method, { id: event.id });

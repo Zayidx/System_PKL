@@ -7,17 +7,56 @@
     <title>MagangSMK - Platform Pencarian Magang untuk Siswa SMK</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --main-bg: #f8fafc;
+            --main-color: #333;
+            --header-bg: linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%);
+            --header-color: #fff;
+            --btn-primary-bg: #fff;
+            --btn-primary-color: #4a90e2;
+            --btn-outline-bg: transparent;
+            --btn-outline-color: #fff;
+            --btn-outline-border: #fff;
         }
-
+        html[data-bs-theme=dark] {
+            --main-bg: #161B22;
+            --main-color: #c9d1d9;
+            --header-bg: linear-gradient(135deg, #232946 0%, #161B22 100%);
+            --header-color: #fff;
+            --btn-primary-bg: #232946;
+            --btn-primary-color: #fff;
+            --btn-outline-bg: transparent;
+            --btn-outline-color: #fff;
+            --btn-outline-border: #fff;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background-color: #f8fafc;
+            color: var(--main-color);
+            background-color: var(--main-bg);
+        }
+        header {
+            background: var(--header-bg);
+            color: var(--header-color);
+        }
+        .logo {
+            color: var(--header-color);
+        }
+        .nav-links a {
+            color: var(--header-color);
+        }
+        .btn-primary {
+            background: var(--btn-primary-bg);
+            color: var(--btn-primary-color);
+        }
+        .btn-outline {
+            background: var(--btn-outline-bg);
+            color: var(--btn-outline-color);
+            border: 2px solid var(--btn-outline-border);
+        }
+        .btn-outline:hover {
+            background: var(--btn-outline-color);
+            color: var(--btn-primary-color);
         }
 
         .container {
@@ -420,6 +459,19 @@
             }
         }
     </style>
+    <script src="/assets/static/js/initTheme.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggler = document.getElementById('toggle-dark');
+            if (toggler) {
+                toggler.checked = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+                toggler.addEventListener('input', function(e) {
+                    document.documentElement.setAttribute('data-bs-theme', e.target.checked ? 'dark' : 'light');
+                    localStorage.setItem('theme', e.target.checked ? 'dark' : 'light');
+                });
+            }
+        });
+    </script>
 </head>
 <body>
     {{ $slot }}

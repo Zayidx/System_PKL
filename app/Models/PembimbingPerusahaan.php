@@ -7,15 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/*
-|--------------------------------------------------------------------------
-| Model: PembimbingPerusahaan
-|--------------------------------------------------------------------------
-|
-| Model ini merepresentasikan tabel `pembimbing_perusahaan`.
-| Berisi data pembimbing yang berasal dari pihak perusahaan.
-|
-*/
 class PembimbingPerusahaan extends Model
 {
     use HasFactory;
@@ -24,25 +15,45 @@ class PembimbingPerusahaan extends Model
     protected $primaryKey = 'id_pembimbing';
     public $timestamps = false;
 
+    // BARU: 'user_id' ditambahkan ke fillable
     protected $fillable = [
         'id_perusahaan',
+        'user_id',
         'nama',
         'no_hp',
     ];
 
-    // Relasi ke model Perusahaan
+    /**
+     * Relasi ke model User (akun pembimbing perusahaan)
+     * @return BelongsTo<User, PembimbingPerusahaan>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Relasi ke model Perusahaan
+     * @return BelongsTo<Perusahaan, PembimbingPerusahaan>
+     */
     public function perusahaan(): BelongsTo
     {
         return $this->belongsTo(Perusahaan::class, 'id_perusahaan', 'id_perusahaan');
     }
 
-    // Relasi ke model Prakerin
+    /**
+     * Relasi ke model Prakerin
+     * @return HasMany<Prakerin>
+     */
     public function prakerin(): HasMany
     {
         return $this->hasMany(Prakerin::class, 'id_pembimbing_perusahaan', 'id_pembimbing');
     }
     
-    // Relasi ke model Penilaian
+    /**
+     * Relasi ke model Penilaian
+     * @return HasMany<Penilaian>
+     */
     public function penilaian(): HasMany
     {
         return $this->hasMany(Penilaian::class, 'id_pemb_perusahaan', 'id_pembimbing');

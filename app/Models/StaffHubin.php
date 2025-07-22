@@ -19,6 +19,10 @@ class StaffHubin extends Model
     public $timestamps = false;
     protected $fillable = ['user_id', 'nama_staff'];
 
+    /**
+     * Relasi ke model User (akun staff hubin)
+     * @return BelongsTo<User, StaffHubin>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
