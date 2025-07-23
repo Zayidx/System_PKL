@@ -29,12 +29,12 @@ class Login extends Component
             $user = Auth::user();
             if ($user->role) {
                 $roleName = $user->role->name;
-                // PERUBAHAN: Arahkan 'admin' dan 'superadmin' ke dashboard admin.
+                
                 if ($roleName === 'admin' || $roleName === 'superadmin') {
-                    return $this->redirect(route('admin.dashboard'), navigate: true);
-                } 
-                // PERUBAHAN: Arahkan 'user' ke dashboard user.
-                elseif ($roleName === 'user') {
+                   return $this->redirect(route('admin.dashboard'), navigate: true);
+                } elseif ($roleName === 'staffhubin') {
+                   return $this->redirect(route('staffhubin.dashboard'), navigate: true);
+                } elseif ($roleName === 'user') {
                     return $this->redirect(route('user.dashboard'), navigate: true);
                 }
             }
@@ -64,9 +64,10 @@ class Login extends Component
         $credentials = ['email' => $this->email, 'password' => $this->password];
         $user = User::where('email', $this->email)->first();
 
-        // PERUBAHAN: Cek kredensial DAN pastikan user memiliki role yang diizinkan.
+        // Cek kredensial DAN pastikan user memiliki role yang diizinkan.
         if ($user && Auth::validate($credentials)) {
-            if ($user->role && in_array($user->role->name, ['admin', 'superadmin', 'user'])) {
+            // PERBAIKAN: Tambahkan 'staffhubin' ke dalam daftar role yang diizinkan
+            if ($user->role && in_array($user->role->name, ['admin', 'superadmin', 'user', 'staffhubin'])) {
                 $this->sendOtp();
             } else {
                 $this->addError('credentials', 'Anda tidak memiliki hak akses untuk masuk.');
@@ -111,12 +112,13 @@ class Login extends Component
                 Redis::del($redisKey);
                 request()->session()->regenerate();
 
-                // PERUBAHAN: Logika pengalihan disederhanakan untuk 'admin'/'superadmin' dan 'user'.
+                // PERBAIKAN: Tambahkan logika pengalihan untuk 'staffhubin'
                 $roleName = $user->role->name;
                 if ($roleName === 'admin' || $roleName === 'superadmin') {
                     return $this->redirect(route('admin.dashboard'), navigate: true);
-                } 
-                elseif ($roleName === 'user') {
+                } elseif ($roleName === 'staffhubin') {
+                    return $this->redirect(route('staffhubin.dashboard'), navigate: true);
+                } elseif ($roleName === 'user') {
                     return $this->redirect(route('user.dashboard'), navigate: true);
                 } 
                 // Ini seharusnya tidak terjadi karena sudah dicek di attemptLogin, tapi sebagai pengaman.

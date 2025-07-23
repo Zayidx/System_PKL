@@ -14,6 +14,14 @@
         </a>
     </li>
 
+    <li class="sidebar-item {{ Request::routeIs('user.pengajuan') ? 'active' : '' }}">
+        {{-- Arahkan ke rute pengajuan pengguna yang benar --}}
+        <a href="{{ route('user.pengajuan') }}" wire:navigate class='sidebar-link'>
+            <i class="bi bi-grid-fill"></i>
+            <span>Pengajuan Magang</span>
+        </a>
+    </li>
+
     {{-- Tambahkan menu lain untuk user di sini jika ada --}}
     {{-- 
     <li class="sidebar-item {{ Request::routeIs('user.profile') ? 'active' : '' }}">

@@ -13,10 +13,11 @@ return new class extends Migration
             $table->string('nis_siswa', 10);
             // PERBAIKAN: Menyesuaikan semua tipe data foreign key
             $table->unsignedInteger('id_perusahaan');
-            $table->unsignedInteger('nip_kepala_program');
-            $table->unsignedInteger('nip_staff');
-            $table->string('status_pengajuan', 11);
-            $table->string('bukti_penerimaan');
+            $table->unsignedInteger('nip_kepala_program')->nullable();
+            $table->unsignedInteger('nip_staff')->nullable();
+            $table->string('status_pengajuan', 30);
+            $table->string('bukti_penerimaan')->nullable();
+            $table->string('token', 64)->nullable();
             $table->timestamps();
 
             $table->foreign('nis_siswa')->references('nis')->on('siswa')->onDelete('cascade');

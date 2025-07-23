@@ -1,18 +1,19 @@
 <div>
-<!-- Header -->
-    <header>
-        <nav class="container">
-            <a href="#" class="logo">
-                <i class="fas fa-graduation-cap"></i> MagangSMK
+
+    <!-- Header -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-40 transition-all duration-300">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-white text-2xl font-bold flex items-center gap-2">
+                <i class="fas fa-graduation-cap"></i>
+                <span>MagangSMK</span>
             </a>
-            <ul class="nav-links">
-                <li><a href="#beranda">Beranda</a></li>
-                <li><a href="#lowongan">Lowongan</a></li>
-                <li><a href="#perusahaan">Perusahaan</a></li>
-                <li><a href="#tentang">Tentang</a></li>
-                <li><a href="#kontak">Kontak</a></li>
+            <ul class="hidden lg:flex items-center space-x-8 text-white font-medium">
+                <li><a href="#beranda" class="hover:text-sky-200 transition-colors">Beranda</a></li>
+                <li><a href="#fitur" class="hover:text-sky-200 transition-colors">Fitur</a></li>
+                <li><a href="#perusahaan" class="hover:text-sky-200 transition-colors">Perusahaan</a></li>
+                <li><a href="#kontak" class="hover:text-sky-200 transition-colors">Kontak</a></li>
             </ul>
-            <div class="auth-buttons">
+            <div class="hidden lg:flex items-center space-x-4">
                 
                 {{-- [PERBAIKAN] Logika Tombol Dinamis --}}
                 @auth
@@ -20,203 +21,212 @@
                     
                     {{-- Tombol Dashboard --}}
                     @if(Auth::user()->role->name == 'superadmin')
-                        <a href="{{ route('admin.dashboard') }}" wire:navigate class="btn btn-outline">Dashboard</a>
+                        <a href="{{ route('admin.dashboard') }}" wire:navigate class="text-white font-medium px-5 py-2 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Dashboard</a>
                     @else
-                        <a href="{{ route('user.dashboard') }}" wire:navigate class="btn btn-outline">Dashboard</a>
+                        <a href="{{ route('user.dashboard') }}" wire:navigate class="text-white font-medium px-5 py-2 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Dashboard</a>
                     @endif
-
+                
                     {{-- Tombol Logout --}}
                     <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                         @csrf
-                        <a href="{{ route('logout') }}" 
-                           onclick="event.preventDefault(); this.closest('form').submit();"
-                           class="btn btn-primary">Logout</a>
+                        <a
+                           wire:click="logout"
+                           class="bg-white text-blue-500 font-semibold px-5 py-2.5 rounded-full hover:bg-sky-100 transition-all duration-300 shadow-lg hover:shadow-none">Logout</a>
                     </form>
                 @else
-                    {{-- Tampilan jika pengguna BELUM LOGIN (Tamu) --}}
-                    <a href="{{ route('login') }}" wire:navigate class="btn btn-outline">Masuk</a>
-                    <a href="{{ route('register') }}" wire:navigate class="btn btn-primary">Daftar</a>
+                     <a href="{{ route('login') }}" class="text-white font-medium px-5 py-2 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Masuk</a>
+                <a href="{{ route('register') }}" class="bg-white text-blue-500 font-semibold px-5 py-2.5 rounded-full hover:bg-sky-100 transition-all duration-300 shadow-lg hover:shadow-none">Daftar</a>
                 @endauth
-
+              
             </div>
-            <button class="mobile-menu">
+            <button id="mobile-menu-button" class="lg:hidden text-white text-2xl z-50">
                 <i class="fas fa-bars"></i>
             </button>
         </nav>
     </header>
 
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden lg:hidden fixed top-0 left-0 w-full h-full bg-blue-500 z-50">
+        <div class="container mx-auto px-6 py-4 flex flex-col h-full">
+            <div class="flex justify-between items-center mb-12">
+                <a href="#" class="text-white text-2xl font-bold flex items-center gap-2">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>MagangSMK</span>
+                </a>
+                <button id="mobile-menu-close" class="text-white text-3xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <ul class="flex flex-col items-center space-y-8 text-white text-xl font-medium">
+                <li><a href="#beranda" class="mobile-link">Beranda</a></li>
+                <li><a href="#fitur" class="mobile-link">Fitur</a></li>
+                <li><a href="#perusahaan" class="mobile-link">Perusahaan</a></li>
+                <li><a href="#kontak" class="mobile-link">Kontak</a></li>
+            </ul>
+            <div class="mt-auto flex flex-col items-center space-y-4 pb-8">
+                <a href="#" class="w-full text-center text-white font-medium px-6 py-3 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Masuk</a>
+                <a href="#" class="w-full text-center bg-white text-blue-500 font-semibold px-6 py-3 rounded-full hover:bg-sky-100 transition-all duration-300">Daftar</a>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section -->
-    <section class="hero" id="beranda">
-        <div class="container">
-            <h1>Temukan Tempat Magang Impianmu</h1>
-            <p>Platform terpercaya untuk siswa SMK mencari pengalaman magang di perusahaan terbaik</p>
-            <div class="search-container">
-                <div class="search-box">
-                    <input type="text" class="search-input" placeholder="Cari posisi magang, perusahaan, atau lokasi...">
-                    <button class="search-btn">
-                        <i class="fas fa-search"></i> Cari
-                    </button>
-                </div>
+    <section id="beranda" class="hero-gradient pt-32 pb-20 text-white overflow-hidden">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4 reveal-on-scroll">Temukan Tempat Magang Impianmu</h1>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto mb-8 opacity-90 reveal-on-scroll transition-delay-100">Platform terpercaya untuk siswa SMK mendapatkan pengalaman magang di perusahaan-perusahaan terbaik Indonesia.</p>
+            <div class="mt-10 reveal-on-scroll transition-delay-200">
+                <a href="#fitur" class="bg-white text-blue-600 font-bold px-8 py-4 rounded-full text-lg hover:bg-sky-100 transition-all duration-300 transform hover:scale-105 inline-block shadow-xl">
+                    Magang Sekarang
+                </a>
             </div>
         </div>
     </section>
 
     <!-- Stats Section -->
-    <section class="stats">
-        <div class="container">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number">1,500+</div>
-                    <div class="stat-label">Lowongan Magang</div>
+    <section class="py-12 bg-slate-100">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div class="reveal-on-scroll">
+                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">1,500+</div>
+                    <div class="text-slate-500 mt-1">Lowongan Magang</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">800+</div>
-                    <div class="stat-label">Perusahaan Partner</div>
+                <div class="reveal-on-scroll transition-delay-100">
+                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">800+</div>
+                    <div class="text-slate-500 mt-1">Perusahaan Partner</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">5,000+</div>
-                    <div class="stat-label">Siswa Terdaftar</div>
+                <div class="reveal-on-scroll transition-delay-200">
+                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">5,000+</div>
+                    <div class="text-slate-500 mt-1">Siswa Terdaftar</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">95%</div>
-                    <div class="stat-label">Tingkat Keberhasilan</div>
+                <div class="reveal-on-scroll transition-delay-300">
+                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">95%</div>
+                    <div class="text-slate-500 mt-1">Tingkat Keberhasilan</div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section class="features">
-        <div class="container">
-            <h2 class="section-title">Mengapa Memilih MagangSMK?</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
+    <section id="fitur" class="py-20">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4 reveal-on-scroll">Mengapa Memilih MagangSMK?</h2>
+                <p class="text-slate-500 text-lg reveal-on-scroll transition-delay-100">Kami menyediakan semua yang kamu butuhkan untuk memulai karir profesionalmu.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature Card 1 -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-blue-200 hover:-translate-y-2 transition-all duration-300 reveal-on-scroll">
+                    <div class="bg-sky-100 text-sky-500 text-3xl w-16 h-16 rounded-full flex items-center justify-center mb-6">
                         <i class="fas fa-search"></i>
                     </div>
-                    <h3>Pencarian Mudah</h3>
-                    <p>Temukan lowongan magang sesuai jurusan dan minatmu dengan sistem pencarian yang canggih dan filter yang lengkap.</p>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Pencarian Cerdas</h3>
+                    <p class="text-slate-500">Temukan lowongan sesuai jurusan dan minatmu dengan sistem pencarian canggih dan filter lengkap.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <!-- Feature Card 2 -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-blue-200 hover:-translate-y-2 transition-all duration-300 reveal-on-scroll transition-delay-100">
+                    <div class="bg-indigo-100 text-indigo-500 text-3xl w-16 h-16 rounded-full flex items-center justify-center mb-6">
                         <i class="fas fa-building"></i>
                     </div>
-                    <h3>Perusahaan Terpercaya</h3>
-                    <p>Bermitra dengan perusahaan-perusahaan terkemuka yang memberikan pengalaman magang berkualitas tinggi.</p>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Perusahaan Terverifikasi</h3>
+                    <p class="text-slate-500">Bermitra dengan perusahaan terkemuka yang memberikan pengalaman magang berkualitas tinggi.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
+                <!-- Feature Card 3 -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-blue-200 hover:-translate-y-2 transition-all duration-300 reveal-on-scroll transition-delay-200">
+                    <div class="bg-emerald-100 text-emerald-500 text-3xl w-16 h-16 rounded-full flex items-center justify-center mb-6">
                         <i class="fas fa-certificate"></i>
                     </div>
-                    <h3>Sertifikat Resmi</h3>
-                    <p>Dapatkan sertifikat magang resmi yang diakui industri untuk memperkuat portofolio dan CV-mu.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h3>Bimbingan Mentor</h3>
-                    <p>Didampingi mentor berpengalaman yang akan membimbing selama proses magang berlangsung.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3>Peluang Karir</h3>
-                    <p>Kesempatan untuk melanjutkan karir di perusahaan tempat magang atau mendapat rekomendasi kerja.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <h3>Akses 24/7</h3>
-                    <p>Platform yang dapat diakses kapan saja dan dimana saja melalui website maupun aplikasi mobile.</p>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">Sertifikat Resmi</h3>
+                    <p class="text-slate-500">Dapatkan sertifikat magang resmi yang diakui industri untuk memperkuat portofolio dan CV-mu.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Companies Section -->
-    <section class="companies" id="perusahaan">
-        <div class="container">
-            <h2 class="section-title">Perusahaan Partner Kami</h2>
-            <div class="companies-grid">
-                <div class="company-card">
-                    <h4>PT. Teknologi Maju</h4>
-                    <p>IT & Software Development</p>
-                </div>
-                <div class="company-card">
-                    <h4>CV. Kreatif Digital</h4>
-                    <p>Digital Marketing & Design</p>
-                </div>
-                <div class="company-card">
-                    <h4>PT. Industri Otomotif</h4>
-                    <p>Teknik Mesin & Otomotif</p>
-                </div>
-                <div class="company-card">
-                    <h4>Hotel Bintang Lima</h4>
-                    <p>Perhotelan & Pariwisata</p>
-                </div>
-                <div class="company-card">
-                    <h4>PT. Elektronik Nusantara</h4>
-                    <p>Teknik Elektronika</p>
-                </div>
-                <div class="company-card">
-                    <h4>Rumah Sakit Modern</h4>
-                    <p>Kesehatan & Keperawatan</p>
-                </div>
+    <section id="perusahaan" class="py-20 bg-slate-100">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4 reveal-on-scroll">Dipercaya oleh Perusahaan Terkemuka</h2>
+            </div>
+        </div>
+        <div class="relative overflow-hidden">
+            <div class="flex gap-8 animate-marquee">
+                <!-- Logos with error handling -->
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=TechCorp" alt="TechCorp Logo" onerror="this.style.display='none'; this.parentElement.innerText='TechCorp'"></div>
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=InnovateInc" alt="InnovateInc Logo" onerror="this.style.display='none'; this.parentElement.innerText='InnovateInc'"></div>
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=DigitalCreative" alt="DigitalCreative Logo" onerror="this.style.display='none'; this.parentElement.innerText='DigitalCreative'"></div>
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=OtomotifJaya" alt="OtomotifJaya Logo" onerror="this.style.display='none'; this.parentElement.innerText='OtomotifJaya'"></div>
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=NusantaraHotel" alt="NusantaraHotel Logo" onerror="this.style.display='none'; this.parentElement.innerText='NusantaraHotel'"></div>
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=HealthCare" alt="HealthCare Logo" onerror="this.style.display='none'; this.parentElement.innerText='HealthCare'"></div>
+                <!-- Duplicate for seamless loop -->
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=TechCorp" alt="TechCorp Logo" onerror="this.style.display='none'; this.parentElement.innerText='TechCorp'"></div>
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=InnovateInc" alt="InnovateInc Logo" onerror="this.style.display='none'; this.parentElement.innerText='InnovateInc'"></div>
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=DigitalCreative" alt="DigitalCreative Logo" onerror="this.style.display='none'; this.parentElement.innerText='DigitalCreative'"></div>
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=OtomotifJaya" alt="OtomotifJaya Logo" onerror="this.style.display='none'; this.parentElement.innerText='OtomotifJaya'"></div>
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=NusantaraHotel" alt="NusantaraHotel Logo" onerror="this.style.display='none'; this.parentElement.innerText='NusantaraHotel'"></div>
+                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=HealthCare" alt="HealthCare Logo" onerror="this.style.display='none'; this.parentElement.innerText='HealthCare'"></div>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
-    <section class="cta">
-        <div class="container">
-            <h2>Siap Memulai Perjalanan Magangmu?</h2>
-            <p>Bergabunglah dengan ribuan siswa SMK lainnya yang telah menemukan tempat magang impian mereka</p>
-            <a href="#" class="btn btn-large">Daftar Sekarang Gratis</a>
+    <section class="cta-gradient py-20 text-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 reveal-on-scroll">Siap Memulai Perjalanan Karirmu?</h2>
+            <p class="text-lg md:text-xl max-w-2xl mx-auto mb-8 opacity-90 reveal-on-scroll transition-delay-100">Bergabunglah dengan ribuan siswa SMK yang telah menemukan masa depan mereka bersama kami.</p>
+            <div class="reveal-on-scroll transition-delay-200">
+                <a href="#" class="bg-white text-blue-600 font-bold px-8 py-4 rounded-full text-lg hover:bg-sky-100 transition-all duration-300 transform hover:scale-105 inline-block shadow-xl">Daftar Sekarang, Gratis!</a>
+            </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>MagangSMK</h3>
-                    <p>Platform terpercaya untuk menghubungkan siswa SMK dengan perusahaan terbaik untuk pengalaman magang yang berkualitas.</p>
+    <footer id="kontak" class="bg-slate-800 text-slate-300">
+        <div class="container mx-auto px-6 pt-16 pb-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+                <!-- About -->
+                <div class="col-span-1 md:col-span-2 lg:col-span-1">
+                    <h3 class="text-white text-xl font-bold flex items-center gap-2 mb-4">
+                        <i class="fas fa-graduation-cap"></i> MagangSMK
+                    </h3>
+                    <p class="text-slate-400">Menghubungkan siswa SMK dengan perusahaan terbaik untuk pengalaman magang yang berkualitas.</p>
                 </div>
-                <div class="footer-section">
-                    <h3>Layanan</h3>
-                    <ul>
-                        <li><a href="#">Cari Lowongan</a></li>
-                        <li><a href="#">Daftar Perusahaan</a></li>
-                        <li><a href="#">Konsultasi Karir</a></li>
-                        <li><a href="#">Sertifikat Digital</a></li>
+                <!-- Links -->
+                <div>
+                    <h4 class="font-semibold text-white mb-4">Layanan</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="hover:text-sky-300 transition-colors">Cari Lowongan</a></li>
+                        <li><a href="#" class="hover:text-sky-300 transition-colors">Daftar Perusahaan</a></li>
+                        <li><a href="#" class="hover:text-sky-300 transition-colors">Konsultasi Karir</a></li>
                     </ul>
                 </div>
-                <div class="footer-section">
-                    <h3>Dukungan</h3>
-                    <ul>
-                        <li><a href="#">Pusat Bantuan</a></li>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Hubungi Kami</a></li>
-                        <li><a href="#">Panduan Pengguna</a></li>
+                <!-- Support -->
+                <div>
+                    <h4 class="font-semibold text-white mb-4">Dukungan</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="hover:text-sky-300 transition-colors">Pusat Bantuan</a></li>
+                        <li><a href="#" class="hover:text-sky-300 transition-colors">FAQ</a></li>
+                        <li><a href="#" class="hover:text-sky-300 transition-colors">Hubungi Kami</a></li>
                     </ul>
                 </div>
-                <div class="footer-section">
-                    <h3>Ikuti Kami</h3>
-                    <ul>
-                        <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
-                        <li><a href="#"><i class="fab fa-instagram"></i> Instagram</a></li>
-                        <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
-                        <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
-                    </ul>
+                <!-- Social -->
+                <div>
+                    <h4 class="font-semibold text-white mb-4">Ikuti Kami</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-xl hover:text-sky-300 transition-colors"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-xl hover:text-sky-300 transition-colors"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-xl hover:text-sky-300 transition-colors"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-xl hover:text-sky-300 transition-colors"><i class="fab fa-linkedin"></i></a>
+                    </div>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 MagangSMK. Semua hak dilindungi undang-undang.</p>
+            <div class="border-t border-slate-700 pt-8 text-center text-slate-500">
+                <p>&copy; 2025 MagangSMK. Semua hak dilindungi.</p>
             </div>
         </div>
     </footer>
-    </div>
+
+
+
+</div>

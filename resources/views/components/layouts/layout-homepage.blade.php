@@ -1,587 +1,164 @@
-
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MagangSMK - Platform Pencarian Magang untuk Siswa SMK</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <style>
-        :root {
-            --main-bg: #f8fafc;
-            --main-color: #333;
-            --header-bg: linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%);
-            --header-color: #fff;
-            --btn-primary-bg: #fff;
-            --btn-primary-color: #4a90e2;
-            --btn-outline-bg: transparent;
-            --btn-outline-color: #fff;
-            --btn-outline-border: #fff;
-        }
-        html[data-bs-theme=dark] {
-            --main-bg: #161B22;
-            --main-color: #c9d1d9;
-            --header-bg: linear-gradient(135deg, #232946 0%, #161B22 100%);
-            --header-color: #fff;
-            --btn-primary-bg: #232946;
-            --btn-primary-color: #fff;
-            --btn-outline-bg: transparent;
-            --btn-outline-color: #fff;
-            --btn-outline-border: #fff;
-        }
+        /* Custom styles to complement Tailwind */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--main-color);
-            background-color: var(--main-bg);
-        }
-        header {
-            background: var(--header-bg);
-            color: var(--header-color);
-        }
-        .logo {
-            color: var(--header-color);
-        }
-        .nav-links a {
-            color: var(--header-color);
-        }
-        .btn-primary {
-            background: var(--btn-primary-bg);
-            color: var(--btn-primary-color);
-        }
-        .btn-outline {
-            background: var(--btn-outline-bg);
-            color: var(--btn-outline-color);
-            border: 2px solid var(--btn-outline-border);
-        }
-        .btn-outline:hover {
-            background: var(--btn-outline-color);
-            color: var(--btn-primary-color);
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #334155; /* slate-700 */
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
+        /* Prevent body scroll when mobile menu is open */
+        body.menu-open {
+            overflow: hidden;
         }
 
-        /* Header */
-        header {
-            background: linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%);
-            color: white;
-            padding: 1rem 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        /* Custom gradient for hero and CTA */
+        .hero-gradient {
+            background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%); /* sky-400 to blue-500 */
+        }
+        
+        .cta-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%); /* blue-500 to indigo-500 */
         }
 
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Animation for elements on scroll */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
         }
 
-        .logo {
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-decoration: none;
-            color: white;
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
         }
+        
+        /* Custom transition delay utilities */
+        .transition-delay-100 { transition-delay: 100ms; }
+        .transition-delay-200 { transition-delay: 200ms; }
+        .transition-delay-300 { transition-delay: 300ms; }
+        .transition-delay-400 { transition-delay: 400ms; }
+        .transition-delay-500 { transition-delay: 500ms; }
 
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 2rem;
+        /* Marquee animation for logos */
+        @keyframes marquee { 
+            0% { transform: translateX(0%); } 
+            100% { transform: translateX(-50%); } 
         }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            transition: opacity 0.3s;
-        }
-
-        .nav-links a:hover {
-            opacity: 0.8;
-        }
-
-        .auth-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .btn {
-            padding: 0.5rem 1.5rem;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-
-        .btn-outline {
-            background: transparent;
-            color: white;
-            border: 2px solid white;
-        }
-
-        .btn-outline:hover {
-            background: white;
-            color: #4a90e2;
-        }
-
-        .btn-primary {
-            background: white;
-            color: #4a90e2;
-        }
-
-        .btn-primary:hover {
-            background: #f0f8ff;
-            transform: translateY(-2px);
-        }
-
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%);
-            color: white;
-            padding: 120px 0 80px;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            animation: fadeInUp 1s ease-out;
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-            animation: fadeInUp 1s ease-out 0.2s both;
-        }
-
-        .search-container {
-            max-width: 600px;
-            margin: 0 auto;
-            position: relative;
-            animation: fadeInUp 1s ease-out 0.4s both;
-        }
-
-        .search-box {
-            display: flex;
-            background: white;
-            border-radius: 50px;
-            padding: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .search-input {
-            flex: 1;
-            border: none;
-            padding: 15px 20px;
-            font-size: 1rem;
-            border-radius: 40px;
-            outline: none;
-            color: #333;
-        }
-
-        .search-btn {
-            background: #4a90e2;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.3s;
-        }
-
-        .search-btn:hover {
-            background: #357abd;
-        }
-
-        /* Stats Section */
-        .stats {
-            background: white;
-            padding: 60px 0;
-            margin-top: -40px;
-            position: relative;
-            z-index: 10;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            text-align: center;
-        }
-
-        .stat-item {
-            padding: 2rem;
-            border-radius: 15px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            transition: transform 0.3s;
-        }
-
-        .stat-item:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #4a90e2;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            color: #64748b;
-            font-size: 1rem;
-        }
-
-        /* Features Section */
-        .features {
-            padding: 80px 0;
-            background: #f8fafc;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 3rem;
-            color: #1e293b;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        }
-
-        .feature-icon {
-            font-size: 3rem;
-            color: #87ceeb;
-            margin-bottom: 1rem;
-        }
-
-        .feature-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #1e293b;
-        }
-
-        .feature-card p {
-            color: #64748b;
-            line-height: 1.6;
-        }
-
-        /* Companies Section */
-        .companies {
-            padding: 80px 0;
-            background: white;
-        }
-
-        .companies-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .company-card {
-            background: #f8fafc;
-            padding: 1.5rem;
-            border-radius: 10px;
-            text-align: center;
-            border: 1px solid #e2e8f0;
-            transition: all 0.3s;
-        }
-
-        .company-card:hover {
-            background: #87ceeb;
-            color: white;
-            transform: translateY(-3px);
-        }
-
-        /* CTA Section */
-        .cta {
-            background: linear-gradient(135deg, #4a90e2 0%, #87ceeb 100%);
-            color: white;
-            padding: 80px 0;
-            text-align: center;
-        }
-
-        .cta h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .cta p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        .btn-large {
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
-            background: white;
-            color: #4a90e2;
-            border-radius: 30px;
-        }
-
-        .btn-large:hover {
-            background: #f0f8ff;
-            transform: translateY(-3px);
-        }
-
-        /* Footer */
-        footer {
-            background: #1e293b;
-            color: white;
-            padding: 40px 0 20px;
-        }
-
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .footer-section h3 {
-            margin-bottom: 1rem;
-            color: #87ceeb;
-        }
-
-        .footer-section ul {
-            list-style: none;
-        }
-
-        .footer-section ul li {
-            margin-bottom: 0.5rem;
-        }
-
-        .footer-section ul li a {
-            color: #cbd5e1;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-section ul li a:hover {
-            color: #87ceeb;
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid #334155;
-            color: #94a3b8;
-        }
-
-        /* Mobile Menu */
-        .mobile-menu {
-            display: none;
-            background: white;
-            color: #4a90e2;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .mobile-menu {
-                display: block;
-            }
-
-            .hero h1 {
-                font-size: 2rem;
-            }
-
-            .hero p {
-                font-size: 1rem;
-            }
-
-            .search-box {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .search-btn {
-                border-radius: 25px;
-            }
-
-            .section-title {
-                font-size: 2rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
+        .animate-marquee { 
+            display: flex; 
+            animation: marquee 30s linear infinite; 
         }
     </style>
-    <script src="/assets/static/js/initTheme.js"></script>
+</head>
+<body class="antialiased">
+
+  {{ $slot }}
+
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const toggler = document.getElementById('toggle-dark');
-            if (toggler) {
-                toggler.checked = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-                toggler.addEventListener('input', function(e) {
-                    document.documentElement.setAttribute('data-bs-theme', e.target.checked ? 'dark' : 'light');
-                    localStorage.setItem('theme', e.target.checked ? 'dark' : 'light');
-                });
-            }
-        });
-    </script>
-</head>
-<body>
-    {{ $slot }}
-
-    <script>
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+            // --- Header Scroll Effect ---
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('bg-blue-500/90', 'backdrop-blur-sm', 'shadow-lg');
+                } else {
+                    header.classList.remove('bg-blue-500/90', 'backdrop-blur-sm', 'shadow-lg');
                 }
             });
-        });
 
-        // Search functionality
-        document.querySelector('.search-btn').addEventListener('click', function() {
-            const searchInput = document.querySelector('.search-input');
-            const searchTerm = searchInput.value.trim();
-            
-            if (searchTerm) {
-                // Simulate search action
-                alert(`Mencari: "${searchTerm}"\n\nFitur pencarian akan segera tersedia!`);
-            } else {
-                alert('Silakan masukkan kata kunci pencarian');
+            // --- Mobile Menu Toggle (Bug-Free) ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenuClose = document.getElementById('mobile-menu-close');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileLinks = document.querySelectorAll('.mobile-link');
+
+            const openMenu = () => {
+                mobileMenu.classList.remove('hidden');
+                document.body.classList.add('menu-open');
+            };
+            const closeMenu = () => {
+                mobileMenu.classList.add('hidden');
+                document.body.classList.remove('menu-open');
+            };
+
+            mobileMenuButton.addEventListener('click', openMenu);
+            mobileMenuClose.addEventListener('click', closeMenu);
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', closeMenu);
+            });
+
+            // --- Animate on Scroll ---
+            const scrollElements = document.querySelectorAll('.reveal-on-scroll');
+            const elementInView = (el, dividend = 1) => {
+                const elementTop = el.getBoundingClientRect().top;
+                return (
+                    elementTop <= (window.innerHeight || document.documentElement.clientHeight) / dividend
+                );
+            };
+
+            const handleScrollAnimation = () => {
+                scrollElements.forEach((el) => {
+                    if (elementInView(el, 1.25)) {
+                        el.classList.add('is-visible');
+                    }
+                });
             }
-        });
+            window.addEventListener('scroll', handleScrollAnimation);
+            handleScrollAnimation(); // Trigger on load
 
-        // Enter key search
-        document.querySelector('.search-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.querySelector('.search-btn').click();
-            }
-        });
-
-        // Mobile menu toggle (basic implementation)
-        document.querySelector('.mobile-menu').addEventListener('click', function() {
-            const navLinks = document.querySelector('.nav-links');
-            if (navLinks.style.display === 'flex') {
-                navLinks.style.display = 'none';
-            } else {
-                navLinks.style.display = 'flex';
-                navLinks.style.flexDirection = 'column';
-                navLinks.style.position = 'absolute';
-                navLinks.style.top = '100%';
-                navLinks.style.left = '0';
-                navLinks.style.right = '0';
-                navLinks.style.background = '#4a90e2';
-                navLinks.style.padding = '1rem';
-            }
-        });
-
-        // Animate stats on scroll
-        function animateStats() {
+            // --- Stat Number Animation ---
             const statNumbers = document.querySelectorAll('.stat-number');
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const target = entry.target;
-                        const finalNumber = target.textContent;
-                        const numericValue = parseInt(finalNumber.replace(/\D/g, ''));
-                        const suffix = finalNumber.replace(/[\d,]/g, '');
+                        const finalValue = target.textContent;
+                        const numericValue = parseInt(finalValue.replace(/\D/g, ''));
+                        const suffix = finalValue.replace(/[\d,.]/g, '');
                         
-                        let current = 0;
-                        const increment = numericValue / 50;
-                        const timer = setInterval(() => {
-                            current += increment;
-                            if (current >= numericValue) {
-                                current = numericValue;
-                                clearInterval(timer);
+                        const duration = 2000; // 2 seconds
+                        const startTime = performance.now();
+
+                        function animate(currentTime) {
+                            const elapsedTime = currentTime - startTime;
+                            const progress = Math.min(elapsedTime / duration, 1);
+                            const currentVal = Math.floor(progress * numericValue);
+                            
+                            target.textContent = currentVal.toLocaleString('id-ID') + suffix;
+
+                            if (progress < 1) {
+                                requestAnimationFrame(animate);
+                            } else {
+                                target.textContent = numericValue.toLocaleString('id-ID') + suffix;
                             }
-                            target.textContent = Math.floor(current).toLocaleString() + suffix;
-                        }, 30);
+                        }
                         
-                        observer.unobserve(target);
+                        requestAnimationFrame(animate);
+                        observer.unobserve(target); // Animate only once
                     }
                 });
-            });
+            }, { threshold: 0.5 }); // Trigger when 50% of the element is visible
 
             statNumbers.forEach(stat => observer.observe(stat));
-        }
-
-        // Initialize animations when page loads
-        window.addEventListener('load', animateStats);
-
-        // Add scroll effect to header
-        window.addEventListener('scroll', function() {
-            const header = document.querySelector('header');
-            if (window.scrollY > 100) {
-                header.style.background = 'rgba(74, 144, 226, 0.95)';
-                header.style.backdropFilter = 'blur(10px)';
-            } else {
-                header.style.background = 'linear-gradient(135deg, #87ceeb 0%, #4a90e2 100%)';
-                header.style.backdropFilter = 'none';
-            }
-        });
-
-        // Add hover effects to cards
-        document.querySelectorAll('.feature-card, .company-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-10px) scale(1.02)';
-            });
-            
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0) scale(1)';
-            });
         });
     </script>
 </body>

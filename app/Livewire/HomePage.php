@@ -21,6 +21,12 @@ class HomePage extends Component
         // Mengambil seluruh data pengguna yang terotentikasi
         $this->user = Auth::user();
     }
+
+    public function logout()
+    {
+        Auth::logout();
+        return redirect()->route('homepage');
+    }
     public function render()
     {
         return view('livewire.home-page');

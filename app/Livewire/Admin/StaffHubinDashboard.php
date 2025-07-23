@@ -16,7 +16,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\On;
 
-#[Layout("components.layouts.layout-admin-dashboard")]
+#[Layout("components.layouts.layout-staff-hubin-dashboard")]
 #[Title("Manajemen Staff Hubin")]
 class StaffHubinDashboard extends Component
 {

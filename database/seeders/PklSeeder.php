@@ -9,17 +9,10 @@ use App\Models\Kelas;
 use App\Models\KepalaProgram;
 use App\Models\KepalaSekolah;
 use App\Models\Kompetensi;
-use App\Models\KontakPerusahaan;
-use App\Models\Monitoring;
 use App\Models\PembimbingPerusahaan;
 use App\Models\PembimbingSekolah;
-use App\Models\Pengajuan;
-use App\Models\Penilaian;
 use App\Models\Perusahaan;
-use App\Models\Prakerin;
-use App\Models\PresensiSiswa;
 use App\Models\Role;
-use App\Models\Sertifikat;
 use App\Models\Siswa;
 use App\Models\StaffHubin;
 use App\Models\User;
@@ -33,6 +26,7 @@ class PklSeeder extends Seeder
 {
     public function run(): void
     {
+        // Inisialisasi Faker hanya sekali di sini
         $faker = Faker::create('id_ID');
 
         DB::transaction(function () use ($faker) {
@@ -65,20 +59,37 @@ class PklSeeder extends Seeder
             $this->command->info($jurusans->count() . ' Jurusan telah dibuat.');
 
             // Membuat entitas-entitas yang memiliki akun user
-            $gurus = $this->createUsersWithProfile(5, $adminRole, Guru::class, ['nama_guru' => 'username', 'kontak_guru' => fn() => $faker->e164PhoneNumber]);
+            $gurus = $this->createUsersWithProfile($faker, 5, $adminRole, Guru::class, ['nama_guru' => 'username', 'kontak_guru' => fn() => $faker->e164PhoneNumber]);
             $this->command->info($gurus->count() . ' Guru (role: admin) telah dibuat.');
             
-            // PERBAIKAN: Menghapus 'nip_wali_kelas' dari array.
-            $waliKelasCollection = $this->createUsersWithProfile(5, $waliKelasRole, WaliKelas::class, ['nama_wali_kelas' => 'username']);
+            $waliKelasCollection = $this->createUsersWithProfile($faker, 5, $waliKelasRole, WaliKelas::class, ['nama_wali_kelas' => 'username']);
             $this->command->info($waliKelasCollection->count() . ' Wali Kelas (role: walikelas) telah dibuat.');
 
-            $pembimbingSekolahs = $this->createUsersWithProfile(5, $pembimbingSekolahRole, PembimbingSekolah::class, ['nama_pembimbing_sekolah' => 'username']);
+            $pembimbingSekolahs = $this->createUsersWithProfile($faker, 5, $pembimbingSekolahRole, PembimbingSekolah::class, ['nama_pembimbing_sekolah' => 'username']);
             $this->command->info($pembimbingSekolahs->count() . ' Pembimbing Sekolah (role: pembimbingsekolah) telah dibuat.');
 
-            $staffHubins = $this->createUsersWithProfile(2, $staffHubinRole, StaffHubin::class, ['nama_staff' => 'username']);
+            // Membuat akun Staff Hubin statis
+            $this->command->info('Membuat akun Staff Hubin statis (vanjirgua@gmail.com)...');
+            $staffHubinUserStatis = User::firstOrCreate(
+                ['email' => 'vanjirgua@gmail.com'],
+                [
+                    'username' => 'vanjirgua',
+                    'password' => Hash::make('indrawan0236'),
+                    'roles_id' => $staffHubinRole->id
+                ]
+            );
+            $staffHubinStatis = StaffHubin::firstOrCreate(
+                ['user_id' => $staffHubinUserStatis->id],
+                ['nama_staff' => $staffHubinUserStatis->username]
+            );
+
+            // Membuat Staff Hubin Faker
+            $staffHubins = $this->createUsersWithProfile($faker, 1, $staffHubinRole, StaffHubin::class, ['nama_staff' => 'username']);
+            $staffHubins->push($staffHubinStatis); // Menambahkan staff hubin statis ke koleksi
             $this->command->info($staffHubins->count() . ' Staff Hubin (role: staffhubin) telah dibuat.');
 
-            $kepalaSekolahs = $this->createUsersWithProfile(1, $kepalaSekolahRole, KepalaSekolah::class, ['nama_kepala_sekolah' => 'username', 'jabatan' => 'Kepala Sekolah', 'nip_kepsek' => fn() => $faker->numerify('19#########-####-##-###')]);
+
+            $kepalaSekolahs = $this->createUsersWithProfile($faker, 1, $kepalaSekolahRole, KepalaSekolah::class, ['nama_kepala_sekolah' => 'username', 'jabatan' => 'Kepala Sekolah', 'nip_kepsek' => fn() => $faker->numerify('19#########-####-##-###')]);
             $this->command->info($kepalaSekolahs->count() . ' Kepala Sekolah (role: kepalasekolah) telah dibuat.');
 
             $kepalaPrograms = collect();
@@ -96,18 +107,29 @@ class PklSeeder extends Seeder
                 }
             }
             $jurusanDefault = Jurusan::firstOrCreate(['nama_jurusan_lengkap' => 'Belum Ditentukan', 'nama_jurusan_singkat' => 'N/A']);
-            $kelasCollection->push(Kelas::firstOrCreate(['nama_kelas' => 'N/A'], ['tingkat_kelas' => 'N/A', 'nip_wali_kelas' => $waliKelasCollection->first()->nip_wali_kelas, 'id_jurusan' => $jurusanDefault->id_jurusan, 'id_angkatan' => $angkatan->id_angkatan]));
+            $kelasDefault = Kelas::firstOrCreate(['nama_kelas' => 'N/A'], ['tingkat_kelas' => 'N/A', 'nip_wali_kelas' => $waliKelasCollection->first()->nip_wali_kelas, 'id_jurusan' => $jurusanDefault->id_jurusan, 'id_angkatan' => $angkatan->id_angkatan]);
+            $kelasCollection->push($kelasDefault);
             $this->command->info($kelasCollection->count() . ' Kelas telah dibuat.');
+
+            // Membuat akun siswa statis
+            $siswaUser = User::firstOrCreate(['email' => 'faridx0236@gmail.com'], ['username' => 'Farid Siswa', 'password' => Hash::make('indrawan0236'), 'roles_id' => $userRole->id]);
+            Siswa::firstOrCreate(['user_id' => $siswaUser->id], ['nis' => '1234567890', 'id_kelas' => $kelasCollection->where('nama_kelas', '!=', 'N/A')->random()->id_kelas, 'id_jurusan' => Jurusan::where('nama_jurusan_singkat', 'RPL')->first()->id_jurusan, 'nama_siswa' => $siswaUser->username, 'tempat_lahir' => 'Jakarta', 'tanggal_lahir' => '2006-08-17', 'kontak_siswa' => '081234567890']);
+            $this->command->info('User Siswa Farid (user) telah dibuat.');
             
-            // Membuat Siswa
-            $siswas = $this->createUsersWithProfile(100, $userRole, Siswa::class, ['nis' => fn() => $faker->unique()->numerify('##########'), 'nama_siswa' => 'username', 'id_kelas' => fn() => $kelasCollection->where('nama_kelas', '!=', 'N/A')->random()->id_kelas, 'id_jurusan' => fn($kelas) => $kelas->id_jurusan, 'tempat_lahir' => fn() => $faker->city, 'tanggal_lahir' => fn() => $faker->date(), 'kontak_siswa' => fn() => $faker->e164PhoneNumber]);
+            // Membuat Siswa Faker
+            $siswas = $this->createUsersWithProfile($faker, 100, $userRole, Siswa::class, ['nis' => fn() => $faker->unique()->numerify('##########'), 'nama_siswa' => 'username', 'id_kelas' => fn() => $kelasCollection->where('nama_kelas', '!=', 'N/A')->random()->id_kelas, 'id_jurusan' => fn($kelas) => $kelas->id_jurusan, 'tempat_lahir' => fn() => $faker->city, 'tanggal_lahir' => fn() => $faker->date(), 'kontak_siswa' => fn() => $faker->e164PhoneNumber]);
             $this->command->info($siswas->count() . ' Siswa (role: user) telah dibuat.');
 
             // 4. MEMBUAT DATA PERUSAHAAN
             $this->command->info('Membuat data Perusahaan...');
             $perusahaans = collect();
             for ($i = 0; $i < 20; $i++) {
-                $perusahaans->push(Perusahaan::create(['nama_perusahaan' => $faker->company, 'alamat_perusahaan' => $faker->address, 'email_perusahaan' => $faker->unique()->companyEmail, 'kontak_perusahaan' => $faker->e164PhoneNumber]));
+                $perusahaans->push(Perusahaan::create([
+                    'nama_perusahaan' => $faker->company,
+                    'alamat_perusahaan' => $faker->address,
+                    'email_perusahaan' => 'silfa0236@gmail.com',
+                    'kontak_perusahaan' => $faker->e164PhoneNumber
+                ]));
             }
             $this->command->info($perusahaans->count() . ' Perusahaan telah dibuat.');
 
@@ -125,24 +147,36 @@ class PklSeeder extends Seeder
     /**
      * Helper function to create users and their corresponding profiles.
      */
-    private function createUsersWithProfile(int $count, Role $role, string $profileModel, array $profileAttributes): \Illuminate\Support\Collection
+    private function createUsersWithProfile(\Faker\Generator $faker, int $count, Role $role, string $profileModel, array $profileAttributes): \Illuminate\Support\Collection
     {
-        $faker = Faker::create('id_ID');
         $collection = collect();
-
+        $usedEmails = User::pluck('email')->toArray();
         for ($i = 0; $i < $count; $i++) {
+            // Generate email unik
+            $email = null;
+            $try = 0;
+            do {
+                $try++;
+                $email = $faker->unique()->safeEmail;
+                if ($try > 5) {
+                    $email = 'user_' . $role->name . '_' . $i . '@example.com';
+                }
+            } while (in_array($email, $usedEmails));
+            $usedEmails[] = $email;
+
             $user = User::create([
                 'username' => $faker->unique()->userName,
-                'email' => $faker->unique()->safeEmail,
+                'email' => $email,
                 'password' => Hash::make('password'),
                 'roles_id' => $role->id,
             ]);
-
             $attributes = ['user_id' => $user->id];
             foreach ($profileAttributes as $key => $value) {
                 if (is_callable($value)) {
-                    // Pass related models if needed, e.g., for id_jurusan from kelas
-                    $relatedModel = $key === 'id_jurusan' ? Kelas::find($attributes['id_kelas']) : null;
+                    $relatedModel = null;
+                    if ($key === 'id_jurusan' && isset($attributes['id_kelas'])) {
+                         $relatedModel = Kelas::find($attributes['id_kelas']);
+                    }
                     $attributes[$key] = $value($relatedModel);
                 } elseif ($value === 'username') {
                     $attributes[$key] = $user->username;

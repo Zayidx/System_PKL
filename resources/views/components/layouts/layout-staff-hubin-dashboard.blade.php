@@ -1,6 +1,6 @@
 {{-- ========================================================================================= --}}
-{{-- FILE 1: Layout Utama (layout-admin-dashboard.blade.php) --}}
-{{-- LOKASI: resources/views/components/layouts/layout-admin-dashboard.blade.php --}}
+{{-- FILE 1: Layout Utama (layout-staff-hubin-dashboard.blade.php) --}}
+{{-- LOKASI: resources/views/components/layouts/layout-staff-hubin-dashboard.blade.php --}}
 {{-- ANALISIS: --}}
 {{-- 1. [DIKEMBALIKAN] Struktur HTML dan CSS kembali menggunakan template Mazer (Bootstrap). --}}
 {{-- 2. [DIADOPSI] Script SweetAlert2 dari layout sebelumnya (tema gelap) ditambahkan --}}
@@ -12,7 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Admin Dashboard' }}</title>
+    <title>{{ $title ?? 'Staff Hubin Dashboard' }}</title>
 
     {{-- Stylesheet dari Template Mazer --}}
     <link rel="shortcut icon" href="{{ asset('assets/compiled/svg/favicon.svg') }}" type="image/x-icon">
@@ -59,7 +59,7 @@
                 </div>
                 <div class="sidebar-menu">
                     {{-- Ganti dengan include sidebar Anda --}}
-                    @include('components.layouts.partials.sidebar-admin-dashboard')
+                    @include('components.layouts.partials.sidebar-staff-hubin-dashboard')
                 </div>
             </div>
         </div>

@@ -1,11 +1,3 @@
-{{-- ========================================================================================= --}}
-{{-- FILE 1: Layout Utama (layout-admin-dashboard.blade.php) --}}
-{{-- LOKASI: resources/views/components/layouts/layout-admin-dashboard.blade.php --}}
-{{-- ANALISIS: --}}
-{{-- 1. [DIKEMBALIKAN] Struktur HTML dan CSS kembali menggunakan template Mazer (Bootstrap). --}}
-{{-- 2. [DIADOPSI] Script SweetAlert2 dari layout sebelumnya (tema gelap) ditambahkan --}}
-{{--    dan disesuaikan agar bisa berfungsi di layout ini. --}}
-{{-- ========================================================================================= --}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,6 +16,27 @@
 
     @livewireStyles
     @stack('styles')
+    <style>
+        /* Custom style to ensure the #app container takes full height */
+        html, body {
+            height: 100%;
+        }
+        #app {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        #main {
+            /* This ensures the main content area can grow and push the footer */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .page-content {
+            /* This makes the actual content area expand */
+            flex-grow: 1;
+        }
+    </style>
 </head>
 <body>
     <script src="{{ asset('assets/static/js/initTheme.js') }}"></script>
@@ -57,6 +70,7 @@
             </div>
         </div>
         
+        <!-- KEY CHANGE: The #main container is now a flex column, allowing its children to be arranged vertically. -->
         <div id="main">
             <header class="mb-3">
                 <a href="#" class="burger-btn d-block d-xl-none">
@@ -66,6 +80,7 @@
             <div class="page-heading">
                 <h3>{{ $title ?? 'Halaman' }}</h3>
             </div> 
+            <!-- KEY CHANGE: The .page-content will now grow to fill available vertical space, pushing the footer down. -->
             <div class="page-content">
                 {{ $slot }}
             </div>
@@ -114,7 +129,7 @@
             }
         }
     </script>
-    {{-- [DIADOPSI] Script Listener SweetAlert dengan Tema Gelap --}}
+    {{-- Script Listener SweetAlert --}}
     <script>
         document.addEventListener('livewire:init', () => {
             Livewire.on('swal:success', event => {
@@ -129,6 +144,42 @@
                     confirmButtonColor: theme.confirmButtonColor
                 });
             });
+
+            Livewire.on('swal:error', event => {
+                const theme = getSwalThemeOptions();
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: event.message,
+                    icon: 'error',
+                    background: theme.background,
+                    color: theme.color,
+                    confirmButtonText: 'Tutup',
+                    confirmButtonColor: theme.confirmButtonColor
+                });
+            });
+
+            // Listener baru untuk konfirmasi pengajuan
+            Livewire.on('swal:ajukan', event => {
+                const theme = getSwalThemeOptions();
+                Swal.fire({
+                    title: 'Konfirmasi Pengajuan',
+                    html: `Anda yakin ingin mengajukan magang ke <strong>${event.nama}</strong>?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: theme.confirmButtonColor,
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, ajukan!',
+                    cancelButtonText: 'Batal',
+                    background: theme.background,
+                    color: theme.color,
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Memanggil metode Livewire setelah konfirmasi
+                        Livewire.dispatch('confirmAjukanMagang', { id: event.id });
+                    }
+                })
+            });
+
             Livewire.on('swal:confirm', event => {
                 const theme = getSwalThemeOptions();
                 Swal.fire({

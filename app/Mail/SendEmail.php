@@ -13,12 +13,21 @@ class SendEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $view;
+    public $data;
+    public $pdfContent;
+    public $pdfName;
+
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($subject = 'Send Email', $view = null, $data = [], $pdfContent = null, $pdfName = null)
     {
-        //
+        $this->subject = $subject;
+        $this->view = $view;
+        $this->data = $data;
+        $this->pdfContent = $pdfContent;
+        $this->pdfName = $pdfName;
     }
 
     /**
@@ -27,7 +36,7 @@ class SendEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Send Email',
+            subject: $this->subject,
         );
     }
 
@@ -37,7 +46,8 @@ class SendEmail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: $this->view,
+            with: $this->data,
         );
     }
 
@@ -48,6 +58,11 @@ class SendEmail extends Mailable
      */
     public function attachments(): array
     {
+        if ($this->pdfContent && $this->pdfName) {
+            return [
+                \Illuminate\Mail\Mailables\Attachment::fromData(fn() => $this->pdfContent, $this->pdfName)
+            ];
+        }
         return [];
     }
 }
