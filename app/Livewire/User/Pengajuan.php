@@ -21,11 +21,22 @@ class Pengajuan extends Component
     public $search = '';
     public $perPage = 10;
     public $pengajuanSiswa = [];
+    public $tanggal_mulai;
+    public $tanggal_selesai;
+    public $showModal = false;
+    public $selectedPerusahaanId = null;
+    public $link_cv;
+
+    protected $rules = [
+        'tanggal_mulai' => 'required|date|after_or_equal:today',
+        'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+        'link_cv' => 'required|url',
+    ];
 
     /**
      * Menambahkan listener untuk event konfirmasi dari SweetAlert.
      */
-    protected $listeners = ['confirmAjukanMagang'];
+    protected $listeners = ['confirmAjukanMagangFinal' => 'ajukanMagangKontrak'];
 
     public function mount()
     {
@@ -65,15 +76,66 @@ class Pengajuan extends Component
 
         Log::info("Semua validasi berhasil untuk NIS: {$nis}. Membuat data pengajuan baru...");
 
-        PengajuanModel::create([
-            'nis_siswa' => $nis,
-            'id_perusahaan' => $idPerusahaan,
-            'status_pengajuan' => 'pending',
-        ]);
+        // Tampilkan modal input tanggal kontrak dan link CV
+        $this->selectedPerusahaanId = $idPerusahaan;
+        $this->tanggal_mulai = null;
+        $this->tanggal_selesai = null;
+        $this->link_cv = null;
+        $this->showModal = true;
+    }
 
+    public function openModalPengajuan($id)
+    {
+        $this->selectedPerusahaanId = $id;
+        $this->tanggal_mulai = null;
+        $this->tanggal_selesai = null;
+        $this->link_cv = null;
+        $this->showModal = true;
+    }
+
+    public function konfirmasiPengajuanSetelahForm()
+    {
+        $this->validate();
+        // Tampilkan SweetAlert konfirmasi
+        $perusahaan = \App\Models\Perusahaan::find($this->selectedPerusahaanId);
+        $this->dispatch('swal:ajukan-final', [
+            'id' => $this->selectedPerusahaanId,
+            'nama' => $perusahaan ? $perusahaan->nama_perusahaan : 'Perusahaan',
+        ]);
+    }
+
+    public function ajukanMagangKontrak()
+    {
+        $year = date('Y');
+        if (
+            !$this->tanggal_mulai ||
+            !$this->tanggal_selesai ||
+            !$this->link_cv ||
+            date('Y', strtotime($this->tanggal_mulai)) != $year ||
+            date('Y', strtotime($this->tanggal_selesai)) != $year
+        ) {
+            $this->addError('tanggal_mulai', 'Tanggal PKL harus di tahun berjalan.');
+            $this->addError('tanggal_selesai', 'Tanggal PKL harus di tahun berjalan.');
+            $this->addError('link_cv', 'Link CV wajib diisi.');
+            return;
+        }
+        $nis = Auth::user()->siswa->nis;
+        $idPerusahaan = $this->selectedPerusahaanId;
+        try {
+            PengajuanModel::create([
+                'nis_siswa' => $nis,
+                'id_perusahaan' => $idPerusahaan,
+                'status_pengajuan' => 'pending',
+                'tanggal_mulai' => $this->tanggal_mulai,
+                'tanggal_selesai' => $this->tanggal_selesai,
+                'link_cv' => $this->link_cv,
+            ]);
+        } catch (\Exception $e) {
+            $this->dispatch('swal:error', ['message' => 'Gagal menyimpan pengajuan. Silakan coba lagi.']);
+            return;
+        }
         $this->loadPengajuanSiswa();
-        
-        Log::info("Pengajuan BERHASIL untuk NIS: {$nis} ke Perusahaan ID: {$idPerusahaan}.");
+        $this->showModal = false;
         $this->dispatch('swal:success', ['message' => 'Pengajuan berhasil dikirim!']);
     }
     

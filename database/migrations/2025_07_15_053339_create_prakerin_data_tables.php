@@ -18,6 +18,10 @@ return new class extends Migration
             $table->string('status_pengajuan', 30);
             $table->string('bukti_penerimaan')->nullable();
             $table->string('token', 64)->nullable();
+            // Tambahan field kontrak PKL
+            $table->date('tanggal_mulai')->nullable();
+            $table->date('tanggal_selesai')->nullable();
+            $table->string('link_cv', 255)->nullable();
             $table->timestamps();
 
             $table->foreign('nis_siswa')->references('nis')->on('siswa')->onDelete('cascade');

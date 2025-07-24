@@ -13,7 +13,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use App\Models\Siswa;
 
-#[Layout('components.layouts.layout-admin-dashboard')]
+#[Layout('components.layouts.layout-staff-hubin-dashboard')]
 #[Title('Status Pengajuan Siswa')]
 class StatusPengajuanSiswaDashboard extends Component
 {

@@ -72,7 +72,7 @@
                         <table class="table table-hover mb-0">
                             <tbody>
                                 @forelse($recentPengajuan as $pengajuan)
-                                    <tr>
+                                    <tr @if($pengajuan->status_pengajuan !== 'pending') style="cursor:pointer" onclick="window.location='{{ route('user.pengajuan.proses', ['id_perusahaan' => $pengajuan->id_perusahaan]) }}'" @endif>
                                         <td>
                                             <div class="fw-bold">{{ $pengajuan->perusahaan->nama_perusahaan ?? 'Nama Perusahaan' }}</div>
                                             <small class="text-muted">Diajukan pada: {{ $pengajuan->created_at->format('d M Y, H:i') }}</small>

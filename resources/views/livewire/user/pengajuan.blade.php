@@ -83,11 +83,14 @@
                                     </div>
                                 </div>
                             @else
-                                <div wire:click="$dispatch('swal:ajukan', { id: {{ $perusahaan->id_perusahaan }}, nama: '{{ $perusahaan->nama_perusahaan }}' })"
-                                     class="card-footer bg-primary text-white text-center fw-bold footer-hover"
-                                     style="cursor: pointer;">
-                                    <i class="bi bi-send-fill me-1"></i> Ajukan Magang
-                                </div>
+                                {{-- Pada bagian tombol Ajukan Magang --}}
+                                @if(!$showModal)
+                                    <a href="{{ route('user.pengajuan.proses', ['id_perusahaan' => $perusahaan->id_perusahaan]) }}"
+                                       class="card-footer bg-primary text-white text-center fw-bold footer-hover text-decoration-none"
+                                       style="cursor: pointer;">
+                                        <i class="bi bi-send-fill me-1"></i> Ajukan Magang
+                                    </a>
+                                @endif
                             @endif
                         </div>
                     </div>
@@ -107,6 +110,44 @@
         </div>
     </div>
 </div>
+
+{{-- Modal Form Kontrak PKL --}}
+@if($showModal)
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.4);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Isi Kontrak PKL</h5>
+                    <button type="button" class="btn-close" wire:click="$set('showModal', false)"></button>
+                </div>
+                <form wire:submit.prevent="konfirmasiPengajuanSetelahForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="tanggal_mulai" class="form-label">Tanggal Mulai PKL</label>
+                            <input type="date" id="tanggal_mulai" class="form-control @error('tanggal_mulai') is-invalid @enderror" wire:model.defer="tanggal_mulai">
+                            @error('tanggal_mulai') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="tanggal_selesai" class="form-label">Tanggal Selesai PKL</label>
+                            <input type="date" id="tanggal_selesai" class="form-control @error('tanggal_selesai') is-invalid @enderror" wire:model.defer="tanggal_selesai">
+                            @error('tanggal_selesai') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="link_cv" class="form-label">Link CV (Google Drive, Dropbox, dsb)</label>
+                            <input type="url" id="link_cv" class="form-control @error('link_cv') is-invalid @enderror" wire:model.defer="link_cv" placeholder="https://...">
+                            @error('link_cv') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" wire:click="$set('showModal', false)">Batal</button>
+                        <button type="submit" class="btn btn-primary">Lanjutkan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+@endif
 
 @push('styles')
 <style>

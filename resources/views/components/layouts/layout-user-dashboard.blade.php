@@ -36,6 +36,12 @@
             /* This makes the actual content area expand */
             flex-grow: 1;
         }
+        /* Style untuk input di dalam SweetAlert */
+        .swal2-input-label {
+            text-align: left !important;
+            margin: 1em 0 0.5em !important;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -70,7 +76,6 @@
             </div>
         </div>
         
-        <!-- KEY CHANGE: The #main container is now a flex column, allowing its children to be arranged vertically. -->
         <div id="main">
             <header class="mb-3">
                 <a href="#" class="burger-btn d-block d-xl-none">
@@ -80,7 +85,6 @@
             <div class="page-heading">
                 <h3>{{ $title ?? 'Halaman' }}</h3>
             </div> 
-            <!-- KEY CHANGE: The .page-content will now grow to fill available vertical space, pushing the footer down. -->
             <div class="page-content">
                 {{ $slot }}
             </div>
@@ -158,12 +162,25 @@
                 });
             });
 
-            // Listener baru untuk konfirmasi pengajuan
+            // =================================================================
+            // KEY CHANGE: Listener untuk menampilkan form pengajuan magang
+            // =================================================================
             Livewire.on('swal:ajukan', event => {
                 const theme = getSwalThemeOptions();
                 Swal.fire({
-                    title: 'Konfirmasi Pengajuan',
-                    html: `Anda yakin ingin mengajukan magang ke <strong>${event.nama}</strong>?`,
+                    title: `Ajukan Magang ke ${event.nama}`,
+                    html: `
+                        <div class="text-start">
+                            <label for="swal-tanggal-mulai" class="swal2-input-label">Tanggal Mulai</label>
+                            <input id="swal-tanggal-mulai" type="date" class="form-control" required>
+                            
+                            <label for="swal-tanggal-selesai" class="swal2-input-label">Tanggal Selesai</label>
+                            <input id="swal-tanggal-selesai" type="date" class="form-control" required>
+
+                            <label for="swal-link-cv" class="swal2-input-label">Link CV (Google Drive)</label>
+                            <input id="swal-link-cv" type="url" class="form-control" placeholder="https://..." required>
+                        </div>
+                    `,
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: theme.confirmButtonColor,
@@ -172,13 +189,43 @@
                     cancelButtonText: 'Batal',
                     background: theme.background,
                     color: theme.color,
+                    // Fungsi untuk validasi sebelum modal ditutup
+                    preConfirm: () => {
+                        const tanggalMulai = document.getElementById('swal-tanggal-mulai').value;
+                        const tanggalSelesai = document.getElementById('swal-tanggal-selesai').value;
+                        const linkCv = document.getElementById('swal-link-cv').value;
+
+                        if (!tanggalMulai || !tanggalSelesai || !linkCv) {
+                            Swal.showValidationMessage(`Harap isi semua field yang diperlukan.`);
+                            return false; // Mencegah modal tertutup
+                        }
+                        
+                        if (new Date(tanggalSelesai) <= new Date(tanggalMulai)) {
+                            Swal.showValidationMessage('Tanggal selesai harus setelah tanggal mulai.');
+                            return false;
+                        }
+
+                        // Mengembalikan nilai sebagai objek
+                        return { 
+                            tanggalMulai: tanggalMulai, 
+                            tanggalSelesai: tanggalSelesai, 
+                            linkCv: linkCv 
+                        };
+                    }
                 }).then((result) => {
+                    // Cek jika user menekan tombol "Ya, ajukan!" dan validasi berhasil
                     if (result.isConfirmed) {
-                        // Memanggil metode Livewire setelah konfirmasi
-                        Livewire.dispatch('confirmAjukanMagang', { id: event.id });
+                        // Memanggil metode Livewire dengan membawa data dari form
+                        Livewire.dispatch('confirmAjukanMagang', { 
+                            id: event.id,
+                            formData: result.value // result.value berisi objek dari preConfirm
+                        });
                     }
                 })
             });
+
+            // Hapus atau komentari listener 'swal:ajukan-final' karena sudah tidak relevan
+            // Livewire.on('swal:ajukan-final', event => { ... });
 
             Livewire.on('swal:confirm', event => {
                 const theme = getSwalThemeOptions();

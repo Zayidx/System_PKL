@@ -20,6 +20,10 @@
         <p>Dengan ini kami menyatakan bahwa pengajuan pemagangan Anda di {{ $pengajuan->perusahaan->nama_perusahaan }} telah <b>DITERIMA</b>.</p>
         <p>Silakan menghubungi perusahaan untuk proses selanjutnya.</p>
         <p>Terima kasih.</p>
+        <table style="width:100%; margin-bottom: 10px;">
+            <tr><td>Tanggal PKL</td><td>: {{ \Carbon\Carbon::parse($pengajuan->tanggal_mulai)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($pengajuan->tanggal_selesai)->format('d M Y') }}</td></tr>
+            <tr><td>Link CV</td><td>: <a href="{{ $pengajuan->link_cv }}">{{ $pengajuan->link_cv }}</a></td></tr>
+        </table>
     </div>
     <div class="footer">
         <p>Hormat kami,<br>Admin Sekolah</p>

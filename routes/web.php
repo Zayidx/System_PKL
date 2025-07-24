@@ -86,6 +86,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('user')->name('user.')->middleware('role:user')->group(function () {
         Route::get('/dashboard', UserDashboard::class)->name('dashboard');
         Route::get('/pengajuan', Pengajuan::class)->name('pengajuan');
+        Route::get('/pengajuan/proses/{id_perusahaan}', \App\Livewire\User\ProsesPengajuan::class)->name('pengajuan.proses');
     });
 
     Route::post('/send-otp', [OtpController::class, 'sendOtp']);

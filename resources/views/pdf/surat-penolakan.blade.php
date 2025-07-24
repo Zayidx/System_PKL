@@ -19,6 +19,10 @@
         <p>Dengan hormat,</p>
         <p>Dengan ini kami menyatakan bahwa pengajuan pemagangan Anda di {{ $pengajuan->perusahaan->nama_perusahaan }} <b>TIDAK DAPAT KAMI TERIMA</b> pada periode ini.</p>
         <p>Terima kasih atas minat dan partisipasi Anda.</p>
+        <table style="width:100%; margin-bottom: 10px;">
+            <tr><td>Tanggal PKL</td><td>: {{ \Carbon\Carbon::parse($pengajuan->tanggal_mulai)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($pengajuan->tanggal_selesai)->format('d M Y') }}</td></tr>
+            <tr><td>Link CV</td><td>: <a href="{{ $pengajuan->link_cv }}">{{ $pengajuan->link_cv }}</a></td></tr>
+        </table>
     </div>
     <div class="footer">
         <p>Hormat kami,<br>Admin Sekolah</p>

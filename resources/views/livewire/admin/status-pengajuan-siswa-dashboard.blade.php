@@ -1,5 +1,5 @@
 <div>
-    <a href="{{ route('admin.master.pengajuan.siswa', ['id_kelas' => $siswa->kelas->id_kelas]) }}" class="btn btn-link p-2 mb-3 bg-primary text-white text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Daftar Siswa</a>
+    <a href="{{ route('staffhubin.master.pengajuan.siswa', ['id_kelas' => $siswa->kelas->id_kelas]) }}" class="btn btn-link p-2 mb-3 bg-primary text-white text-decoration-none"><i class="bi bi-arrow-left"></i> Kembali ke Daftar Siswa</a>
     
     <div class="card shadow-sm">
          <div class="card-header">

@@ -22,6 +22,8 @@
             <tr><td>Nama Siswa</td><td>: {{ $pengajuan->siswa->nama_siswa }}</td></tr>
             <tr><td>NIS</td><td>: {{ $pengajuan->siswa->nis }}</td></tr>
             <tr><td>Jurusan</td><td>: {{ $pengajuan->siswa->jurusan->nama_jurusan_lengkap ?? '-' }}</td></tr>
+            <tr><td>Tanggal PKL</td><td>: {{ \Carbon\Carbon::parse($pengajuan->tanggal_mulai)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($pengajuan->tanggal_selesai)->format('d M Y') }}</td></tr>
+            <tr><td>Link CV</td><td>: <a href="{{ $pengajuan->link_cv }}">{{ $pengajuan->link_cv }}</a></td></tr>
         </table>
         <p>Mohon kesediaan Bapak/Ibu untuk menerima siswa tersebut sebagai peserta magang di perusahaan yang Bapak/Ibu pimpin.</p>
         <p>Atas perhatian dan kerjasama Bapak/Ibu, kami ucapkan terima kasih.</p>

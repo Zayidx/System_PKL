@@ -16,6 +16,8 @@
         <li><b>NIS:</b> {{ $pengajuan->siswa->nis }}</li>
         <li><b>Kelas:</b> {{ $pengajuan->siswa->kelas->nama_kelas ?? '-' }}</li>
         <li><b>Jurusan:</b> {{ $pengajuan->siswa->jurusan->nama_jurusan_lengkap ?? '-' }}</li>
+        <li><b>Tanggal PKL:</b> {{ \Carbon\Carbon::parse($pengajuan->tanggal_mulai)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($pengajuan->tanggal_selesai)->format('d M Y') }}</li>
+        <li><b>Link CV:</b> <a href="{{ $pengajuan->link_cv }}">{{ $pengajuan->link_cv }}</a></li>
     </ul>
     <p>Silakan klik tombol berikut untuk memberikan keputusan:</p>
     <a href="{{ $approveUrl }}" class="btn btn-approve">Setujui Pengajuan</a>

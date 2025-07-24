@@ -34,6 +34,9 @@ class Pengajuan extends Model
         'nip_staff',
         'status_pengajuan',
         'bukti_penerimaan',
+        'tanggal_mulai', // kontrak PKL
+        'tanggal_selesai', // kontrak PKL
+        'link_cv', // link CV siswa
     ];
 
     // Relasi ke model Siswa
