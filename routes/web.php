@@ -12,23 +12,25 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
+use App\Livewire\StaffHubin\Dashboard as StaffHubinDashboard;
 use App\Livewire\Admin\JurusanDashboard;
 use App\Livewire\Admin\KepalaProgramDashboard;
 use App\Livewire\Admin\KepalaSekolahDashboard;
 use App\Livewire\Admin\PembimbingPerusahaan;
 use App\Livewire\Admin\PembimbingPerusahaanDashboard;
 use App\Livewire\Admin\PembimbingSekolahDashboard;
-use App\Livewire\Admin\StaffHubinDashboard;
 use App\Livewire\Admin\UserDashboard as AdminUserManagement; // Alias agar lebih jelas
 use App\Livewire\Admin\WaliKelasDashboard;
 use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\User\Dashboard as UserDashboard;
-// Import komponen-komponen baru
+use App\Livewire\User\Pengajuan;
+use App\Livewire\User\AjukanPerusahaanBaru;
+use App\Livewire\User\ProsesPengajuan;
+use App\Livewire\StaffHubin\MitraPerusahaan;
+use App\Http\Controllers\PengajuanApprovalController;
 use App\Livewire\Admin\PengajuanDashboard;
 use App\Livewire\Admin\PengajuanSiswaDashboard;
 use App\Livewire\Admin\StatusPengajuanSiswaDashboard;
-use App\Livewire\User\Pengajuan;
-use App\Http\Controllers\PengajuanApprovalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,30 +65,24 @@ Route::middleware('auth')->group(function () {
             Route::get('/staff-hubin', StaffHubinDashboard::class)->name('staff-hubin');
             Route::get('/kepala-sekolah', KepalaSekolahDashboard::class)->name('kepala-sekolah');
             Route::get('/kepala-program', KepalaProgramDashboard::class)->name('kepala-program');
-            
-           
         });
     });
 
-     Route::prefix('staffhubin')->name('staffhubin.')->middleware('role:staffhubin')->group(function () {
+    Route::prefix('staffhubin')->name('staffhubin.')->middleware('role:staffhubin')->group(function () {
         Route::get('/dashboard', StaffHubinDashboard::class)->name('dashboard');
         Route::prefix('master-data')->name('master.')->group(function () {
-         // --- RUTE PENGAJUAN YANG BARU ---
-            // 1. Halaman utama menampilkan daftar kelas
             Route::get('/pengajuan', PengajuanDashboard::class)->name('pengajuan');
-            // 2. Halaman untuk menampilkan siswa dalam satu kelas
             Route::get('/pengajuan/kelas/{id_kelas}', PengajuanSiswaDashboard::class)->name('pengajuan.siswa');
-            // 3. Halaman untuk menampilkan status pengajuan per siswa
             Route::get('/pengajuan/siswa/{nis}', StatusPengajuanSiswaDashboard::class)->name('pengajuan.status');
+            Route::get('/mitra-perusahaan', MitraPerusahaan::class)->name('mitra-perusahaan');
         });
-
     });
-
 
     Route::prefix('user')->name('user.')->middleware('role:user')->group(function () {
         Route::get('/dashboard', UserDashboard::class)->name('dashboard');
         Route::get('/pengajuan', Pengajuan::class)->name('pengajuan');
-        Route::get('/pengajuan/proses/{id_perusahaan}', \App\Livewire\User\ProsesPengajuan::class)->name('pengajuan.proses');
+        Route::get('/pengajuan/proses/{id_perusahaan}', ProsesPengajuan::class)->name('pengajuan.proses');
+        Route::get('/ajukan-perusahaan-baru', AjukanPerusahaanBaru::class)->name('ajukan-perusahaan-baru');
     });
 
     Route::post('/send-otp', [OtpController::class, 'sendOtp']);

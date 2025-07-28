@@ -1,12 +1,11 @@
 <?php
 
+// app/Livewire/Auth/Login.php
+
 namespace App\Livewire\Auth;
 
-use App\Mail\LoginOtpMail;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Redis;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
@@ -20,9 +19,10 @@ class Login extends Component
     #[Validate('required')]
     public $password;
 
-    public $otp;
-    public $showOtpForm = false;
-
+    /**
+     * Cek jika user sudah login saat komponen di-mount.
+     * Jika sudah, redirect ke dashboard sesuai role.
+     */
     public function mount()
     {
         if (Auth::check()) {
@@ -39,8 +39,7 @@ class Login extends Component
                 }
             }
             
-            // Jika user sudah login tapi rolenya tidak sesuai (atau tidak punya role),
-            // maka logout paksa dan kembalikan ke halaman login.
+            // Jika user login tapi tidak punya role yang valid, logout paksa.
             Auth::logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
@@ -54,6 +53,10 @@ class Login extends Component
         return view('livewire.auth.login');
     }
 
+    /**
+     * Mencoba untuk login user.
+     * Jika berhasil, langsung redirect ke dashboard.
+     */
     public function attemptLogin()
     {
         $this->validate([
@@ -64,11 +67,23 @@ class Login extends Component
         $credentials = ['email' => $this->email, 'password' => $this->password];
         $user = User::where('email', $this->email)->first();
 
-        // Cek kredensial DAN pastikan user memiliki role yang diizinkan.
+        // Cek kredensial dan pastikan user memiliki role yang diizinkan.
         if ($user && Auth::validate($credentials)) {
-            // PERBAIKAN: Tambahkan 'staffhubin' ke dalam daftar role yang diizinkan
             if ($user->role && in_array($user->role->name, ['admin', 'superadmin', 'user', 'staffhubin'])) {
-                $this->sendOtp();
+                
+                // Langsung login user
+                Auth::login($user);
+                request()->session()->regenerate();
+
+                // Redirect berdasarkan role
+                $roleName = $user->role->name;
+                if ($roleName === 'admin' || $roleName === 'superadmin') {
+                    return $this->redirect(route('admin.dashboard'), navigate: true);
+                } elseif ($roleName === 'staffhubin') {
+                    return $this->redirect(route('staffhubin.dashboard'), navigate: true);
+                } elseif ($roleName === 'user') {
+                    return $this->redirect(route('user.dashboard'), navigate: true);
+                }
             } else {
                 $this->addError('credentials', 'Anda tidak memiliki hak akses untuk masuk.');
             }
@@ -77,70 +92,9 @@ class Login extends Component
         }
     }
 
-    public function sendOtp()
-    {
-        $otpCode = rand(100000, 999999);
-        $redisKey = "otp:" . $this->email;
-        Redis::setex($redisKey, 300, $otpCode); // OTP berlaku 5 menit
-
-        try {
-            Mail::to($this->email)->send(new LoginOtpMail($otpCode));
-            $this->showOtpForm = true;
-            $this->reset('password');
-            $this->dispatch('otp-sent');
-        } catch (\Exception $e) {
-            $this->addError('credentials', 'Gagal mengirim OTP. Pastikan konfigurasi email benar.');
-            report($e);
-        }
-    }
-
-    public function resendOtp()
-    {
-        $this->sendOtp();
-    }
-
-    public function verifyOtpAndLogin()
-    {
-        $this->validate(['otp' => 'required|numeric|digits:6']);
-        $redisKey = "otp:" . $this->email;
-        $storedOtp = Redis::get($redisKey);
-
-        if ($storedOtp && $storedOtp == $this->otp) {
-            $user = User::where('email', $this->email)->first();
-            if ($user) {
-                Auth::login($user);
-                Redis::del($redisKey);
-                request()->session()->regenerate();
-
-                // PERBAIKAN: Tambahkan logika pengalihan untuk 'staffhubin'
-                $roleName = $user->role->name;
-                if ($roleName === 'admin' || $roleName === 'superadmin') {
-                    return $this->redirect(route('admin.dashboard'), navigate: true);
-                } elseif ($roleName === 'staffhubin') {
-                    return $this->redirect(route('staffhubin.dashboard'), navigate: true);
-                } elseif ($roleName === 'user') {
-                    return $this->redirect(route('user.dashboard'), navigate: true);
-                } 
-                // Ini seharusnya tidak terjadi karena sudah dicek di attemptLogin, tapi sebagai pengaman.
-                else {
-                    Auth::logout();
-                    return $this->redirect(route('login'));
-                }
-            } else {
-                // Seharusnya tidak terjadi, tapi sebagai pengaman.
-                $this->addError('credentials', 'User tidak ditemukan setelah verifikasi OTP.');
-                return;
-            }
-        }
-        $this->addError('otp', 'Kode OTP tidak valid atau telah kedaluwarsa.');
-    }
-
-    public function cancelOtp()
-    {
-        $this->reset('otp', 'showOtpForm', 'email', 'password');
-        $this->resetErrorBag();
-    }
-
+    /**
+     * Logout user.
+     */
     public function logout()
     {
         Auth::logout();

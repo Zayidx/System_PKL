@@ -88,19 +88,25 @@
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 <div class="reveal-on-scroll">
-                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">1,500+</div>
+                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">{{ number_format($statPengajuan) }}</div>
                     <div class="text-slate-500 mt-1">Lowongan Magang</div>
                 </div>
                 <div class="reveal-on-scroll transition-delay-100">
-                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">800+</div>
+                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">{{ number_format($statPerusahaan) }}</div>
                     <div class="text-slate-500 mt-1">Perusahaan Partner</div>
                 </div>
                 <div class="reveal-on-scroll transition-delay-200">
-                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">5,000+</div>
+                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">{{ number_format($statSiswa) }}</div>
                     <div class="text-slate-500 mt-1">Siswa Terdaftar</div>
                 </div>
                 <div class="reveal-on-scroll transition-delay-300">
-                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">95%</div>
+                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">
+                        @if($statPengajuan > 0)
+                            {{ round(($statSuccess / $statPengajuan) * 100, 1) }}%
+                        @else
+                            0%
+                        @endif
+                    </div>
                     <div class="text-slate-500 mt-1">Tingkat Keberhasilan</div>
                 </div>
             </div>
@@ -152,20 +158,15 @@
         </div>
         <div class="relative overflow-hidden">
             <div class="flex gap-8 animate-marquee">
-                <!-- Logos with error handling -->
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=TechCorp" alt="TechCorp Logo" onerror="this.style.display='none'; this.parentElement.innerText='TechCorp'"></div>
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=InnovateInc" alt="InnovateInc Logo" onerror="this.style.display='none'; this.parentElement.innerText='InnovateInc'"></div>
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=DigitalCreative" alt="DigitalCreative Logo" onerror="this.style.display='none'; this.parentElement.innerText='DigitalCreative'"></div>
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=OtomotifJaya" alt="OtomotifJaya Logo" onerror="this.style.display='none'; this.parentElement.innerText='OtomotifJaya'"></div>
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=NusantaraHotel" alt="NusantaraHotel Logo" onerror="this.style.display='none'; this.parentElement.innerText='NusantaraHotel'"></div>
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=HealthCare" alt="HealthCare Logo" onerror="this.style.display='none'; this.parentElement.innerText='HealthCare'"></div>
-                <!-- Duplicate for seamless loop -->
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=TechCorp" alt="TechCorp Logo" onerror="this.style.display='none'; this.parentElement.innerText='TechCorp'"></div>
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=InnovateInc" alt="InnovateInc Logo" onerror="this.style.display='none'; this.parentElement.innerText='InnovateInc'"></div>
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=DigitalCreative" alt="DigitalCreative Logo" onerror="this.style.display='none'; this.parentElement.innerText='DigitalCreative'"></div>
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=OtomotifJaya" alt="OtomotifJaya Logo" onerror="this.style.display='none'; this.parentElement.innerText='OtomotifJaya'"></div>
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=NusantaraHotel" alt="NusantaraHotel Logo" onerror="this.style.display='none'; this.parentElement.innerText='NusantaraHotel'"></div>
-                <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md"><img src="https://placehold.co/120x40/000000/FFFFFF?text=HealthCare" alt="HealthCare Logo" onerror="this.style.display='none'; this.parentElement.innerText='HealthCare'"></div>
+                @foreach($perusahaanLogos as $perusahaan)
+                    <div class="flex-shrink-0 w-48 h-24 bg-white rounded-xl flex items-center justify-center shadow-md">
+                        @if($perusahaan->logo_perusahaan)
+                            <img src="{{ Storage::url($perusahaan->logo_perusahaan) }}" alt="{{ $perusahaan->nama_perusahaan }} Logo" onerror="this.style.display='none'; this.parentElement.innerText='{{ $perusahaan->nama_perusahaan }}'">
+                        @else
+                            <span class="text-slate-500">{{ $perusahaan->nama_perusahaan }}</span>
+                        @endif
+                    </div>
+                @endforeach
             </div>
         </div>
     </section>

@@ -1,3 +1,5 @@
+<div class="">
+
 <div>
     <div class="row gy-4">
         {{-- Kolom Kiri: Profil Siswa --}}
@@ -110,4 +112,48 @@
             </div>
         </div>
     </div>
+</div>
+@php
+    $mitraList = \App\Models\MitraPerusahaanPending::where('nis_pengaju', Auth::user()->siswa->nis)->orderByDesc('created_at')->get();
+@endphp
+@if($mitraList->count())
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Status Pengajuan Perusahaan Baru</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Nama Perusahaan</th>
+                        <th>Alamat</th>
+                        <th>Status</th>
+                        <th>Catatan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($mitraList as $mitra)
+                    <tr>
+                        <td>{{ $mitra->nama_perusahaan }}</td>
+                        <td>{{ $mitra->alamat_perusahaan }}</td>
+                        <td>
+                            @if($mitra->status == 'pending')
+                                <span class="badge bg-warning text-dark">Diproses</span>
+                            @elseif($mitra->status == 'approved')
+                                <span class="badge bg-success">Disetujui</span>
+                            @else
+                                <span class="badge bg-danger">Ditolak</span>
+                            @endif
+                        </td>
+                        <td>{{ $mitra->catatan_staff ?? '-' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@endif
+
 </div>

@@ -110,16 +110,27 @@ class StatusPengajuanSiswaDashboard extends Component
 
     public function render()
     {
-        $pengajuanData = Pengajuan::with(['perusahaan'])
+        $pengajuanTerdaftar = \App\Models\Pengajuan::with(['perusahaan'])
             ->where('nis_siswa', $this->nis)
+            ->where('is_perusahaan_terdaftar', true)
             ->whereHas('perusahaan', function ($query) {
                 $query->where('nama_perusahaan', 'like', '%' . $this->search . '%');
             })
             ->orderBy($this->sortBy, $this->sortDir)
-            ->paginate($this->perPage);
-            
+            ->paginate($this->perPage, ['*'], 'terdaftar');
+
+        $pengajuanTidakTerdaftar = \App\Models\Pengajuan::where('nis_siswa', $this->nis)
+            ->where('is_perusahaan_terdaftar', false)
+            ->where(function ($query) {
+                $query->where('nama_perusahaan_manual', 'like', '%' . $this->search . '%')
+                      ->orWhere('alamat_perusahaan_manual', 'like', '%' . $this->search . '%');
+            })
+            ->orderBy($this->sortBy, $this->sortDir)
+            ->paginate($this->perPage, ['*'], 'tidak_terdaftar');
+
         return view('livewire.admin.status-pengajuan-siswa-dashboard', [
-            'pengajuanData' => $pengajuanData,
+            'pengajuanTerdaftar' => $pengajuanTerdaftar,
+            'pengajuanTidakTerdaftar' => $pengajuanTidakTerdaftar,
         ]);
     }
 }

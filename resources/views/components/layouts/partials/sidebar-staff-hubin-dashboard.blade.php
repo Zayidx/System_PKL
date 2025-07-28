@@ -18,7 +18,9 @@
             <li class="submenu-item {{ Request::routeIs('staffhubin.master.pengajuan') ? 'active' : '' }}">
                 <a href="{{ route('staffhubin.master.pengajuan') }}" wire:navigate class="submenu-link">Pengelolaan pengajuan</a>
             </li>
-            
+            <li class="submenu-item {{ Request::routeIs('staffhubin.master.mitra-perusahaan') ? 'active' : '' }}">
+                <a href="{{ route('staffhubin.master.mitra-perusahaan') }}" wire:navigate class="submenu-link">Mitra Perusahaan (Konfirmasi)</a>
+            </li>
         </ul>
     </li>
 

@@ -7,6 +7,9 @@
             </div>
         </div>
         <div class="card-body py-4">
+            <div class="mb-3">
+                <a href="{{ route('user.ajukan-perusahaan-baru') }}" class="btn btn-primary">Ajukan Perusahaan Baru</a>
+            </div>
             {{-- Grid layout untuk kartu perusahaan --}}
             <div class="row g-4" wire:loading.class.delay="opacity-50">
                 @forelse($perusahaanData as $perusahaan)
@@ -122,6 +125,18 @@
                 </div>
                 <form wire:submit.prevent="konfirmasiPengajuanSetelahForm">
                     <div class="modal-body">
+                        @if(!$isPerusahaanTerdaftar)
+                        <div class="mb-3">
+                            <label for="nama_perusahaan_manual" class="form-label">Nama Perusahaan</label>
+                            <input type="text" id="nama_perusahaan_manual" class="form-control @error('nama_perusahaan_manual') is-invalid @enderror" wire:model.defer="nama_perusahaan_manual" placeholder="Nama perusahaan">
+                            @error('nama_perusahaan_manual') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="alamat_perusahaan_manual" class="form-label">Alamat Perusahaan</label>
+                            <input type="text" id="alamat_perusahaan_manual" class="form-control @error('alamat_perusahaan_manual') is-invalid @enderror" wire:model.defer="alamat_perusahaan_manual" placeholder="Alamat perusahaan">
+                            @error('alamat_perusahaan_manual') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        @endif
                         <div class="mb-3">
                             <label for="tanggal_mulai" class="form-label">Tanggal Mulai PKL</label>
                             <input type="date" id="tanggal_mulai" class="form-control @error('tanggal_mulai') is-invalid @enderror" wire:model.defer="tanggal_mulai">
@@ -141,6 +156,49 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" wire:click="$set('showModal', false)">Batal</button>
                         <button type="submit" class="btn btn-primary">Lanjutkan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+@endif
+
+{{-- Modal Form Pengajuan Mitra Perusahaan Baru --}}
+@if($showModalMitra)
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,0.4);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ajukan Perusahaan Baru</h5>
+                    <button type="button" class="btn-close" wire:click="$set('showModalMitra', false)"></button>
+                </div>
+                <form wire:submit.prevent="ajukanMitraBaru">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="nama_mitra" class="form-label">Nama Perusahaan</label>
+                            <input type="text" id="nama_mitra" class="form-control @error('nama_mitra') is-invalid @enderror" wire:model.defer="nama_mitra" placeholder="Nama perusahaan">
+                            @error('nama_mitra') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="alamat_mitra" class="form-label">Alamat Perusahaan</label>
+                            <input type="text" id="alamat_mitra" class="form-control @error('alamat_mitra') is-invalid @enderror" wire:model.defer="alamat_mitra" placeholder="Alamat perusahaan">
+                            @error('alamat_mitra') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="email_mitra" class="form-label">Email Perusahaan (opsional)</label>
+                            <input type="email" id="email_mitra" class="form-control @error('email_mitra') is-invalid @enderror" wire:model.defer="email_mitra" placeholder="Email perusahaan">
+                            @error('email_mitra') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="kontak_mitra" class="form-label">Kontak Perusahaan (opsional)</label>
+                            <input type="text" id="kontak_mitra" class="form-control @error('kontak_mitra') is-invalid @enderror" wire:model.defer="kontak_mitra" placeholder="No. telepon/HP">
+                            @error('kontak_mitra') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" wire:click="$set('showModalMitra', false)">Batal</button>
+                        <button type="submit" class="btn btn-primary">Ajukan</button>
                     </div>
                 </form>
             </div>
