@@ -19,6 +19,7 @@ use App\Livewire\Admin\KepalaSekolahDashboard;
 use App\Livewire\Admin\PembimbingPerusahaan;
 use App\Livewire\Admin\PembimbingPerusahaanDashboard;
 use App\Livewire\Admin\PembimbingSekolahDashboard;
+use App\Livewire\Admin\PembimbingSekolahSetting;
 use App\Livewire\Admin\UserDashboard as AdminUserManagement; // Alias agar lebih jelas
 use App\Livewire\Admin\WaliKelasDashboard;
 use App\Livewire\Auth\ForgotPassword;
@@ -26,6 +27,7 @@ use App\Livewire\User\Dashboard as UserDashboard;
 use App\Livewire\User\Pengajuan;
 use App\Livewire\User\AjukanPerusahaanBaru;
 use App\Livewire\User\ProsesPengajuan;
+use App\Livewire\User\ProsesMagang;
 use App\Livewire\StaffHubin\MitraPerusahaan;
 use App\Http\Controllers\PengajuanApprovalController;
 use App\Livewire\Admin\PengajuanDashboard;
@@ -65,6 +67,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/walikelas', WaliKelasDashboard::class)->name('walikelas');
             Route::get('/pembimbing-perusahaan', PembimbingPerusahaanDashboard::class)->name('pembimbing-perusahaan');
             Route::get('/pembimbing-sekolah', PembimbingSekolahDashboard::class)->name('pembimbing-sekolah');
+            Route::get('/pembimbing-sekolah-setting', PembimbingSekolahSetting::class)->name('pembimbing-sekolah-setting');
             Route::get('/staff-hubin', StaffHubinDashboard::class)->name('staff-hubin');
             Route::get('/kepala-sekolah', KepalaSekolahDashboard::class)->name('kepala-sekolah');
             Route::get('/kepala-program', KepalaProgramDashboard::class)->name('kepala-program');
@@ -89,6 +92,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pengajuan', Pengajuan::class)->name('pengajuan');
         Route::get('/pengajuan/proses/{id_perusahaan}', ProsesPengajuan::class)->name('pengajuan.proses');
         Route::get('/ajukan-perusahaan-baru', AjukanPerusahaanBaru::class)->name('ajukan-perusahaan-baru');
+        Route::get('/magang', ProsesMagang::class)->name('magang');
     });
 
     Route::post('/send-otp', [OtpController::class, 'sendOtp']);

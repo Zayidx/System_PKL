@@ -14,11 +14,19 @@
         </a>
     </li>
 
-    <li class="sidebar-item {{ Request::routeIs('user.pengajuan') ? 'active' : '' }}">
+    <li class="sidebar-item {{ Request::routeIs('user.pengajuan*') ? 'active' : '' }}">
         {{-- Arahkan ke rute pengajuan pengguna yang benar --}}
         <a href="{{ route('user.pengajuan') }}" wire:navigate class='sidebar-link'>
-            <i class="bi bi-grid-fill"></i>
+            <i class="bi bi-send-fill"></i>
             <span>Pengajuan Magang</span>
+        </a>
+    </li>
+
+    <li class="sidebar-item {{ Request::routeIs('user.magang') ? 'active' : '' }}">
+        {{-- Menu Magang untuk melihat informasi prakerin --}}
+        <a href="{{ route('user.magang') }}" wire:navigate class='sidebar-link'>
+            <i class="bi bi-briefcase-fill"></i>
+            <span>Magang</span>
         </a>
     </li>
 

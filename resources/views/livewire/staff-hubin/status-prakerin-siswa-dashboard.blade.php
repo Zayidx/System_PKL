@@ -25,9 +25,9 @@
                             <p><strong>Kelas:</strong> {{ $siswa->kelas->nama_kelas ?? '-' }}</p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Jurusan:</strong> {{ $siswa->jurusan->nama_jurusan ?? '-' }}</p>
+                            <p><strong>Jurusan:</strong> {{ $siswa->jurusan->nama_jurusan_singkat ?? '-' }}</p>
                             <p><strong>Email:</strong> {{ $siswa->user->email ?? '-' }}</p>
-                            <p><strong>No. Telepon:</strong> {{ $siswa->no_telepon ?? '-' }}</p>
+                            <p><strong>No. Telepon:</strong> {{ $siswa->kontak_siswa ?? '-' }}</p>
                         </div>
                     </div>
                 </div>

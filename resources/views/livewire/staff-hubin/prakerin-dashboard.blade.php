@@ -30,7 +30,7 @@
                         @forelse($kelasList as $kelas)
                             <tr>
                                 <td>{{ $kelas->nama_kelas }}</td>
-                                <td>{{ $kelas->jurusan->nama_jurusan ?? '-' }}</td>
+                                <td>{{ $kelas->jurusan->nama_jurusan_singkat ?? '-' }}</td>
                                 <td>{{ $kelas->total_siswa }}</td>
                                 <td>{{ $kelas->prakerin_count }}</td>
                                 <td class="text-center">
