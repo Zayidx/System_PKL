@@ -21,6 +21,12 @@
             <li class="submenu-item {{ Request::routeIs('staffhubin.master.mitra-perusahaan') ? 'active' : '' }}">
                 <a href="{{ route('staffhubin.master.mitra-perusahaan') }}" wire:navigate class="submenu-link">Mitra Perusahaan (Konfirmasi)</a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('staffhubin.master.prakerin') }}" class="nav-link {{ request()->routeIs('staffhubin.master.prakerin*') ? 'active' : '' }}">
+                    <i class="bi bi-briefcase me-2"></i>
+                    <span>Prakerin</span>
+                </a>
+            </li>
         </ul>
     </li>
 

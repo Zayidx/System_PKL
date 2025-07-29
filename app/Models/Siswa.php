@@ -85,4 +85,13 @@ class Siswa extends Model
     {
         return $this->hasMany(Pengajuan::class, 'nis_siswa', 'nis');
     }
+
+    /**
+     * Mendefinisikan relasi ke model Prakerin.
+     * Satu siswa bisa memiliki banyak prakerin.
+     */
+    public function prakerin(): HasMany
+    {
+        return $this->hasMany(Prakerin::class, 'nis_siswa', 'nis');
+    }
 }

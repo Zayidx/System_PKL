@@ -127,7 +127,7 @@ class StatusPengajuanSiswaDashboard extends Component
             })
             ->orderBy($this->sortBy, $this->sortDir)
             ->paginate($this->perPage, ['*'], 'tidak_terdaftar');
-
+            
         return view('livewire.admin.status-pengajuan-siswa-dashboard', [
             'pengajuanTerdaftar' => $pengajuanTerdaftar,
             'pengajuanTidakTerdaftar' => $pengajuanTidakTerdaftar,

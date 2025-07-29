@@ -8,7 +8,7 @@ use Livewire\Component;
 use App\Models\Pengajuan;
 use App\Models\Perusahaan;
 use App\Models\Siswa;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 #[Layout("components.layouts.layout-staff-hubin-dashboard")]
 #[Title('Dashboard Staff Hubin')]
@@ -22,12 +22,12 @@ class Dashboard extends Component
     public $statSiswa;
 
     public $todayPengajuan;
+    public $historyPengajuan;
     public $siswaTanpaPengajuan;
-    public array $chartData = [];
-
+    public $chartData;
     public $search = '';
-    public $filterTanggal = '';
     public $filterStatus = '';
+    public $filterTanggal = '';
 
     public function mount()
     {
@@ -38,9 +38,16 @@ class Dashboard extends Component
             ->orderByDesc('created_at')
             ->get();
 
+        // Data untuk chart
+        $this->chartData = [
+            'Pending' => $this->statPending,
+            'Diterima' => $this->statDiterima,
+            'Ditolak' => $this->statDitolak
+        ];
+
+        // Siswa yang belum mengajukan
         $this->siswaTanpaPengajuan = Siswa::whereDoesntHave('pengajuan')
-            ->with('kelas')
-            ->orderBy('nama_siswa')
+            ->with(['kelas'])
             ->take(10)
             ->get();
     }
@@ -64,28 +71,14 @@ class Dashboard extends Component
     public function filterByStatus($status)
     {
         $this->filterStatus = $status;
-        $this->filterTanggal = '';
-        $this->search = '';
     }
 
     public function clearFilter()
     {
-        $this->search = '';
-        $this->filterStatus = '';
-        $this->filterTanggal = '';
+        $this->reset(['search', 'filterStatus', 'filterTanggal']);
     }
 
-    public function getStatusClass($status)
-    {
-        return match ($status) {
-            'pending' => 'bg-light-warning text-warning',
-            'diterima_perusahaan' => 'bg-light-success text-success',
-            'ditolak_admin', 'ditolak_perusahaan' => 'bg-light-danger text-danger',
-            default => 'bg-light-secondary text-secondary',
-        };
-    }
-
-    public function render()
+    public function getHistoryPengajuan()
     {
         $query = Pengajuan::with(['siswa', 'perusahaan'])
             ->orderByDesc('created_at');
@@ -98,13 +91,12 @@ class Dashboard extends Component
 
         $query->when($this->filterStatus, function ($q) {
             if ($this->filterStatus === 'ditolak') {
-                 $q->whereIn('status_pengajuan', ['ditolak_admin', 'ditolak_perusahaan']);
+                $q->whereIn('status_pengajuan', ['ditolak_admin', 'ditolak_perusahaan']);
             } else {
-                 $q->where('status_pengajuan', $this->filterStatus);
+                $q->where('status_pengajuan', $this->filterStatus);
             }
         });
 
-       
         $query->when($this->filterTanggal, function ($q) {
             $days = match($this->filterTanggal) {
                 '1_hari' => 1,
@@ -119,10 +111,22 @@ class Dashboard extends Component
             }
         });
 
-        $historyPengajuan = $query->take(20)->get();
+        return $query->take(20)->get();
+    }
 
-        return view('livewire.staff-hubin.dashboard', [
-            'historyPengajuan' => $historyPengajuan
-        ]);
+    public function getStatusClass($status)
+    {
+        return match($status) {
+            'pending' => 'bg-light-warning text-warning',
+            'diterima_perusahaan' => 'bg-light-success text-success',
+            'ditolak_perusahaan', 'ditolak_sekolah' => 'bg-light-danger text-danger',
+            default => 'bg-light-secondary text-secondary'
+        };
+    }
+
+    public function render()
+    {
+        $this->historyPengajuan = $this->getHistoryPengajuan();
+        return view('livewire.staff-hubin.dashboard');
     }
 }

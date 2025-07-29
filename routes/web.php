@@ -31,6 +31,9 @@ use App\Http\Controllers\PengajuanApprovalController;
 use App\Livewire\Admin\PengajuanDashboard;
 use App\Livewire\Admin\PengajuanSiswaDashboard;
 use App\Livewire\Admin\StatusPengajuanSiswaDashboard;
+use App\Livewire\StaffHubin\PrakerinDashboard;
+use App\Livewire\StaffHubin\PrakerinSiswaDashboard;
+use App\Livewire\StaffHubin\StatusPrakerinSiswaDashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,13 +71,16 @@ Route::middleware('auth')->group(function () {
         });
     });
 
-    Route::prefix('staffhubin')->name('staffhubin.')->middleware('role:staffhubin')->group(function () {
+     Route::prefix('staffhubin')->name('staffhubin.')->middleware('role:staffhubin')->group(function () {
         Route::get('/dashboard', StaffHubinDashboard::class)->name('dashboard');
         Route::prefix('master-data')->name('master.')->group(function () {
             Route::get('/pengajuan', PengajuanDashboard::class)->name('pengajuan');
             Route::get('/pengajuan/kelas/{id_kelas}', PengajuanSiswaDashboard::class)->name('pengajuan.siswa');
             Route::get('/pengajuan/siswa/{nis}', StatusPengajuanSiswaDashboard::class)->name('pengajuan.status');
             Route::get('/mitra-perusahaan', MitraPerusahaan::class)->name('mitra-perusahaan');
+            Route::get('/prakerin', PrakerinDashboard::class)->name('prakerin');
+            Route::get('/prakerin/kelas/{id_kelas}', PrakerinSiswaDashboard::class)->name('prakerin.siswa');
+            Route::get('/prakerin/status/{nis}', StatusPrakerinSiswaDashboard::class)->name('prakerin.status');
         });
     });
 

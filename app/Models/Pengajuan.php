@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use App\Models\Siswa;
+use App\Models\Perusahaan;
+use App\Models\Prakerin;
+use App\Models\PembimbingSekolah;
+use App\Models\KepalaProgram;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,16 +44,68 @@ class Pengajuan extends Model
         'link_cv', // link CV siswa
     ];
 
-    // Relasi ke model Siswa
-    public function siswa(): BelongsTo
+    protected static function booted()
     {
-        return $this->belongsTo(Siswa::class, 'nis_siswa', 'nis');
+        static::updated(function ($pengajuan) {
+            // Jika status pengajuan berubah menjadi diterima_perusahaan
+            if ($pengajuan->isDirty('status_pengajuan') && $pengajuan->status_pengajuan === 'diterima_perusahaan') {
+                // Cek apakah sudah ada prakerin untuk siswa ini di perusahaan ini
+                $existingPrakerin = Prakerin::where('nis_siswa', $pengajuan->nis_siswa)
+                    ->where('id_perusahaan', $pengajuan->id_perusahaan)
+                    ->first();
+
+                if (!$existingPrakerin) {
+                    try {
+                        // Ambil pembimbing perusahaan dari perusahaan
+                        $pembimbingPerusahaan = $pengajuan->perusahaan->pembimbingPerusahaan->first();
+                        
+                        // Ambil pembimbing sekolah default (bisa diambil dari jurusan siswa)
+                        $pembimbingSekolah = PembimbingSekolah::first();
+                        
+                        // Ambil kepala program dari jurusan siswa
+                        $kepalaProgram = KepalaProgram::where('id_jurusan', $pengajuan->siswa->id_jurusan)->first();
+                        
+                        // Pastikan semua data yang diperlukan ada
+                        if (!$pembimbingSekolah || !$kepalaProgram) {
+                            \Log::error('Data pembimbing sekolah atau kepala program tidak ditemukan untuk prakerin', [
+                                'nis_siswa' => $pengajuan->nis_siswa,
+                                'id_perusahaan' => $pengajuan->id_perusahaan
+                            ]);
+                            return; // Jangan buat prakerin jika data tidak lengkap
+                        }
+                        
+                        // Buat prakerin baru
+                        Prakerin::create([
+                            'nis_siswa' => $pengajuan->nis_siswa,
+                            'id_perusahaan' => $pengajuan->id_perusahaan,
+                            'id_pembimbing_perusahaan' => $pembimbingPerusahaan->id_pembimbing ?? null,
+                            'nip_pembimbing_sekolah' => $pembimbingSekolah->nip_pembimbing_sekolah,
+                            'nip_kepala_program' => $kepalaProgram->nip_kepala_program,
+                            'tanggal_mulai' => now(),
+                            'tanggal_selesai' => now()->addMonths(3), // Default 3 bulan
+                        ]);
+                    } catch (\Exception $e) {
+                        \Log::error('Error saat membuat prakerin otomatis', [
+                            'error' => $e->getMessage(),
+                            'nis_siswa' => $pengajuan->nis_siswa,
+                            'id_perusahaan' => $pengajuan->id_perusahaan
+                        ]);
+                    }
+                }
+            }
+        });
     }
 
     // Relasi ke model Perusahaan
     public function perusahaan(): BelongsTo
     {
         return $this->belongsTo(Perusahaan::class, 'id_perusahaan', 'id_perusahaan');
+    }
+
+    // Relasi ke model Siswa
+    public function siswa(): BelongsTo
+    {
+        return $this->belongsTo(Siswa::class, 'nis_siswa', 'nis');
     }
 
     // Relasi ke model KepalaProgram
