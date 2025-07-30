@@ -38,7 +38,6 @@ class Siswa extends Model
         'tempat_lahir',
         'tanggal_lahir',
         'kontak_siswa', // Kolom ini sekarang menjadi bagian dari tabel siswa
-        'nip_pembimbing_sekolah', // Tambahan untuk pembimbing sekolah
     ];
 
     /**
@@ -66,15 +65,6 @@ class Siswa extends Model
     public function jurusan(): BelongsTo
     {
         return $this->belongsTo(Jurusan::class, 'id_jurusan', 'id_jurusan');
-    }
-
-    /**
-     * Mendefinisikan relasi ke model PembimbingSekolah.
-     * Satu siswa memiliki satu pembimbing sekolah.
-     */
-    public function pembimbingSekolah(): BelongsTo
-    {
-        return $this->belongsTo(PembimbingSekolah::class, 'nip_pembimbing_sekolah', 'nip_pembimbing_sekolah');
     }
 
     /**

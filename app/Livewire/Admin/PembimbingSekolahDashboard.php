@@ -27,6 +27,7 @@ class PembimbingSekolahDashboard extends Component
     public $isModalOpen = false;
     public $pembimbingId, $userId;
     public $nip_pembimbing_sekolah, $nama_pembimbing_sekolah, $email;
+    public $kontak_pembimbing_sekolah;
     public $password, $password_confirmation;
     public $foto, $existingFoto;
 
@@ -42,6 +43,7 @@ class PembimbingSekolahDashboard extends Component
         return [
             'nip_pembimbing_sekolah' => ['required', 'numeric', 'digits_between:4,18', Rule::unique('pembimbing_sekolah', 'nip_pembimbing_sekolah')->ignore($this->pembimbingId, 'nip_pembimbing_sekolah')],
             'nama_pembimbing_sekolah' => ['required', 'string', 'max:100'],
+            'kontak_pembimbing_sekolah' => ['nullable', 'string', 'max:17'],
             'email' => ['required', 'email', 'max:100', Rule::unique('users', 'email')->ignore($this->userId)],
             'password' => $passwordRule,
             'foto' => $fotoRule,
@@ -55,6 +57,7 @@ class PembimbingSekolahDashboard extends Component
             'nip_pembimbing_sekolah.unique' => 'NIP/ID ini sudah terdaftar.',
             'email.unique' => 'Email ini sudah digunakan oleh akun lain.',
             'nama_pembimbing_sekolah.required' => 'Nama pembimbing wajib diisi.',
+            'kontak_pembimbing_sekolah.max' => 'Nomor kontak maksimal 17 karakter.',
             'password.required' => 'Password wajib diisi untuk akun baru.',
             'foto.required' => 'Foto profil wajib diunggah untuk akun baru.',
         ];
@@ -68,9 +71,11 @@ class PembimbingSekolahDashboard extends Component
     public function render()
     {
         $searchTerm = '%' . $this->search . '%';
-        $pembimbingData = PembimbingSekolah::with('user')
+        $pembimbingData = PembimbingSekolah::with(['user', 'perusahaan'])
             ->where('nama_pembimbing_sekolah', 'like', $searchTerm)
             ->orWhere('nip_pembimbing_sekolah', 'like', $searchTerm)
+            ->orWhere('kontak_pembimbing_sekolah', 'like', $searchTerm)
+            ->orWhereHas('perusahaan', fn($q) => $q->where('nama_perusahaan', 'like', $searchTerm))
             ->orWhereHas('user', fn($q) => $q->where('email', 'like', $searchTerm))
             ->latest('nip_pembimbing_sekolah')
             ->paginate($this->perPage);
@@ -86,11 +91,12 @@ class PembimbingSekolahDashboard extends Component
 
     public function edit($id)
     {
-        $pembimbing = PembimbingSekolah::with('user')->findOrFail($id);
+        $pembimbing = PembimbingSekolah::with(['user', 'perusahaan'])->findOrFail($id);
         $this->pembimbingId = $pembimbing->nip_pembimbing_sekolah;
         $this->userId = $pembimbing->user_id;
         $this->nip_pembimbing_sekolah = $pembimbing->nip_pembimbing_sekolah;
         $this->nama_pembimbing_sekolah = $pembimbing->nama_pembimbing_sekolah;
+        $this->kontak_pembimbing_sekolah = $pembimbing->kontak_pembimbing_sekolah;
         
         if ($pembimbing->user) {
             $this->email = $pembimbing->user->email;
@@ -115,14 +121,23 @@ class PembimbingSekolahDashboard extends Component
                     $userData['foto'] = $this->foto->store('fotos/profil', 'public');
                 }
                 $user->update($userData);
-                $pembimbing->update(['nip_pembimbing_sekolah' => $validatedData['nip_pembimbing_sekolah'], 'nama_pembimbing_sekolah' => $validatedData['nama_pembimbing_sekolah']]);
+                $pembimbing->update([
+                    'nip_pembimbing_sekolah' => $validatedData['nip_pembimbing_sekolah'], 
+                    'nama_pembimbing_sekolah' => $validatedData['nama_pembimbing_sekolah'],
+                    'kontak_pembimbing_sekolah' => $validatedData['kontak_pembimbing_sekolah'],
+                ]);
 
             } else { // Create
                 $pembimbingRole = Role::where('name', 'pembimbingsekolah')->firstOrFail();
                 $fotoPath = $this->foto->store('fotos/profil', 'public');
 
                 $newUser = User::create(['roles_id' => $pembimbingRole->id, 'username' => $validatedData['nama_pembimbing_sekolah'], 'email' => $validatedData['email'], 'password' => Hash::make($validatedData['password']), 'foto' => $fotoPath]);
-                PembimbingSekolah::create(['nip_pembimbing_sekolah' => $validatedData['nip_pembimbing_sekolah'], 'user_id' => $newUser->id, 'nama_pembimbing_sekolah' => $validatedData['nama_pembimbing_sekolah']]);
+                PembimbingSekolah::create([
+                    'nip_pembimbing_sekolah' => $validatedData['nip_pembimbing_sekolah'], 
+                    'user_id' => $newUser->id, 
+                    'nama_pembimbing_sekolah' => $validatedData['nama_pembimbing_sekolah'],
+                    'kontak_pembimbing_sekolah' => $validatedData['kontak_pembimbing_sekolah'],
+                ]);
             }
         });
 
@@ -151,7 +166,7 @@ class PembimbingSekolahDashboard extends Component
 
     private function resetForm()
     {
-        $this->reset(['isModalOpen', 'pembimbingId', 'userId', 'nip_pembimbing_sekolah', 'nama_pembimbing_sekolah', 'email', 'password', 'password_confirmation', 'foto', 'existingFoto']);
+        $this->reset(['isModalOpen', 'pembimbingId', 'userId', 'nip_pembimbing_sekolah', 'nama_pembimbing_sekolah', 'kontak_pembimbing_sekolah', 'email', 'password', 'password_confirmation', 'foto', 'existingFoto']);
         $this->resetErrorBag();
     }
 }

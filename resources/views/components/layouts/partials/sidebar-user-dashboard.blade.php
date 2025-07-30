@@ -30,6 +30,14 @@
         </a>
     </li>
 
+    <li class="sidebar-item {{ Request::routeIs('user.riwayat-prakerin') ? 'active' : '' }}">
+        {{-- Menu Riwayat Prakerin --}}
+        <a href="{{ route('user.riwayat-prakerin') }}" wire:navigate class='sidebar-link'>
+            <i class="bi bi-clock-history"></i>
+            <span>Riwayat Prakerin</span>
+        </a>
+    </li>
+    
     {{-- Tambahkan menu lain untuk user di sini jika ada --}}
     {{-- 
     <li class="sidebar-item {{ Request::routeIs('user.profile') ? 'active' : '' }}">

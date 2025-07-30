@@ -9,54 +9,101 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 
+// Menentukan layout utama dan judul halaman untuk komponen ini.
 #[Layout('components.layouts.layout-user-dashboard')]
 #[Title('Informasi Magang')]
 class ProsesMagang extends Component
 {
-    public $prakerinData = [];
-    public $pengajuanData = [];
+    /**
+     * Menampung data prakerin aktif jika ada.
+     * @var \Illuminate\Support\Collection
+     */
+    public $prakerinData;
 
     /**
-     * Method yang dijalankan saat komponen pertama kali di-mount.
+     * Menampung data pengajuan yang diterima jika tidak ada prakerin aktif.
+     * @var \Illuminate\Support\Collection
+     */
+    public $pengajuanData;
+
+    /**
+     * Menampung data siswa yang sedang login.
+     * @var \App\Models\Siswa|null
+     */
+    public $siswa;
+
+    /**
+     * Method yang dipanggil saat komponen pertama kali di-mount.
+     * Berfungsi untuk memuat data awal.
+     * Logika di sini sudah efisien dan tidak memerlukan perubahan.
      */
     public function mount()
     {
+        $this->prakerinData = collect();
+        $this->pengajuanData = collect();
         $this->loadData();
     }
 
     /**
-     * Memuat data magang dan pengajuan untuk siswa yang sedang login.
+     * Memuat data proses magang untuk siswa yang terautentikasi.
+     * Method ini mengatur logika pengambilan data, pertama mencari status prakerin aktif,
+     * jika tidak ada, baru mencari status pengajuan yang diterima.
+     * Penggunaan eager loading ('with') sudah tepat untuk optimasi query.
      */
     public function loadData()
     {
         $user = Auth::user();
-        
-        // Pastikan user memiliki relasi siswa
+
+        // Pastikan user terautentikasi dan memiliki relasi dengan data siswa.
         if ($user && $user->siswa) {
-            $siswa = $user->siswa;
+            // Eager load relasi 'kelas' dan 'jurusan' untuk mencegah N+1 query problem di view.
+            $this->siswa = $user->siswa()->with(['kelas', 'jurusan'])->first();
 
-            // Ambil data prakerin (magang yang sudah dikonfirmasi dan berjalan)
-            // Relasi yang diambil (eager loading) untuk optimasi query
+            // 1. Update prakerin yang sudah lewat waktu menjadi selesai
+            $this->updateExpiredPrakerin();
+
+            // 2. Cek data prakerin yang aktif untuk siswa ini.
+            // Memuat semua relasi yang dibutuhkan untuk menghindari query tambahan.
             $this->prakerinData = Prakerin::with([
-                'perusahaan',
-                'pembimbingPerusahaan',
-                'pembimbingSekolah'
-            ])->where('nis_siswa', $siswa->nis)->get();
+                'perusahaan.pembimbingSekolah',
+                'pembimbingPerusahaan'
+            ])
+            ->where('nis_siswa', $this->siswa->nis)
+            ->where('status_prakerin', 'aktif')
+            ->latest('tanggal_mulai')
+            ->get();
 
-            // Ambil data pengajuan yang statusnya sudah diterima oleh perusahaan
-            // tetapi belum diproses menjadi data 'prakerin' oleh admin.
-            $this->pengajuanData = Pengajuan::with([
-                'perusahaan'
-            ])->where('nis_siswa', $siswa->nis)
-              ->where('status_pengajuan', 'diterima_perusahaan')
-              ->get();
+            // 3. Cek data pengajuan yang diterima.
+            // Ini merepresentasikan kondisi di mana siswa sudah diterima tapi belum mulai magang.
+            $this->pengajuanData = Pengajuan::with('perusahaan.pembimbingSekolah')
+            ->where('nis_siswa', $this->siswa->nis)
+            ->where('status_pengajuan', 'diterima_perusahaan')
+            ->latest('updated_at')
+            ->get();
+        }
+    }
+
+    /**
+     * Update prakerin yang sudah lewat waktu menjadi selesai
+     */
+    private function updateExpiredPrakerin()
+    {
+        $expiredPrakerin = Prakerin::where('nis_siswa', $this->siswa->nis)
+            ->where('status_prakerin', 'aktif')
+            ->where('tanggal_selesai', '<', now())
+            ->get();
+
+        foreach ($expiredPrakerin as $prakerin) {
+            $prakerin->update(['status_prakerin' => 'selesai']);
         }
     }
 
     /**
      * Merender view komponen.
+     * View akan secara otomatis di-hydrate dengan public properties:
+     * $prakerinData, $pengajuanData, dan $siswa.
      *
-     * @return \Illuminate\Contracts\View\View
+     * @return \Illuminate\View\View
      */
     public function render()
     {

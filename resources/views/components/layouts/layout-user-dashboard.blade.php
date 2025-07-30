@@ -1,10 +1,16 @@
+{{-- 
+    File: resources/views/components/layouts/layout-user-dashboard.blade.php
+    Description: Ini adalah file layout utama untuk dashboard pengguna.
+                 File ini menyediakan struktur HTML dasar, sidebar, header, footer,
+                 dan mengimpor semua aset CSS dan JS yang diperlukan.
+--}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Admin Dashboard' }}</title>
+    <title>{{ $title ?? 'User Dashboard' }}</title>
 
     {{-- Stylesheet dari Template Mazer --}}
     <link rel="shortcut icon" href="{{ asset('assets/compiled/svg/favicon.svg') }}" type="image/x-icon">
@@ -15,9 +21,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @livewireStyles
+    {{-- Stack untuk menampung style kustom dari view lain --}}
     @stack('styles')
     <style>
-        /* Custom style to ensure the #app container takes full height */
+        /* Custom style untuk memastikan container #app mengambil tinggi penuh */
         html, body {
             height: 100%;
         }
@@ -27,13 +34,13 @@
             flex-direction: column;
         }
         #main {
-            /* This ensures the main content area can grow and push the footer */
+            /* Memastikan area konten utama dapat tumbuh dan mendorong footer ke bawah */
             flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
         .page-content {
-            /* This makes the actual content area expand */
+            /* Membuat area konten yang sebenarnya bisa meluas */
             flex-grow: 1;
         }
         /* Style untuk input di dalam SweetAlert */
@@ -56,7 +63,7 @@
                             <a href="#">Siap Magang</a>
                         </div>
                         <div class="theme-toggle d-flex gap-2 align-items-center mt-2">
-                            {{-- Theme Toggle SVG --}}
+                            {{-- SVG untuk toggle tema --}}
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--system-uicons" width="20" height="20" preserveAspectRatio="xMidYMid meet" viewBox="0 0 21 21"><g fill="none" fill-rule="evenodd" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 14.5c2.219 0 4-1.763 4-3.982a4.003 4.003 0 0 0-4-4.018c-2.219 0-4 1.781-4 4c0 2.219 1.781 4 4 4zM4.136 4.136L5.55 5.55m9.9 9.9l1.414 1.414M1.5 10.5h2m14 0h2M4.135 16.863L5.55 15.45m9.899-9.9l1.414-1.415M10.5 19.5v-2m0-14v-2" opacity=".3"></path><g transform="translate(-210 -1)"><path d="M220.5 2.5v2m6.5.5l-1.5 1.5"></path><circle cx="220.5" cy="11.5" r="4"></circle><path d="m214 5l1.5 1.5m5 14v-2m6.5-.5l-1.5-1.5M214 18l1.5-1.5m-4-5h2m14 0h2"></path></g></g></svg>
                             <div class="form-check form-switch fs-6">
                                 <input class="form-check-input me-0" type="checkbox" id="toggle-dark" style="cursor: pointer">
@@ -70,7 +77,7 @@
                     </div>
                 </div>
                 <div class="sidebar-menu">
-                    {{-- Ganti dengan include sidebar Anda --}}
+                    {{-- Ganti dengan path include sidebar Anda yang sebenarnya --}}
                     @include('components.layouts.partials.sidebar-user-dashboard')
                 </div>
             </div>
@@ -86,6 +93,7 @@
                 <h3>{{ $title ?? 'Halaman' }}</h3>
             </div> 
             <div class="page-content">
+                {{-- Di sinilah konten dari view (misal: proses-magang.blade.php) akan dimasukkan --}}
                 {{ $slot }}
             </div>
 
@@ -108,12 +116,16 @@
     <script src="{{ asset('assets/compiled/js/app.js') }}"></script>
     
     @livewireScripts
+    {{-- Stack untuk menampung script kustom dari view lain --}}
     @stack('scripts')
 
     <script>
+        // Fungsi untuk mendapatkan tema saat ini (terang atau gelap)
         function getThemeMode() {
             return document.documentElement.getAttribute('data-bs-theme') || 'light';
         }
+
+        // Fungsi untuk mendapatkan opsi tema untuk SweetAlert
         function getSwalThemeOptions() {
             const mode = getThemeMode();
             if (mode === 'dark') {
@@ -133,38 +145,34 @@
             }
         }
     </script>
-    {{-- Script Listener SweetAlert --}}
+    {{-- Script Listener untuk event dari Livewire --}}
     <script>
         document.addEventListener('livewire:init', () => {
+            // Listener untuk notifikasi sukses
             Livewire.on('swal:success', event => {
                 const theme = getSwalThemeOptions();
                 Swal.fire({
                     title: 'Berhasil!',
                     text: event.message,
                     icon: 'success',
-                    background: theme.background,
-                    color: theme.color,
+                    ...theme, // Menggabungkan opsi tema
                     confirmButtonText: 'Tutup',
-                    confirmButtonColor: theme.confirmButtonColor
                 });
             });
 
+            // Listener untuk notifikasi error
             Livewire.on('swal:error', event => {
                 const theme = getSwalThemeOptions();
                 Swal.fire({
                     title: 'Gagal!',
                     text: event.message,
                     icon: 'error',
-                    background: theme.background,
-                    color: theme.color,
+                    ...theme,
                     confirmButtonText: 'Tutup',
-                    confirmButtonColor: theme.confirmButtonColor
                 });
             });
 
-            // =================================================================
-            // KEY CHANGE: Listener untuk menampilkan form pengajuan magang
-            // =================================================================
+            // Listener untuk menampilkan form pengajuan magang
             Livewire.on('swal:ajukan', event => {
                 const theme = getSwalThemeOptions();
                 Swal.fire({
@@ -183,12 +191,9 @@
                     `,
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonColor: theme.confirmButtonColor,
-                    cancelButtonColor: '#d33',
                     confirmButtonText: 'Ya, ajukan!',
                     cancelButtonText: 'Batal',
-                    background: theme.background,
-                    color: theme.color,
+                    ...theme,
                     // Fungsi untuk validasi sebelum modal ditutup
                     preConfirm: () => {
                         const tanggalMulai = document.getElementById('swal-tanggal-mulai').value;
@@ -224,9 +229,7 @@
                 })
             });
 
-            // Hapus atau komentari listener 'swal:ajukan-final' karena sudah tidak relevan
-            // Livewire.on('swal:ajukan-final', event => { ... });
-
+            // Listener untuk dialog konfirmasi (misal: hapus data)
             Livewire.on('swal:confirm', event => {
                 const theme = getSwalThemeOptions();
                 Swal.fire({
@@ -235,13 +238,12 @@
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
-                    cancelButtonColor: theme.cancelButtonColor,
                     confirmButtonText: 'Ya, hapus!',
                     cancelButtonText: 'Batal',
-                    background: theme.background,
-                    color: theme.color,
+                    ...theme,
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        // Memanggil method di komponen Livewire jika dikonfirmasi
                         Livewire.dispatch(event.method, { id: event.id });
                     }
                 })

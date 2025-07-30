@@ -38,7 +38,7 @@
                                     <img src="{{ $p->user && $p->user->foto ? Storage::url($p->user->foto) : 'https://placehold.co/100x100/6c757d/white?text=' . strtoupper(substr($p->nama, 0, 1)) }}" alt="{{ $p->nama }}" class="table-img">
                                 </td>
                                 <td class="fw-bold">{{ $p->nama }}</td>
-                                <td>{{ $p->perusahaan->nama_perusahaan ?? 'N/A' }}</td>
+                                <td>{{ $p->perusahaan->first()->nama_perusahaan ?? 'N/A' }}</td>
                                 <td>{{ $p->no_hp }}</td>
                                 <td>{{ $p->user->email ?? 'N/A' }}</td>
                                 <td class="text-center">

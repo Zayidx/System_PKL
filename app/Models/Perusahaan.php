@@ -29,13 +29,21 @@ class Perusahaan extends Model
         'alamat_perusahaan',
         'email_perusahaan',
         'logo_perusahaan',
-        'kontak_perusahaan', 
+        'kontak_perusahaan',
+        'nip_pembimbing_sekolah',
+        'id_pembimbing_perusahaan',
     ];
 
-    // Relasi ke model PembimbingPerusahaan
-    public function pembimbingPerusahaan(): HasMany
+    // Relasi ke model PembimbingSekolah
+    public function pembimbingSekolah(): BelongsTo
     {
-        return $this->hasMany(PembimbingPerusahaan::class, 'id_perusahaan', 'id_perusahaan');
+        return $this->belongsTo(PembimbingSekolah::class, 'nip_pembimbing_sekolah', 'nip_pembimbing_sekolah');
+    }
+
+    // Relasi ke model PembimbingPerusahaan
+    public function pembimbingPerusahaan(): BelongsTo
+    {
+        return $this->belongsTo(PembimbingPerusahaan::class, 'id_pembimbing_perusahaan', 'id_pembimbing');
     }
 
     // Relasi ke model KontakPerusahaan

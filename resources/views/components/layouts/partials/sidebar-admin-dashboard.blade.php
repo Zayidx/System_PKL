@@ -52,9 +52,7 @@
              <li class="submenu-item {{ Request::routeIs('admin.master.kepala-sekolah') ? 'active' : '' }}">
                 <a href="{{ route('admin.master.kepala-sekolah') }}" wire:navigate class="submenu-link">Pengelolaan kepala-sekolah</a>
             </li>
-            <li class="submenu-item {{ Request::routeIs('admin.master.pembimbing-sekolah-setting') ? 'active' : '' }}">
-                <a href="{{ route('admin.master.pembimbing-sekolah-setting') }}" wire:navigate class="submenu-link">Pengelolaan pembimbing-sekolah-setting</a>
-            </li>
+           
         </ul>
     </li>
 

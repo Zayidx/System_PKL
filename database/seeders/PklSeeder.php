@@ -65,7 +65,10 @@ class PklSeeder extends Seeder
             $waliKelasCollection = $this->createUsersWithProfile($faker, 5, $waliKelasRole, WaliKelas::class, ['nama_wali_kelas' => 'username']);
             $this->command->info($waliKelasCollection->count() . ' Wali Kelas (role: walikelas) telah dibuat.');
 
-            $pembimbingSekolahs = $this->createUsersWithProfile($faker, 5, $pembimbingSekolahRole, PembimbingSekolah::class, ['nama_pembimbing_sekolah' => 'username']);
+            $pembimbingSekolahs = $this->createUsersWithProfile($faker, 5, $pembimbingSekolahRole, PembimbingSekolah::class, [
+                'nama_pembimbing_sekolah' => 'username',
+                'kontak_pembimbing_sekolah' => fn() => $faker->e164PhoneNumber
+            ]);
             $this->command->info($pembimbingSekolahs->count() . ' Pembimbing Sekolah (role: pembimbingsekolah) telah dibuat.');
 
             // Membuat akun Staff Hubin statis
@@ -117,7 +120,7 @@ class PklSeeder extends Seeder
             $this->command->info('User Siswa Farid (user) telah dibuat.');
             
             // Membuat Siswa Faker
-            $siswas = $this->createUsersWithProfile($faker, 100, $userRole, Siswa::class, ['nis' => fn() => $faker->unique()->numerify('##########'), 'nama_siswa' => 'username', 'id_kelas' => fn() => $kelasCollection->where('nama_kelas', '!=', 'N/A')->random()->id_kelas, 'id_jurusan' => fn($kelas) => $kelas->id_jurusan, 'tempat_lahir' => fn() => $faker->city, 'tanggal_lahir' => fn() => $faker->date(), 'kontak_siswa' => fn() => $faker->e164PhoneNumber]);
+            $siswas = $this->createUsersWithProfile($faker, 25, $userRole, Siswa::class, ['nis' => fn() => $faker->unique()->numerify('##########'), 'nama_siswa' => 'username', 'id_kelas' => fn() => $kelasCollection->where('nama_kelas', '!=', 'N/A')->random()->id_kelas, 'id_jurusan' => fn($kelas) => $kelas->id_jurusan, 'tempat_lahir' => fn() => $faker->city, 'tanggal_lahir' => fn() => $faker->date(), 'kontak_siswa' => fn() => $faker->e164PhoneNumber]);
             $this->command->info($siswas->count() . ' Siswa (role: user) telah dibuat.');
 
             // 4. MEMBUAT DATA PERUSAHAAN
@@ -133,12 +136,55 @@ class PklSeeder extends Seeder
             }
             $this->command->info($perusahaans->count() . ' Perusahaan telah dibuat.');
 
+            // Membuat Pembimbing Perusahaan (1 per perusahaan)
             $pembimbingPerusahaans = collect();
             foreach ($perusahaans as $perusahaan) {
                 $pembimbingUser = User::create(['username' => $faker->unique()->userName, 'email' => $faker->unique()->safeEmail, 'password' => Hash::make('password'), 'roles_id' => $pembimbingPerusahaanRole->id]);
-                $pembimbingPerusahaans->push(PembimbingPerusahaan::create(['id_perusahaan' => $perusahaan->id_perusahaan, 'user_id' => $pembimbingUser->id, 'nama' => $pembimbingUser->username, 'no_hp' => $faker->e164PhoneNumber]));
+                $pembimbingPerusahaans->push(PembimbingPerusahaan::create([
+                    'id_perusahaan' => $perusahaan->id_perusahaan, 
+                    'user_id' => $pembimbingUser->id, 
+                    'nama' => $pembimbingUser->username, 
+                    'no_hp' => $faker->e164PhoneNumber,
+                    'email' => $pembimbingUser->email
+                ]));
             }
             $this->command->info($pembimbingPerusahaans->count() . ' Pembimbing Perusahaan (role: pembimbingperusahaan) telah dibuat.');
+
+            // Mengassign pembimbing ke perusahaan
+            $this->command->info('Mengassign pembimbing ke perusahaan...');
+            
+            // Ambil semua pembimbing sekolah dan perusahaan
+            $pembimbingSekolahs = PembimbingSekolah::all();
+            $pembimbingPerusahaans = PembimbingPerusahaan::all();
+            
+            // Assign pembimbing perusahaan ke perusahaan (1:1)
+            foreach ($perusahaans as $index => $perusahaan) {
+                $pembimbingPerusahaan = $pembimbingPerusahaans->where('id_perusahaan', $perusahaan->id_perusahaan)->first();
+                if ($pembimbingPerusahaan) {
+                    $perusahaan->update([
+                        'id_pembimbing_perusahaan' => $pembimbingPerusahaan->id_pembimbing
+                    ]);
+                }
+            }
+            
+            // Assign pembimbing sekolah ke beberapa perusahaan (1:many)
+            // Setiap pembimbing sekolah bisa mengawasi 2-4 perusahaan
+            foreach ($pembimbingSekolahs as $pembimbingSekolah) {
+                $jumlahPerusahaan = $faker->numberBetween(2, 4);
+                $perusahaanTerpilih = $perusahaans->random($jumlahPerusahaan);
+                
+                foreach ($perusahaanTerpilih as $perusahaan) {
+                    $perusahaan->update([
+                        'nip_pembimbing_sekolah' => $pembimbingSekolah->nip_pembimbing_sekolah
+                    ]);
+                }
+            }
+            
+            $this->command->info('Pembimbing telah diassign ke perusahaan.');
+
+            // CATATAN: Tidak membuat pengajuan atau prakerin dummy
+            // Siswa akan berada dalam tahap awal tanpa pengajuan apapun
+            $this->command->info('Siswa dibuat dalam tahap awal tanpa pengajuan atau prakerin.');
 
             $this->command->info('PklSeeder selesai dijalankan dengan sukses!');
         });
@@ -187,5 +233,35 @@ class PklSeeder extends Seeder
             $collection->push($profileModel::create($attributes));
         }
         return $collection;
+    }
+
+    /**
+     * Helper function to create prakerin data
+     */
+    private function createPrakerinData(\Faker\Generator $faker): void
+    {
+        $this->command->info('Membuat data Prakerin...');
+        $prakerins = collect();
+        $kepalaPrograms = KepalaProgram::all();
+        $perusahaanDenganPembimbing = Perusahaan::whereNotNull('nip_pembimbing_sekolah')->get();
+        $pembimbingSekolahs = PembimbingSekolah::all();
+        $pembimbingPerusahaans = PembimbingPerusahaan::all();
+        $siswaNIS = Siswa::pluck('nis')->toArray();
+        
+        // Membuat prakerin dummy dengan NIS yang benar
+        for ($i = 0; $i < 30; $i++) {
+            $prakerins->push(DB::table('prakerin')->insert([
+                'nis_siswa' => $faker->randomElement($siswaNIS),
+                'nip_pembimbing_sekolah' => $pembimbingSekolahs->random()->nip_pembimbing_sekolah,
+                'id_pembimbing_perusahaan' => $pembimbingPerusahaans->random()->id_pembimbing,
+                'id_perusahaan' => $perusahaanDenganPembimbing->random()->id_perusahaan,
+                'nip_kepala_program' => $kepalaPrograms->random()->nip_kepala_program,
+                'tanggal_mulai' => $faker->dateTimeBetween('now', '+1 month'),
+                'tanggal_selesai' => $faker->dateTimeBetween('+2 months', '+4 months'),
+                'keterangan' => $faker->optional(0.6)->sentence,
+                'status_prakerin' => $faker->randomElement(['aktif', 'selesai', 'dibatalkan'])
+            ]));
+        }
+        $this->command->info('30 Prakerin dummy telah dibuat.');
     }
 }

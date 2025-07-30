@@ -21,6 +21,7 @@ class PembimbingPerusahaan extends Model
         'user_id',
         'nama',
         'no_hp',
+        'email',
     ];
 
     /**
@@ -34,11 +35,11 @@ class PembimbingPerusahaan extends Model
 
     /**
      * Relasi ke model Perusahaan
-     * @return BelongsTo<Perusahaan, PembimbingPerusahaan>
+     * @return HasMany<Perusahaan>
      */
-    public function perusahaan(): BelongsTo
+    public function perusahaan(): HasMany
     {
-        return $this->belongsTo(Perusahaan::class, 'id_perusahaan', 'id_perusahaan');
+        return $this->hasMany(Perusahaan::class, 'id_pembimbing_perusahaan', 'id_pembimbing');
     }
 
     /**

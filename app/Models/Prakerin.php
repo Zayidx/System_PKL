@@ -33,6 +33,7 @@ class Prakerin extends Model
         'tanggal_mulai',
         'tanggal_selesai',
         'keterangan',
+        'status_prakerin', // baru: aktif, selesai, dibatalkan
     ];
 
     // Relasi ke model Siswa

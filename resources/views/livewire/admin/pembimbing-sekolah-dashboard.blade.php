@@ -12,7 +12,7 @@
                     <select wire:model.live="perPage" class="form-select" style="width: auto;">
                         <option value="5">5</option> <option value="10">10</option> <option value="20">20</option>
                     </select>
-                    <input type="search" wire:model.live.debounce.300ms="search" class="form-control" placeholder="Cari NIP, nama, atau email...">
+                    <input type="search" wire:model.live.debounce.300ms="search" class="form-control" placeholder="Cari NIP, nama, kontak, perusahaan, atau email...">
                 </div>
                  <button class="btn btn-primary" wire:click="create"><i class="bi bi-plus-circle me-2"></i>Tambah Pembimbing</button>
             </div>
@@ -25,6 +25,8 @@
                             <th>Foto</th>
                             <th>NIP/ID</th>
                             <th>Nama Pembimbing</th>
+                            <th>Kontak</th>
+                            <th>Perusahaan</th>
                             <th>Email Akun</th>
                             <th class="text-center">Aksi</th>
                         </tr>
@@ -38,6 +40,8 @@
                                 </td>
                                 <td>{{ $p->nip_pembimbing_sekolah }}</td>
                                 <td class="fw-bold">{{ $p->nama_pembimbing_sekolah }}</td>
+                                <td>{{ $p->kontak_pembimbing_sekolah ?? 'N/A' }}</td>
+                                <td>{{ $p->perusahaan->first()->nama_perusahaan ?? 'N/A' }}</td>
                                 <td>{{ $p->user->email ?? 'N/A' }}</td>
                                 <td class="text-center">
                                     <div class="d-inline-flex gap-1">
@@ -47,7 +51,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="text-center py-4">Tidak ada data pembimbing yang ditemukan.</td></tr>
+                            <tr><td colspan="8" class="text-center py-4">Tidak ada data pembimbing yang ditemukan.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -76,6 +80,11 @@
                                 <label for="nama_pembimbing_sekolah" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('nama_pembimbing_sekolah') is-invalid @enderror" id="nama_pembimbing_sekolah" wire:model.defer="nama_pembimbing_sekolah">
                                 @error('nama_pembimbing_sekolah') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="kontak_pembimbing_sekolah" class="form-label">Kontak/No. HP</label>
+                                <input type="text" class="form-control @error('kontak_pembimbing_sekolah') is-invalid @enderror" id="kontak_pembimbing_sekolah" wire:model.defer="kontak_pembimbing_sekolah" placeholder="+6281234567890">
+                                @error('kontak_pembimbing_sekolah') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                             <div class="col-12"><hr class="my-2"></div>
                             <h6 class="mb-3 px-3">Informasi Akun (Role: Pembimbing Sekolah)</h6>

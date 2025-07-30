@@ -54,6 +54,7 @@ class PembimbingPerusahaanDashboard extends Component
     {
         return [
             'id_perusahaan.required' => 'Perusahaan wajib dipilih.',
+            'id_perusahaan.exists' => 'Perusahaan yang dipilih tidak valid.',
             'nama.required' => 'Nama pembimbing wajib diisi.',
             'no_hp.required' => 'Nomor HP wajib diisi.',
             'email.unique' => 'Email ini sudah digunakan oleh akun lain.',
@@ -96,7 +97,7 @@ class PembimbingPerusahaanDashboard extends Component
         $pembimbing = PembimbingPerusahaan::with('user')->findOrFail($id);
         $this->pembimbingId = $pembimbing->id_pembimbing;
         $this->userId = $pembimbing->user_id;
-        $this->id_perusahaan = $pembimbing->id_perusahaan;
+        $this->id_perusahaan = $pembimbing->perusahaan->first()->id_perusahaan ?? null;
         $this->nama = $pembimbing->nama;
         $this->no_hp = $pembimbing->no_hp;
         
@@ -123,14 +124,26 @@ class PembimbingPerusahaanDashboard extends Component
                     $userData['foto'] = $this->foto->store('fotos/profil', 'public');
                 }
                 $user->update($userData);
-                $pembimbing->update(['id_perusahaan' => $validatedData['id_perusahaan'], 'nama' => $validatedData['nama'], 'no_hp' => $validatedData['no_hp']]);
+                $pembimbing->update(['nama' => $validatedData['nama'], 'no_hp' => $validatedData['no_hp']]);
+
+                // Update perusahaan assignment
+                $perusahaan = Perusahaan::find($validatedData['id_perusahaan']);
+                if ($perusahaan) {
+                    $perusahaan->update(['id_pembimbing_perusahaan' => $pembimbing->id_pembimbing]);
+                }
 
             } else { // Create
                 $pembimbingRole = Role::where('name', 'pembimbingperusahaan')->firstOrFail();
                 $fotoPath = $this->foto->store('fotos/profil', 'public');
 
                 $newUser = User::create(['roles_id' => $pembimbingRole->id, 'username' => $validatedData['nama'], 'email' => $validatedData['email'], 'password' => Hash::make($validatedData['password']), 'foto' => $fotoPath]);
-                PembimbingPerusahaan::create(['user_id' => $newUser->id, 'id_perusahaan' => $validatedData['id_perusahaan'], 'nama' => $validatedData['nama'], 'no_hp' => $validatedData['no_hp']]);
+                $pembimbing = PembimbingPerusahaan::create(['user_id' => $newUser->id, 'nama' => $validatedData['nama'], 'no_hp' => $validatedData['no_hp']]);
+
+                // Assign pembimbing to perusahaan
+                $perusahaan = Perusahaan::find($validatedData['id_perusahaan']);
+                if ($perusahaan) {
+                    $perusahaan->update(['id_pembimbing_perusahaan' => $pembimbing->id_pembimbing]);
+                }
             }
         });
 

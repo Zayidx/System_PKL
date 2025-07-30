@@ -4,6 +4,8 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Perusahaan;
+use App\Models\PembimbingSekolah;
+use App\Models\PembimbingPerusahaan;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
@@ -23,6 +25,7 @@ class PerusahaanDashboard extends Component
     // Properti untuk Modal dan Form
     public $isModalOpen = false;
     public $perusahaanId, $nama_perusahaan, $alamat_perusahaan, $email_perusahaan, $kontak_perusahaan, $logo_perusahaan, $existingLogo;
+    public $nip_pembimbing_sekolah;
 
     // Properti untuk fungsionalitas tabel
     public $search = '';
@@ -52,6 +55,7 @@ class PerusahaanDashboard extends Component
             ],
 
             'logo_perusahaan' => $logoRule,
+            'nip_pembimbing_sekolah' => 'nullable|exists:pembimbing_sekolah,nip_pembimbing_sekolah',
         ];
     }
 
@@ -77,6 +81,7 @@ class PerusahaanDashboard extends Component
             'logo_perusahaan.required' => 'Logo perusahaan wajib diunggah.',
             'logo_perusahaan.image' => 'File harus berupa gambar.',
             'logo_perusahaan.max' => 'Ukuran gambar maksimal 2MB.',
+            'nip_pembimbing_sekolah.exists' => 'Pembimbing sekolah yang dipilih tidak valid.',
         ];
     }
 
@@ -127,6 +132,7 @@ class PerusahaanDashboard extends Component
         $this->email_perusahaan = $perusahaan->email_perusahaan;
         $this->kontak_perusahaan = $perusahaan->kontak_perusahaan;
         $this->existingLogo = $perusahaan->logo_perusahaan ? Storage::url($perusahaan->logo_perusahaan) : null;
+        $this->nip_pembimbing_sekolah = $perusahaan->nip_pembimbing_sekolah;
         $this->isModalOpen = true;
     }
 
@@ -142,6 +148,7 @@ class PerusahaanDashboard extends Component
             'alamat_perusahaan' => $validatedData['alamat_perusahaan'],
             'email_perusahaan' => $validatedData['email_perusahaan'],
             'kontak_perusahaan' => $validatedData['kontak_perusahaan'],
+            'nip_pembimbing_sekolah' => $validatedData['nip_pembimbing_sekolah'],
         ];
 
         if ($this->logo_perusahaan) {
@@ -198,7 +205,7 @@ class PerusahaanDashboard extends Component
     {
         // [PERBAIKAN] Menambahkan 'kontak_perusahaan' ke dalam array reset
         // agar field tidak menyimpan nilai lama saat modal ditutup dan dibuka lagi.
-        $this->reset(['perusahaanId', 'nama_perusahaan', 'alamat_perusahaan', 'kontak_perusahaan', 'email_perusahaan', 'logo_perusahaan', 'existingLogo']);
+        $this->reset(['perusahaanId', 'nama_perusahaan', 'alamat_perusahaan', 'kontak_perusahaan', 'email_perusahaan', 'logo_perusahaan', 'existingLogo', 'nip_pembimbing_sekolah']);
         $this->resetErrorBag();
     }
 }

@@ -94,6 +94,10 @@ return new class extends Migration
             $table->increments('nip_pembimbing_sekolah');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->string('nama_pembimbing_sekolah', 60);
+            $table->string('kontak_pembimbing_sekolah', 17)->nullable();
+            // PENAMBAHAN: Field email untuk pembimbing sekolah
+            $table->string('email_pembimbing_sekolah', 100)->nullable();
+            // PENGHAPUSAN: Kolom id_perusahaan dihapus
         });
 
         Schema::create('kompetensi', function (Blueprint $table) {
@@ -108,6 +112,7 @@ return new class extends Migration
     public function down()
     {
         Schema::dropIfExists('kompetensi');
+        // PENGHAPUSAN: Drop foreign key pembimbing_sekolah dihapus
         Schema::dropIfExists('pembimbing_sekolah');
         Schema::dropIfExists('siswa');
         Schema::dropIfExists('kelas');

@@ -36,7 +36,7 @@ class Pengajuan extends Component
     public $kontak_mitra;
 
     protected $rules = [
-        'tanggal_mulai' => 'required|date|after_or_equal:today',
+        'tanggal_mulai' => 'required|date',
         'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
         'link_cv' => 'required|url',
     ];
@@ -137,16 +137,13 @@ class Pengajuan extends Component
 
     public function ajukanMagangKontrak()
     {
-        $year = date('Y');
         if (
             !$this->tanggal_mulai ||
             !$this->tanggal_selesai ||
-            !$this->link_cv ||
-            date('Y', strtotime($this->tanggal_mulai)) != $year ||
-            date('Y', strtotime($this->tanggal_selesai)) != $year
+            !$this->link_cv
         ) {
-            $this->addError('tanggal_mulai', 'Tanggal PKL harus di tahun berjalan.');
-            $this->addError('tanggal_selesai', 'Tanggal PKL harus di tahun berjalan.');
+            $this->addError('tanggal_mulai', 'Tanggal mulai wajib diisi.');
+            $this->addError('tanggal_selesai', 'Tanggal selesai wajib diisi.');
             $this->addError('link_cv', 'Link CV wajib diisi.');
             return;
         }

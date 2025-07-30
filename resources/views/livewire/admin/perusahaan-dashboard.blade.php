@@ -37,6 +37,7 @@
                             <th class="text-nowrap">Kontak Perusahaan</th>
                             {{-- [PERBAIKAN] Menghapus tag penutup </th> yang berlebih --}}
                             <th>Email</th>
+                            <th>Pembimbing Sekolah</th>
                             <th class="text-center text-nowrap">Aksi</th>
                         </tr>
                     </thead>
@@ -51,6 +52,7 @@
                                 <td>{{ Str::limit($p->alamat_perusahaan, 50) }}</td>
                                 <td>{{ $p->kontak_perusahaan }}</td>
                                 <td>{{ $p->email_perusahaan }}</td>
+                                <td>{{ $p->pembimbingSekolah->nama_pembimbing_sekolah ?? 'N/A' }}</td>
                                 <td class="text-center">
                                     <div class="d-inline-flex gap-1">
                                         <button class="btn btn-warning btn-sm" wire:click="edit({{ $p->id_perusahaan }})"><i class="bi bi-pencil-square"></i></button>
@@ -59,8 +61,8 @@
                                 </td>
                             </tr>
                         @empty
-                            {{-- [PERBAIKAN] Colspan diubah dari 6 menjadi 7 agar sesuai dengan jumlah kolom tabel --}}
-                            <tr><td colspan="7" class="text-center py-4">Tidak ada data perusahaan yang ditemukan.</td></tr>
+                            {{-- [PERBAIKAN] Colspan diubah dari 6 menjadi 8 agar sesuai dengan jumlah kolom tabel --}}
+                            <tr><td colspan="8" class="text-center py-4">Tidak ada data perusahaan yang ditemukan.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -101,6 +103,16 @@
                             <label for="alamat_perusahaan" class="form-label">Alamat Perusahaan <span class="text-danger">*</span></label>
                             <textarea class="form-control @error('alamat_perusahaan') is-invalid @enderror" id="alamat_perusahaan" wire:model.defer="alamat_perusahaan" rows="3"></textarea>
                             @error('alamat_perusahaan') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label for="nip_pembimbing_sekolah" class="form-label">Pembimbing Sekolah</label>
+                            <select class="form-select @error('nip_pembimbing_sekolah') is-invalid @enderror" id="nip_pembimbing_sekolah" wire:model.defer="nip_pembimbing_sekolah">
+                                <option value="">Pilih Pembimbing Sekolah</option>
+                                @foreach(\App\Models\PembimbingSekolah::orderBy('nama_pembimbing_sekolah')->get() as $pembimbing)
+                                    <option value="{{ $pembimbing->nip_pembimbing_sekolah }}">{{ $pembimbing->nama_pembimbing_sekolah }}</option>
+                                @endforeach
+                            </select>
+                            @error('nip_pembimbing_sekolah') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
                         <div class="mb-3">
                             <label for="logo_perusahaan" class="form-label">Logo Perusahaan @if(!$perusahaanId)<span class="text-danger">*</span>@endif</label>

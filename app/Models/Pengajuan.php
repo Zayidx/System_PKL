@@ -49,9 +49,41 @@ class Pengajuan extends Model
         static::updated(function ($pengajuan) {
             // Jika status pengajuan berubah menjadi diterima_perusahaan
             if ($pengajuan->isDirty('status_pengajuan') && $pengajuan->status_pengajuan === 'diterima_perusahaan') {
-                // Cek apakah sudah ada prakerin untuk siswa ini di perusahaan ini
+                // Hapus semua pengajuan lain untuk siswa ini
+                Pengajuan::where('nis_siswa', $pengajuan->nis_siswa)
+                    ->where('id_pengajuan', '!=', $pengajuan->id_pengajuan)
+                    ->update(['status_pengajuan' => 'dibatalkan']);
+                
+                // Kirim notifikasi email ke perusahaan lain yang sudah menerima pengajuan
+                $pengajuanLain = Pengajuan::where('nis_siswa', $pengajuan->nis_siswa)
+                    ->where('id_pengajuan', '!=', $pengajuan->id_pengajuan)
+                    ->where('status_pengajuan', '!=', 'dibatalkan')
+                    ->get();
+                
+                foreach ($pengajuanLain as $pengajuanLainnya) {
+                    // Kirim email notifikasi ke perusahaan
+                    if ($pengajuanLainnya->perusahaan && $pengajuanLainnya->perusahaan->email_perusahaan) {
+                        try {
+                            \Mail::send('emails.siswa-diterima-di-perusahaan-lain', [
+                                'perusahaan' => $pengajuanLainnya->perusahaan,
+                                'siswa' => $pengajuan->siswa,
+                                'perusahaanDiterima' => $pengajuan->perusahaan
+                            ], function ($message) use ($pengajuanLainnya) {
+                                $message->to($pengajuanLainnya->perusahaan->email_perusahaan)
+                                       ->subject('Siswa Telah Diterima di Perusahaan Lain');
+                            });
+                        } catch (\Exception $e) {
+                            \Log::error('Gagal mengirim email notifikasi', [
+                                'error' => $e->getMessage(),
+                                'email' => $pengajuanLainnya->perusahaan->email_perusahaan
+                            ]);
+                        }
+                    }
+                }
+                
+                // Cek apakah sudah ada prakerin aktif untuk siswa ini
                 $existingPrakerin = Prakerin::where('nis_siswa', $pengajuan->nis_siswa)
-                    ->where('id_perusahaan', $pengajuan->id_perusahaan)
+                    ->where('status_prakerin', 'aktif')
                     ->first();
 
                 if (!$existingPrakerin) {
@@ -59,8 +91,8 @@ class Pengajuan extends Model
                         // Ambil pembimbing perusahaan dari perusahaan
                         $pembimbingPerusahaan = $pengajuan->perusahaan->pembimbingPerusahaan->first();
                         
-                        // Ambil pembimbing sekolah default (bisa diambil dari jurusan siswa)
-                        $pembimbingSekolah = PembimbingSekolah::first();
+                        // Ambil pembimbing sekolah dari perusahaan
+                        $pembimbingSekolah = $pengajuan->perusahaan->pembimbingSekolah;
                         
                         // Ambil kepala program dari jurusan siswa
                         $kepalaProgram = KepalaProgram::where('id_jurusan', $pengajuan->siswa->id_jurusan)->first();
@@ -83,6 +115,7 @@ class Pengajuan extends Model
                             'nip_kepala_program' => $kepalaProgram->nip_kepala_program,
                             'tanggal_mulai' => now(),
                             'tanggal_selesai' => now()->addMonths(3), // Default 3 bulan
+                            'status_prakerin' => 'aktif',
                         ]);
                     } catch (\Exception $e) {
                         \Log::error('Error saat membuat prakerin otomatis', [

@@ -20,7 +20,7 @@ class ProsesPengajuan extends Component
     public ?Pengajuan $pengajuan;
 
     // Gunakan atribut Rule untuk validasi yang lebih bersih
-    #[Rule('required|date|after_or_equal:today', message: 'Tanggal mulai tidak boleh tanggal yang sudah lewat.')]
+    #[Rule('required|date', message: 'Tanggal mulai harus berupa tanggal yang valid.')]
     public $tanggal_mulai;
 
     #[Rule('required|date|after_or_equal:tanggal_mulai', message: 'Tanggal selesai harus setelah atau sama dengan tanggal mulai.')]
@@ -35,8 +35,21 @@ class ProsesPengajuan extends Component
     public function mount($id_perusahaan)
     {
         $this->perusahaan = Perusahaan::findOrFail($id_perusahaan);
+        
+        // Cek apakah siswa sudah memiliki prakerin aktif
+        $prakerinAktif = \App\Models\Prakerin::where('nis_siswa', Auth::user()->siswa->nis)
+            ->where('status_prakerin', 'aktif')
+            ->first();
+            
+        if ($prakerinAktif) {
+            $this->dispatch('swal:error', ['message' => 'Anda masih memiliki prakerin aktif. Selesaikan prakerin terlebih dahulu sebelum mengajukan yang baru.']);
+            return redirect()->route('user.dashboard');
+        }
+        
+        // Ambil pengajuan terbaru untuk perusahaan ini (jika ada)
         $this->pengajuan = Pengajuan::where('nis_siswa', Auth::user()->siswa->nis)
             ->where('id_perusahaan', $id_perusahaan)
+            ->latest('created_at')
             ->first();
     }
 
@@ -104,16 +117,6 @@ class ProsesPengajuan extends Component
     {
         // Jalankan validasi sekali lagi sebelum menyimpan
         $this->validate();
-
-        $year = date('Y');
-        if (
-            date('Y', strtotime($this->tanggal_mulai)) != $year ||
-            date('Y', strtotime($this->tanggal_selesai)) != $year
-        ) {
-            $this->addError('tanggal_mulai', 'Tanggal PKL harus di tahun berjalan.');
-            $this->addError('tanggal_selesai', 'Tanggal PKL harus di tahun berjalan.');
-            return;
-        }
 
         try {
             Pengajuan::create([
