@@ -66,7 +66,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">{{ $pembimbingId ? 'Edit Pembimbing' : 'Tambah Pembimbing Baru' }}</h5>
-                    <button type="button" class="btn-close" wire:click="closeModal"></button>
+                    <button type="button" class="btn-close"  wire:click="closeModal"></button>
                 </div>
                 <div class="modal-body">
                     <form wire:submit.prevent="store">
