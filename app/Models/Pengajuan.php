@@ -113,8 +113,8 @@ class Pengajuan extends Model
                             'id_pembimbing_perusahaan' => $pembimbingPerusahaan->id_pembimbing ?? null,
                             'nip_pembimbing_sekolah' => $pembimbingSekolah->nip_pembimbing_sekolah,
                             'nip_kepala_program' => $kepalaProgram->nip_kepala_program,
-                            'tanggal_mulai' => now(),
-                            'tanggal_selesai' => now()->addMonths(3), // Default 3 bulan
+                            'tanggal_mulai' => $pengajuan->tanggal_mulai ?? now(),
+                            'tanggal_selesai' => $pengajuan->tanggal_selesai ?? now()->addMonths(3),
                             'status_prakerin' => 'aktif',
                         ]);
                     } catch (\Exception $e) {
@@ -151,5 +151,76 @@ class Pengajuan extends Model
     public function staffHubin(): BelongsTo
     {
         return $this->belongsTo(StaffHubin::class, 'nip_staff', 'nip_staff');
+    }
+
+    /**
+     * Method untuk membuat prakerin otomatis untuk pengajuan yang sudah diterima
+     * tetapi belum memiliki prakerin aktif
+     */
+    public static function createPrakerinForAcceptedPengajuan()
+    {
+        $pengajuanDiterima = self::where('status_pengajuan', 'diterima_perusahaan')->get();
+        
+        foreach ($pengajuanDiterima as $pengajuan) {
+            // Cek apakah sudah ada prakerin aktif untuk siswa ini
+            $existingPrakerin = Prakerin::where('nis_siswa', $pengajuan->nis_siswa)
+                ->where('status_prakerin', 'aktif')
+                ->first();
+
+            if (!$existingPrakerin) {
+                try {
+                    // Ambil pembimbing perusahaan dari perusahaan
+                    $pembimbingPerusahaan = $pengajuan->perusahaan->pembimbingPerusahaan->first();
+                    
+                    // Ambil pembimbing sekolah dari perusahaan
+                    $pembimbingSekolah = $pengajuan->perusahaan->pembimbingSekolah;
+                    
+                    // Jika tidak ada pembimbing sekolah, ambil yang pertama
+                    if (!$pembimbingSekolah) {
+                        $pembimbingSekolah = PembimbingSekolah::first();
+                        if ($pembimbingSekolah) {
+                            $pengajuan->perusahaan->update(['nip_pembimbing_sekolah' => $pembimbingSekolah->nip_pembimbing_sekolah]);
+                        }
+                    }
+                    
+                    // Ambil kepala program dari jurusan siswa
+                    $kepalaProgram = KepalaProgram::where('id_jurusan', $pengajuan->siswa->id_jurusan)->first();
+                    
+                    // Pastikan semua data yang diperlukan ada
+                    if (!$pembimbingSekolah || !$kepalaProgram) {
+                        \Log::error('Data pembimbing sekolah atau kepala program tidak ditemukan untuk prakerin', [
+                            'nis_siswa' => $pengajuan->nis_siswa,
+                            'id_perusahaan' => $pengajuan->id_perusahaan
+                        ]);
+                        continue; // Skip jika data tidak lengkap
+                    }
+                    
+                    // Buat prakerin baru
+                    Prakerin::create([
+                        'nis_siswa' => $pengajuan->nis_siswa,
+                        'id_perusahaan' => $pengajuan->id_perusahaan,
+                        'id_pembimbing_perusahaan' => $pembimbingPerusahaan->id_pembimbing ?? null,
+                        'nip_pembimbing_sekolah' => $pembimbingSekolah->nip_pembimbing_sekolah,
+                        'nip_kepala_program' => $kepalaProgram->nip_kepala_program,
+                        'tanggal_mulai' => $pengajuan->tanggal_mulai ?? now(),
+                        'tanggal_selesai' => $pengajuan->tanggal_selesai ?? now()->addMonths(3),
+                        'status_prakerin' => 'aktif',
+                    ]);
+                    
+                    \Log::info('Prakerin berhasil dibuat otomatis', [
+                        'nis_siswa' => $pengajuan->nis_siswa,
+                        'id_perusahaan' => $pengajuan->id_perusahaan,
+                        'perusahaan' => $pengajuan->perusahaan->nama_perusahaan
+                    ]);
+                    
+                } catch (\Exception $e) {
+                    \Log::error('Error saat membuat prakerin otomatis', [
+                        'error' => $e->getMessage(),
+                        'nis_siswa' => $pengajuan->nis_siswa,
+                        'id_perusahaan' => $pengajuan->id_perusahaan
+                    ]);
+                }
+            }
+        }
     }
 }

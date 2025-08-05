@@ -147,6 +147,36 @@
     </script>
     {{-- Script Listener untuk event dari Livewire --}}
     <script>
+        // Sweet Alert untuk Login Success
+        function showLoginSuccessAlert() {
+            @if(session('login_success'))
+                const loginData = @json(session('login_success'));
+                console.log('Login success data:', loginData);
+                const theme = getSwalThemeOptions();
+                Swal.fire({
+                    title: 'Login Berhasil!',
+                    text: loginData.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3085d6',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    ...theme
+                });
+            @endif
+        }
+
+        // Jalankan saat DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            showLoginSuccessAlert();
+        });
+
+        // Jalankan juga saat Livewire navigasi selesai
+        document.addEventListener('livewire:navigated', function() {
+            setTimeout(showLoginSuccessAlert, 100);
+        });
+
         document.addEventListener('livewire:init', () => {
             // Listener untuk notifikasi sukses
             Livewire.on('swal:success', event => {

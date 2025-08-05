@@ -1,10 +1,16 @@
-<div class="container-fluid py-2" x-data="dashboardChart()">
+<div class="container-fluid py-2" x-data="dashboardChart()" wire:poll.15s>
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h4 class="fw-bold mb-1">Dashboard Staff Hubin</h4>
                     <p class="text-muted mb-0">Hari ini, {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}.</p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="spinner-border spinner-border-sm text-primary" wire:loading role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <small class="text-muted">Auto-refresh setiap 15 detik</small>
                 </div>
             </div>
         </div>

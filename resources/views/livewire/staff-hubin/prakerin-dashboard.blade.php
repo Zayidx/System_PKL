@@ -1,7 +1,13 @@
-<div>
+<div wire:poll.10s>
     <div class="card shadow-sm">
         <div class="card-header">
             <h4 class="mb-0">Daftar Kelas - Prakerin</h4>
+            <div class="d-flex align-items-center gap-2">
+                <div class="spinner-border spinner-border-sm text-primary" wire:loading role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <small class="text-muted">Auto-refresh setiap 10 detik</small>
+            </div>
         </div>
         <div class="card-body">
             <div class="d-flex gap-2 mb-3">

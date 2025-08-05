@@ -36,6 +36,12 @@ use App\Livewire\Admin\StatusPengajuanSiswaDashboard;
 use App\Livewire\StaffHubin\PrakerinDashboard;
 use App\Livewire\StaffHubin\PrakerinSiswaDashboard;
 use App\Livewire\StaffHubin\StatusPrakerinSiswaDashboard;
+use App\Livewire\User\NilaiSiswa;
+use App\Livewire\StaffHubin\NilaiSiswaDashboard;
+use App\Livewire\Admin\KompetensiNilaiDashboard;
+use App\Livewire\Admin\DetailNilaiPkl;
+use App\Livewire\Admin\DaftarPenilaianPkl;
+use App\Http\Controllers\PenilaianController;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,6 +76,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/staff-hubin', StaffHubinDashboard::class)->name('staff-hubin');
             Route::get('/kepala-sekolah', KepalaSekolahDashboard::class)->name('kepala-sekolah');
             Route::get('/kepala-program', KepalaProgramDashboard::class)->name('kepala-program');
+            Route::get('/kompetensi', KompetensiNilaiDashboard::class)->name('kompetensi');
+            Route::get('/penilaian-pkl', DaftarPenilaianPkl::class)->name('penilaian-pkl');
+            Route::get('/penilaian-pkl/detail/{id}', DetailNilaiPkl::class)->name('penilaian-pkl.detail');
         });
     });
 
@@ -83,6 +92,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/prakerin', PrakerinDashboard::class)->name('prakerin');
             Route::get('/prakerin/kelas/{id_kelas}', PrakerinSiswaDashboard::class)->name('prakerin.siswa');
             Route::get('/prakerin/status/{nis}', StatusPrakerinSiswaDashboard::class)->name('prakerin.status');
+            Route::get('/nilai/kelas/{id_kelas}', NilaiSiswaDashboard::class)->name('nilai.siswa');
         });
     });
 
@@ -93,10 +103,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/ajukan-perusahaan-baru', AjukanPerusahaanBaru::class)->name('ajukan-perusahaan-baru');
         Route::get('/magang', ProsesMagang::class)->name('magang');
         Route::get('/riwayat-prakerin', RiwayatPrakerin::class)->name('riwayat-prakerin');
+        Route::get('/nilai', NilaiSiswa::class)->name('nilai');
     });
 
     Route::post('/send-otp', [OtpController::class, 'sendOtp']);
 });
+
+// Routes untuk form penilaian (tidak memerlukan auth)
+Route::get('/penilaian/form/{token}', [PenilaianController::class, 'showForm'])->name('penilaian.form');
+Route::post('/penilaian/submit/{token}', [PenilaianController::class, 'submitPenilaian'])->name('penilaian.submit');
+Route::get('/penilaian/success/{token}', [PenilaianController::class, 'showSuccess'])->name('penilaian.success');
 
 Route::get('/pengajuan/approve/{token}', [PengajuanApprovalController::class, 'approve'])->name('pengajuan.approve');
 Route::get('/pengajuan/decline/{token}', [PengajuanApprovalController::class, 'decline'])->name('pengajuan.decline');

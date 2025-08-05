@@ -41,6 +41,7 @@ return new class extends Migration
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
             $table->text('keterangan')->nullable();
+            $table->enum('status_prakerin', ['aktif', 'selesai', 'dibatalkan'])->default('aktif');
 
             $table->foreign('nis_siswa')->references('nis')->on('siswa')->onDelete('cascade');
             $table->foreign('nip_pembimbing_sekolah')->references('nip_pembimbing_sekolah')->on('pembimbing_sekolah')->onDelete('cascade');

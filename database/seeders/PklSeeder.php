@@ -98,6 +98,42 @@ class PklSeeder extends Seeder
             $kepalaPrograms = collect();
             foreach ($jurusans as $jurusan) {
                 $kaprogUser = User::create(['username' => $faker->unique()->userName, 'email' => $faker->unique()->safeEmail, 'password' => Hash::make('password'), 'roles_id' => $kepalaProgramRole->id]);
+
+            // MEMBUAT DATA KOMPETENSI UNTUK SETIAP JURUSAN
+            $this->command->info('Membuat data kompetensi untuk setiap jurusan...');
+            $kompetensiData = [
+                1 => [ // RPL
+                    'Pemrograman Web Dasar',
+                    'Pemrograman Web Lanjutan', 
+                    'Basis Data',
+                    'Pemrograman Berorientasi Objek',
+                    'Pengembangan Aplikasi Mobile'
+                ],
+                2 => [ // TKJ
+                    'Konfigurasi Router dan Switch',
+                    'Administrasi Sistem Jaringan',
+                    'Keamanan Jaringan',
+                    'Troubleshooting Jaringan',
+                    'Virtualisasi Jaringan'
+                ],
+                3 => [ // DKV
+                    'Desain Grafis Digital',
+                    'Animasi 2D dan 3D',
+                    'Video Editing',
+                    'Desain Web dan UI/UX',
+                    'Fotografi Digital'
+                ]
+            ];
+
+            foreach ($kompetensiData as $jurusanId => $kompetensiList) {
+                foreach ($kompetensiList as $kompetensiName) {
+                    Kompetensi::firstOrCreate([
+                        'id_jurusan' => $jurusanId,
+                        'nama_kompetensi' => $kompetensiName
+                    ]);
+                }
+                $this->command->info("Kompetensi untuk jurusan ID {$jurusanId} telah dibuat.");
+            }
                 $kepalaPrograms->push(KepalaProgram::create(['user_id' => $kaprogUser->id, 'id_jurusan' => $jurusan->id_jurusan, 'nama_kepala_program' => $kaprogUser->username]));
             }
             $this->command->info($kepalaPrograms->count() . ' Kepala Program (role: kepalaprogram) telah dibuat.');
@@ -118,6 +154,11 @@ class PklSeeder extends Seeder
             $siswaUser = User::firstOrCreate(['email' => 'faridx0236@gmail.com'], ['username' => 'Farid Siswa', 'password' => Hash::make('indrawan0236'), 'roles_id' => $userRole->id]);
             Siswa::firstOrCreate(['user_id' => $siswaUser->id], ['nis' => '1234567890', 'id_kelas' => $kelasCollection->where('nama_kelas', '!=', 'N/A')->random()->id_kelas, 'id_jurusan' => Jurusan::where('nama_jurusan_singkat', 'RPL')->first()->id_jurusan, 'nama_siswa' => $siswaUser->username, 'tempat_lahir' => 'Jakarta', 'tanggal_lahir' => '2006-08-17', 'kontak_siswa' => '081234567890']);
             $this->command->info('User Siswa Farid (user) telah dibuat.');
+            
+            // Membuat akun siswa farid0236@gmail.com untuk testing penilaian
+            $siswaUserFarid = User::firstOrCreate(['email' => 'farid0236@gmail.com'], ['username' => 'Farid Testing', 'password' => Hash::make('indrawan0236'), 'roles_id' => $userRole->id]);
+            $siswaFarid = Siswa::firstOrCreate(['user_id' => $siswaUserFarid->id], ['nis' => '9876543210', 'id_kelas' => $kelasCollection->where('nama_kelas', '!=', 'N/A')->random()->id_kelas, 'id_jurusan' => Jurusan::where('nama_jurusan_singkat', 'RPL')->first()->id_jurusan, 'nama_siswa' => $siswaUserFarid->username, 'tempat_lahir' => 'Bandung', 'tanggal_lahir' => '2006-05-15', 'kontak_siswa' => '081234567891']);
+            $this->command->info('User Siswa Farid (user) untuk testing penilaian telah dibuat.');
             
             // Membuat Siswa Faker
             $siswas = $this->createUsersWithProfile($faker, 25, $userRole, Siswa::class, ['nis' => fn() => $faker->unique()->numerify('##########'), 'nama_siswa' => 'username', 'id_kelas' => fn() => $kelasCollection->where('nama_kelas', '!=', 'N/A')->random()->id_kelas, 'id_jurusan' => fn($kelas) => $kelas->id_jurusan, 'tempat_lahir' => fn() => $faker->city, 'tanggal_lahir' => fn() => $faker->date(), 'kontak_siswa' => fn() => $faker->e164PhoneNumber]);
@@ -185,6 +226,27 @@ class PklSeeder extends Seeder
             // CATATAN: Tidak membuat pengajuan atau prakerin dummy
             // Siswa akan berada dalam tahap awal tanpa pengajuan apapun
             $this->command->info('Siswa dibuat dalam tahap awal tanpa pengajuan atau prakerin.');
+
+            // Membuat prakerin selesai untuk user Farid untuk testing penilaian
+            $this->command->info('Membuat prakerin selesai untuk user Farid...');
+            $perusahaanFarid = $perusahaans->first(); // Ambil perusahaan pertama
+            $pembimbingSekolahFarid = $pembimbingSekolahs->first(); // Ambil pembimbing sekolah pertama
+            $pembimbingPerusahaanFarid = $pembimbingPerusahaans->where('id_perusahaan', $perusahaanFarid->id_perusahaan)->first(); // Ambil pembimbing perusahaan dari perusahaan tersebut
+            $kepalaProgramFarid = $kepalaPrograms->where('id_jurusan', $siswaFarid->id_jurusan)->first(); // Ambil kepala program sesuai jurusan
+
+            // Buat prakerin selesai untuk Farid
+            DB::table('prakerin')->insert([
+                'nis_siswa' => $siswaFarid->nis,
+                'nip_pembimbing_sekolah' => $pembimbingSekolahFarid->nip_pembimbing_sekolah,
+                'id_pembimbing_perusahaan' => $pembimbingPerusahaanFarid->id_pembimbing,
+                'id_perusahaan' => $perusahaanFarid->id_perusahaan,
+                'nip_kepala_program' => $kepalaProgramFarid->nip_kepala_program,
+                'tanggal_mulai' => now()->subMonths(3),
+                'tanggal_selesai' => now()->subDays(1),
+                'keterangan' => 'Prakerin selesai untuk testing sistem penilaian',
+                'status_prakerin' => 'selesai'
+            ]);
+            $this->command->info('Prakerin selesai untuk user Farid telah dibuat.');
 
             $this->command->info('PklSeeder selesai dijalankan dengan sukses!');
         });

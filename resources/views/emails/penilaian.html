@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Penilaian PKL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        .info-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+        .btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+            font-size: 14px;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Form Penilaian PKL</h1>
+        <p>Sistem Informasi Prakerin</p>
+    </div>
+    
+    <div class="content">
+        <p>Kepada Yth. <strong>{{ $pembimbingPerusahaan->nama }}</strong>,</p>
+        
+        <p>Selamat pagi/siang/sore,</p>
+        
+        <p>Berdasarkan laporan bahwa siswa <strong>{{ $siswa->nama_siswa }}</strong> telah menyelesaikan Praktik Kerja Lapangan (PKL) di perusahaan Anda, kami mohon kesediaan Bapak/Ibu untuk memberikan penilaian terhadap kinerja siswa tersebut.</p>
+        
+        <div class="info-box">
+            <h3>📋 Informasi Prakerin</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0;"><strong>Nama Siswa:</strong></td>
+                    <td style="padding: 8px 0;">{{ $siswa->nama_siswa }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0;"><strong>NIS:</strong></td>
+                    <td style="padding: 8px 0;">{{ $siswa->nis }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0;"><strong>Kelas:</strong></td>
+                    <td style="padding: 8px 0;">{{ $siswa->kelas->nama_kelas ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0;"><strong>Jurusan:</strong></td>
+                    <td style="padding: 8px 0;">{{ $siswa->jurusan->nama_jurusan_singkat ?? 'N/A' }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0;"><strong>Perusahaan:</strong></td>
+                    <td style="padding: 8px 0;">{{ $perusahaan->nama_perusahaan }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0;"><strong>Periode PKL:</strong></td>
+                    <td style="padding: 8px 0;">
+                        {{ \Carbon\Carbon::parse($prakerin->tanggal_mulai)->format('d M Y') }} - 
+                        {{ \Carbon\Carbon::parse($prakerin->tanggal_selesai)->format('d M Y') }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0;"><strong>Pembimbing:</strong></td>
+                    <td style="padding: 8px 0;">{{ $pembimbingPerusahaan->nama }}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="highlight">
+            <h4>⚠️ Penting!</h4>
+            <p>Form penilaian ini hanya berlaku selama <strong>7 hari</strong> sejak email ini dikirim. Mohon segera isi form penilaian untuk memastikan penilaian dapat diproses dengan tepat waktu.</p>
+        </div>
+        
+        <p>Untuk memberikan penilaian, silakan klik tombol di bawah ini:</p>
+        
+        <div style="text-align: center;">
+            <a href="{{ url('/penilaian/form/' . $token) }}" class="btn">
+                📝 Isi Form Penilaian
+            </a>
+        </div>
+        
+        <p><strong>Kompetensi yang akan dinilai:</strong></p>
+        <ul>
+            @foreach($kompetensi as $index => $komp)
+                <li><strong>{{ $index + 1 }}.</strong> {{ $komp->nama_kompetensi }}</li>
+            @endforeach
+        </ul>
+        
+        <p><strong>Skala Penilaian:</strong></p>
+        <ul>
+            <li><strong>85-100:</strong> Sangat Baik</li>
+            <li><strong>75-84:</strong> Baik</li>
+            <li><strong>60-74:</strong> Cukup</li>
+            <li><strong>0-59:</strong> Kurang</li>
+        </ul>
+        
+        <p>Atas perhatian dan kerjasamanya, kami ucapkan terima kasih.</p>
+        
+        <p>Salam,<br>
+        <strong>Tim Sistem Informasi Prakerin</strong></p>
+    </div>
+    
+    <div class="footer">
+        <p>Email ini dikirim secara otomatis oleh sistem. Mohon tidak membalas email ini.</p>
+        <p>Jika ada pertanyaan, silakan hubungi admin sistem.</p>
+    </div>
+</body>
+</html> 

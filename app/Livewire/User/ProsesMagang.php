@@ -3,110 +3,110 @@
 namespace App\Livewire\User;
 
 use App\Models\Prakerin;
-use App\Models\Pengajuan;
-use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
+use App\Models\Siswa;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Component;
+use Livewire\WithPagination;
 
-// Menentukan layout utama dan judul halaman untuk komponen ini.
 #[Layout('components.layouts.layout-user-dashboard')]
-#[Title('Informasi Magang')]
+#[Title('Proses Magang')]
 class ProsesMagang extends Component
 {
-    /**
-     * Menampung data prakerin aktif jika ada.
-     * @var \Illuminate\Support\Collection
-     */
-    public $prakerinData;
+    use WithPagination;
 
-    /**
-     * Menampung data pengajuan yang diterima jika tidak ada prakerin aktif.
-     * @var \Illuminate\Support\Collection
-     */
-    public $pengajuanData;
+    public $search = '';
+    public $perPage = 10;
+    public $selectedPrakerinId;
+    public $showModalPerpanjangan = false;
+    public $selectedPerusahaanId;
+    public $tanggalMulaiBaru;
+    public $tanggalSelesaiBaru;
 
-    /**
-     * Menampung data siswa yang sedang login.
-     * @var \App\Models\Siswa|null
-     */
-    public $siswa;
-
-    /**
-     * Method yang dipanggil saat komponen pertama kali di-mount.
-     * Berfungsi untuk memuat data awal.
-     * Logika di sini sudah efisien dan tidak memerlukan perubahan.
-     */
     public function mount()
     {
-        $this->prakerinData = collect();
-        $this->pengajuanData = collect();
-        $this->loadData();
+        $this->tanggalMulaiBaru = now()->format('Y-m-d');
+        $this->tanggalSelesaiBaru = now()->addMonths(3)->format('Y-m-d');
     }
 
-    /**
-     * Memuat data proses magang untuk siswa yang terautentikasi.
-     * Method ini mengatur logika pengambilan data, pertama mencari status prakerin aktif,
-     * jika tidak ada, baru mencari status pengajuan yang diterima.
-     * Penggunaan eager loading ('with') sudah tepat untuk optimasi query.
-     */
-    public function loadData()
+    public function updatingSearch()
     {
-        $user = Auth::user();
-
-        // Pastikan user terautentikasi dan memiliki relasi dengan data siswa.
-        if ($user && $user->siswa) {
-            // Eager load relasi 'kelas' dan 'jurusan' untuk mencegah N+1 query problem di view.
-            $this->siswa = $user->siswa()->with(['kelas', 'jurusan'])->first();
-
-            // 1. Update prakerin yang sudah lewat waktu menjadi selesai
-            $this->updateExpiredPrakerin();
-
-            // 2. Cek data prakerin yang aktif untuk siswa ini.
-            // Memuat semua relasi yang dibutuhkan untuk menghindari query tambahan.
-            $this->prakerinData = Prakerin::with([
-                'perusahaan.pembimbingSekolah',
-                'pembimbingPerusahaan'
-            ])
-            ->where('nis_siswa', $this->siswa->nis)
-            ->where('status_prakerin', 'aktif')
-            ->latest('tanggal_mulai')
-            ->get();
-
-            // 3. Cek data pengajuan yang diterima.
-            // Ini merepresentasikan kondisi di mana siswa sudah diterima tapi belum mulai magang.
-            $this->pengajuanData = Pengajuan::with('perusahaan.pembimbingSekolah')
-            ->where('nis_siswa', $this->siswa->nis)
-            ->where('status_pengajuan', 'diterima_perusahaan')
-            ->latest('updated_at')
-            ->get();
-        }
+        $this->resetPage();
     }
 
-    /**
-     * Update prakerin yang sudah lewat waktu menjadi selesai
-     */
-    private function updateExpiredPrakerin()
+    public function showPerpanjanganModal($prakerinId)
     {
-        $expiredPrakerin = Prakerin::where('nis_siswa', $this->siswa->nis)
-            ->where('status_prakerin', 'aktif')
-            ->where('tanggal_selesai', '<', now())
-            ->get();
-
-        foreach ($expiredPrakerin as $prakerin) {
-            $prakerin->update(['status_prakerin' => 'selesai']);
-        }
+        $this->selectedPrakerinId = $prakerinId;
+        $this->showModalPerpanjangan = true;
     }
 
-    /**
-     * Merender view komponen.
-     * View akan secara otomatis di-hydrate dengan public properties:
-     * $prakerinData, $pengajuanData, dan $siswa.
-     *
-     * @return \Illuminate\View\View
-     */
+    public function perpanjangPrakerin()
+    {
+        $this->validate([
+            'selectedPerusahaanId' => 'required|exists:perusahaan,id_perusahaan',
+            'tanggalMulaiBaru' => 'required|date|after_or_equal:today',
+            'tanggalSelesaiBaru' => 'required|date|after:tanggalMulaiBaru',
+        ]);
+
+        $prakerinLama = Prakerin::findOrFail($this->selectedPrakerinId);
+        
+        // Ambil data pembimbing dari prakerin lama
+        $pembimbingSekolah = $prakerinLama->pembimbingSekolah;
+        $kepalaProgram = $prakerinLama->kepalaProgram;
+        
+        // Cari pembimbing perusahaan dari perusahaan yang dipilih
+        $perusahaanBaru = \App\Models\Perusahaan::findOrFail($this->selectedPerusahaanId);
+        $pembimbingPerusahaan = $perusahaanBaru->pembimbingPerusahaan;
+
+        if (!$pembimbingPerusahaan) {
+            session()->flash('error', 'Perusahaan yang dipilih tidak memiliki pembimbing perusahaan.');
+            return;
+        }
+
+        // Buat prakerin baru
+        Prakerin::create([
+            'nis_siswa' => auth()->user()->siswa->nis,
+            'id_perusahaan' => $this->selectedPerusahaanId,
+            'id_pembimbing_perusahaan' => $pembimbingPerusahaan->id_pembimbing,
+            'nip_pembimbing_sekolah' => $pembimbingSekolah->nip_pembimbing_sekolah,
+            'nip_kepala_program' => $kepalaProgram->nip_kepala_program,
+            'tanggal_mulai' => $this->tanggalMulaiBaru,
+            'tanggal_selesai' => $this->tanggalSelesaiBaru,
+            'status_prakerin' => 'aktif',
+        ]);
+
+        session()->flash('success', 'Prakerin berhasil diperpanjang dengan perusahaan baru.');
+        $this->showModalPerpanjangan = false;
+        $this->reset(['selectedPrakerinId', 'selectedPerusahaanId']);
+    }
+
     public function render()
     {
-        return view('livewire.user.proses-magang');
+        $siswa = auth()->user()->siswa;
+        
+        $prakerinList = Prakerin::with(['perusahaan', 'pembimbingPerusahaan', 'pembimbingSekolah'])
+            ->where('nis_siswa', $siswa->nis)
+            ->when($this->search, function($query) {
+                $query->whereHas('perusahaan', function($q) {
+                    $q->where('nama_perusahaan', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->orderBy('tanggal_mulai', 'desc')
+            ->paginate($this->perPage);
+
+        // Ambil perusahaan dari prakerin yang sudah selesai untuk opsi perpanjangan
+        $perusahaanSelesai = Prakerin::with('perusahaan')
+            ->where('nis_siswa', $siswa->nis)
+            ->where('status_prakerin', 'selesai')
+            ->where('tanggal_selesai', '<', now())
+            ->get()
+            ->pluck('perusahaan')
+            ->unique('id_perusahaan')
+            ->filter();
+
+        return view('livewire.user.proses-magang', [
+            'prakerinList' => $prakerinList,
+            'perusahaanSelesai' => $perusahaanSelesai,
+        ]);
     }
 }

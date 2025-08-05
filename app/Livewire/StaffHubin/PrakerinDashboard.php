@@ -7,6 +7,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
+
 #[Layout('components.layouts.layout-staff-hubin-dashboard')]
 #[Title('Monitoring Pengajuan')]
 class PrakerinDashboard extends Component

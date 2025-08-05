@@ -307,6 +307,76 @@
                 </div>
             @endif
 
+            <!-- Prakerin Selesai dan Opsi Perpanjangan -->
+            @if($prakerinData->isNotEmpty())
+                @php
+                    $prakerinSelesai = $prakerinData->where('status_prakerin', 'selesai');
+                @endphp
+                @if($prakerinSelesai->isNotEmpty())
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <i class="bi bi-check-circle-fill me-2 text-success"></i>
+                            Prakerin Selesai - Opsi Perpanjangan
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="alert alert-info mb-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Fitur Perpanjangan Prakerin:</strong> Anda dapat memperpanjang prakerin di perusahaan yang sudah diselesaikan dengan pembimbing yang sama.
+                            </div>
+                            
+                            @foreach($prakerinSelesai as $prakerin)
+                                <div class="card border-success mb-3">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h6 class="card-title text-success mb-0">
+                                                        <i class="bi bi-buildings me-2"></i>
+                                                        {{ $prakerin->perusahaan->nama_perusahaan }}
+                                                    </h6>
+                                                    <span class="badge bg-success">
+                                                        <i class="bi bi-check-circle me-1"></i>
+                                                        Selesai
+                                                    </span>
+                                                </div>
+                                                <p class="card-text text-muted mb-2">
+                                                    <i class="bi bi-calendar-range me-2"></i>
+                                                    {{ \Carbon\Carbon::parse($prakerin->tanggal_mulai)->format('d M Y') }} - 
+                                                    {{ \Carbon\Carbon::parse($prakerin->tanggal_selesai)->format('d M Y') }}
+                                                </p>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-person me-2"></i>
+                                                    Pembimbing: {{ $prakerin->pembimbingPerusahaan->nama ?? 'N/A' }}
+                                                </small>
+                                            </div>
+                                            <div class="col-md-4 text-end">
+                                                <div class="btn-group-vertical w-100">
+                                                    <button class="btn btn-primary btn-sm mb-2" 
+                                                            wire:click="bukaModalPerpanjangan({{ $prakerin->id_prakerin }})">
+                                                        <i class="bi bi-arrow-clockwise me-2"></i>
+                                                        Perpanjang Prakerin
+                                                    </button>
+                                                    <button class="btn btn-success btn-sm mb-2" 
+                                                            wire:click="kirimFormPenilaian({{ $prakerin->id_prakerin }})" 
+                                                            wire:loading.attr="disabled">
+                                                        <i class="bi bi-envelope me-2"></i>
+                                                        Kirim Form Penilaian
+                                                    </button>
+                                                    <a href="{{ route('user.riwayat-prakerin') }}" class="btn btn-outline-secondary btn-sm">
+                                                        <i class="bi bi-list-ul me-2"></i>
+                                                        Lihat Riwayat
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            @endif
+
             <!-- Statistics -->
             <div class="stat-grid">
                 <div class="stat-card"><div class="stat-number">{{ $totalPengajuan }}</div><div class="stat-label">Total Pengajuan</div></div>
@@ -319,7 +389,13 @@
             @if($prakerinData->isNotEmpty())
                 <!-- Detail Magang Aktif -->
                 <div class="dashboard-card">
-                    <div class="dashboard-card-header">Detail Magang Aktif</div>
+                    <div class="dashboard-card-header d-flex justify-content-between align-items-center">
+                        <span>Detail Magang Aktif</span>
+                        <span class="badge bg-primary">
+                            <i class="bi bi-play-circle me-1"></i>
+                            Sedang Berlangsung
+                        </span>
+                    </div>
                     <div class="dashboard-card-body">
                          @foreach($prakerinData as $prakerin)
                             @php
@@ -415,7 +491,13 @@
             @elseif($pengajuanDiterimaData->isNotEmpty())
                 <!-- Info Magang Diterima -->
                 <div class="dashboard-card">
-                    <div class="dashboard-card-header">Informasi Magang Diterima</div>
+                    <div class="dashboard-card-header d-flex justify-content-between align-items-center">
+                        <span>Informasi Magang Diterima</span>
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Diterima
+                        </span>
+                    </div>
                     <div class="dashboard-card-body">
                         <p>Selamat! Pengajuan Anda ke perusahaan berikut telah diterima. Mohon persiapkan diri Anda sesuai jadwal yang ditentukan.</p>
                         @foreach($pengajuanDiterimaData as $pengajuan)
@@ -554,4 +636,76 @@
     <h4 class="alert-heading">Data Siswa Tidak Ditemukan!</h4>
     <p>Data siswa yang terhubung dengan akun Anda tidak dapat ditemukan. Mohon segera hubungi administrator sekolah untuk pengecekan lebih lanjut.</p>
 </div>
+@endif
+
+<!-- Modal Perpanjangan Prakerin -->
+@if($showModalPerpanjangan ?? false)
+<div class="modal fade show" style="display: block;" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Perpanjang Prakerin
+                </h5>
+                <button type="button" class="btn-close" wire:click="tutupModalPerpanjangan"></button>
+            </div>
+            <div class="modal-body">
+                <form wire:submit.prevent="prosesPerpanjangan">
+                    <div class="mb-3">
+                        <label class="form-label">Perusahaan</label>
+                        <input type="text" class="form-control" value="{{ $perusahaanSelesai->where('id_perusahaan', $selectedPerusahaanId ?? '')->first()->nama_perusahaan ?? 'N/A' }}" readonly>
+                        <small class="text-muted">Perusahaan yang sudah diselesaikan sebelumnya</small>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="tanggalMulaiPerpanjangan" class="form-label">Tanggal Mulai Perpanjangan <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control @error('tanggalMulaiPerpanjangan') is-invalid @enderror" 
+                                   id="tanggalMulaiPerpanjangan" wire:model.defer="tanggalMulaiPerpanjangan">
+                            @error('tanggalMulaiPerpanjangan') 
+                                <div class="invalid-feedback">{{ $message }}</div> 
+                            @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="tanggalSelesaiPerpanjangan" class="form-label">Tanggal Selesai Perpanjangan <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control @error('tanggalSelesaiPerpanjangan') is-invalid @enderror" 
+                                   id="tanggalSelesaiPerpanjangan" wire:model.defer="tanggalSelesaiPerpanjangan">
+                            @error('tanggalSelesaiPerpanjangan') 
+                                <div class="invalid-feedback">{{ $message }}</div> 
+                            @enderror
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="keteranganPerpanjangan" class="form-label">Keterangan (Opsional)</label>
+                        <textarea class="form-control @error('keteranganPerpanjangan') is-invalid @enderror" 
+                                  id="keteranganPerpanjangan" wire:model.defer="keteranganPerpanjangan" 
+                                  rows="3" placeholder="Tambahkan keterangan tentang perpanjangan prakerin..."></textarea>
+                        @error('keteranganPerpanjangan') 
+                            <div class="invalid-feedback">{{ $message }}</div> 
+                        @enderror
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Informasi:</strong> Perpanjangan prakerin akan menggunakan pembimbing dan perusahaan yang sama dengan prakerin sebelumnya.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" wire:click="tutupModalPerpanjangan">
+                    <i class="bi bi-x-circle me-2"></i>Batal
+                </button>
+                <button type="button" class="btn btn-primary" wire:click="prosesPerpanjangan" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="prosesPerpanjangan">
+                        <i class="bi bi-check-circle me-2"></i>Perpanjang Prakerin
+                    </span>
+                    <span wire:loading wire:target="prosesPerpanjangan" class="spinner-border spinner-border-sm me-2"></span>
+                    Memproses...
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show"></div>
 @endif

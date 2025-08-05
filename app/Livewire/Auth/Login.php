@@ -75,8 +75,15 @@ class Login extends Component
                 Auth::login($user);
                 request()->session()->regenerate();
 
-                // Redirect berdasarkan role
+                // Set session untuk sweet alert
                 $roleName = $user->role->name;
+                $roleDisplayName = $this->getRoleDisplayName($roleName);
+                request()->session()->flash('login_success', [
+                    'message' => "Berhasil login sebagai $roleDisplayName",
+                    'role' => $roleName
+                ]);
+
+                // Redirect berdasarkan role
                 if ($roleName === 'admin' || $roleName === 'superadmin') {
                     return $this->redirect(route('admin.dashboard'), navigate: true);
                 } elseif ($roleName === 'staffhubin') {
@@ -90,6 +97,19 @@ class Login extends Component
         } else {
             $this->addError('credentials', 'Gagal masuk, email atau password salah!');
         }
+    }
+
+    /**
+     * Get display name untuk role
+     */
+    private function getRoleDisplayName($roleName)
+    {
+        return match($roleName) {
+            'admin', 'superadmin' => 'Administrator',
+            'staffhubin' => 'Staff Hubin',
+            'user' => 'Siswa',
+            default => 'User'
+        };
     }
 
     /**

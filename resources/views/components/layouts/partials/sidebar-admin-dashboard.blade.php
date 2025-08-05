@@ -52,6 +52,12 @@
              <li class="submenu-item {{ Request::routeIs('admin.master.kepala-sekolah') ? 'active' : '' }}">
                 <a href="{{ route('admin.master.kepala-sekolah') }}" wire:navigate class="submenu-link">Pengelolaan kepala-sekolah</a>
             </li>
+             <li class="submenu-item {{ Request::routeIs('admin.master.kompetensi') ? 'active' : '' }}">
+                <a href="{{ route('admin.master.kompetensi') }}" wire:navigate class="submenu-link">
+                    <i class="bi bi-list-check me-2"></i>
+                    Pengelolaan Kompetensi PKL
+                </a>
+            </li>
            
         </ul>
     </li>

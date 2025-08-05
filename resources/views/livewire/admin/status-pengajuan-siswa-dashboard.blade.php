@@ -11,12 +11,21 @@
             @endif
         </div>
         <div class="col-md-9 align-self-center">
-            <h4 class="mb-1">{{ $siswa->nama_siswa }}</h4>
-            <div class="mb-1"><strong>NIS:</strong> {{ $siswa->nis }}</div>
-            <div class="mb-1"><strong>Kelas:</strong> {{ $siswa->kelas->nama_kelas ?? '-' }}</div>
-            <div class="mb-1"><strong>Jurusan:</strong> {{ $siswa->jurusan->nama_jurusan_singkat ?? '-' }}</div>
-            <div class="mb-1"><strong>Kontak:</strong> {{ $siswa->kontak_siswa ?? '-' }}</div>
-            <div class="mb-1"><strong>Email:</strong> {{ $siswa->user->email ?? '-' }}</div>
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h4 class="mb-1">{{ $siswa->nama_siswa }}</h4>
+                    <div class="mb-1"><strong>NIS:</strong> {{ $siswa->nis }}</div>
+                    <div class="mb-1"><strong>Kelas:</strong> {{ $siswa->kelas->nama_kelas ?? '-' }}</div>
+                    <div class="mb-1"><strong>Jurusan:</strong> {{ $siswa->jurusan->nama_jurusan_singkat ?? '-' }}</div>
+                    <div class="mb-1"><strong>Kontak:</strong> {{ $siswa->kontak_siswa ?? '-' }}</div>
+                    <div class="mb-1"><strong>Email:</strong> {{ $siswa->user->email ?? '-' }}</div>
+                </div>
+                <div>
+                    <a href="{{ route('staffhubin.master.nilai.siswa', ['id_kelas' => $siswa->kelas->id_kelas]) }}" class="btn btn-warning">
+                        <i class="bi bi-star-fill me-2"></i>Cek Nilai PKL
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
     <div class="card shadow-sm">
