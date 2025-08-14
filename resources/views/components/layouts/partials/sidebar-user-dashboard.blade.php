@@ -22,14 +22,6 @@
         </a>
     </li>
 
-    <li class="sidebar-item {{ Request::routeIs('user.magang') ? 'active' : '' }}">
-        {{-- Menu Magang untuk melihat informasi prakerin --}}
-        <a href="{{ route('user.magang') }}" wire:navigate class='sidebar-link'>
-            <i class="bi bi-briefcase-fill"></i>
-            <span>Magang</span>
-        </a>
-    </li>
-
     <li class="sidebar-item {{ Request::routeIs('user.riwayat-prakerin') ? 'active' : '' }}">
         {{-- Menu Riwayat Prakerin --}}
         <a href="{{ route('user.riwayat-prakerin') }}" wire:navigate class='sidebar-link'>

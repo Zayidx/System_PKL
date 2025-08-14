@@ -1,28 +1,88 @@
 <div class="container-fluid">
+    <style>
+        /* Custom responsive styles */
+        .table-responsive {
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .btn-group-sm .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 768px) {
+            .card-header .btn {
+                font-size: 0.875rem;
+                padding: 0.375rem 0.75rem;
+            }
+            
+            .table th, .table td {
+                padding: 0.5rem;
+                font-size: 0.875rem;
+            }
+            
+            .badge {
+                font-size: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .card-header {
+                padding: 1rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .input-group {
+                margin-bottom: 0.5rem;
+            }
+        }
+        
+        /* Modal improvements */
+        .modal-dialog-centered {
+            display: flex;
+            align-items: center;
+            min-height: calc(100% - 1rem);
+        }
+        
+        @media (min-width: 576px) {
+            .modal-dialog-centered {
+                min-height: calc(100% - 3.5rem);
+            }
+        }
+    </style>
+    
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-list-check me-2"></i>
-                        Manajemen Kompetensi PKL
-                    </h5>
-                    <div>
-                        <a href="{{ route('admin.penilaian-pkl') }}" class="btn btn-info me-2">
-                            <i class="bi bi-clipboard-data me-2"></i>
-                            Lihat Penilaian PKL
-                        </a>
-                        <button class="btn btn-primary" wire:click="openModal">
-                            <i class="bi bi-plus-circle me-2"></i>
-                            Tambah Kompetensi
-                        </button>
+                <div class="card-header">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-list-check me-2"></i>
+                            Manajemen Kompetensi PKL
+                        </h5>
+                        <div class="d-flex flex-column flex-sm-row gap-2">
+                            <a href="{{ route('admin.penilaian-pkl') }}" class="btn btn-info btn-sm">
+                                <i class="bi bi-clipboard-data me-2"></i>
+                                <span class="d-none d-sm-inline">Lihat Penilaian PKL</span>
+                                <span class="d-sm-none">Penilaian</span>
+                            </a>
+                            <button class="btn btn-primary btn-sm" wire:click="openModal">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                <span class="d-none d-sm-inline">Tambah Kompetensi</span>
+                                <span class="d-sm-none">Tambah</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="card-body">
                     <!-- Search Bar -->
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6 mb-2 mb-md-0">
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-search"></i>
@@ -30,13 +90,22 @@
                                 <input type="text" 
                                        class="form-control" 
                                        placeholder="Cari kompetensi atau jurusan..."
-                                       wire:model.live="search">
+                                       wire:model.live.debounce.300ms="search">
                             </div>
                         </div>
-                        <div class="col-md-6 text-end">
-                            <span class="text-muted">
-                                Total: {{ $kompetensi->total() }} kompetensi
-                            </span>
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small">
+                                    Total: {{ $kompetensi->total() }} kompetensi
+                                </span>
+                                <div class="d-flex gap-2">
+                                    <select wire:model.live="perPage" class="form-select form-select-sm" style="width: auto;">
+                                        <option value="5">5</option>
+                                        <option value="10">10</option>
+                                        <option value="20">20</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -45,22 +114,27 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
-                                    <th>No</th>
+                                    <th class="text-center" style="width: 50px;">No</th>
                                     <th>Kompetensi</th>
-                                    <th>Jurusan</th>
-                                    <th>Jumlah Penilaian</th>
-                                    <th>Dibuat</th>
-                                    <th class="text-center">Aksi</th>
+                                    <th class="d-none d-md-table-cell">Jurusan</th>
+                                    <th class="text-center d-none d-lg-table-cell">Jumlah Penilaian</th>
+                                    <th class="d-none d-xl-table-cell">Dibuat</th>
+                                    <th class="text-center" style="width: 120px;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($kompetensi as $index => $item)
                                     <tr>
-                                        <td>{{ $kompetensi->firstItem() + $index }}</td>
+                                        <td class="text-center">{{ $kompetensi->firstItem() + $index }}</td>
                                         <td>
                                             <strong>{{ $item->nama_kompetensi }}</strong>
+                                            <div class="d-md-none">
+                                                <small class="text-muted">
+                                                    {{ $item->jurusan->nama_jurusan_singkat }}
+                                                </small>
+                                            </div>
                                         </td>
-                                        <td>
+                                        <td class="d-none d-md-table-cell">
                                             <span class="badge bg-info">
                                                 {{ $item->jurusan->nama_jurusan_singkat }}
                                             </span>
@@ -69,7 +143,7 @@
                                                 {{ $item->jurusan->nama_jurusan_lengkap }}
                                             </small>
                                         </td>
-                                        <td>
+                                        <td class="text-center d-none d-lg-table-cell">
                                             @php
                                                 $jumlahPenilaian = \App\Models\Nilai::where('id_kompetensi', $item->id_kompetensi)->count();
                                             @endphp
@@ -77,19 +151,19 @@
                                                 {{ $jumlahPenilaian }} penilaian
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="d-none d-xl-table-cell">
                                             <small class="text-muted">
                                                 {{ $item->created_at ? $item->created_at->format('d M Y H:i') : 'N/A' }}
                                             </small>
                                         </td>
                                         <td class="text-center">
-                                            <div class="btn-group" role="group">
-                                                <button class="btn btn-sm btn-outline-primary" 
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button class="btn btn-outline-primary" 
                                                         wire:click="editKompetensi({{ $item->id_kompetensi }})"
                                                         title="Edit Kompetensi">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
-                                                <button class="btn btn-sm btn-outline-danger" 
+                                                <button class="btn btn-outline-danger" 
                                                         wire:click="confirmDelete({{ $item->id_kompetensi }})"
                                                         title="Hapus Kompetensi"
                                                         @if($jumlahPenilaian > 0) disabled @endif>
@@ -116,7 +190,7 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div class="d-flex justify-content-center">
+                    <div class="d-flex justify-content-center mt-3">
                         {{ $kompetensi->links() }}
                     </div>
                 </div>
@@ -126,14 +200,14 @@
 
     <!-- Modal Tambah/Edit Kompetensi -->
     <div class="modal fade" id="kompetensiModal" tabindex="-1" wire:ignore.self>
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="bi bi-{{ $editingKompetensi ? 'pencil' : 'plus-circle' }} me-2"></i>
                         {{ $editingKompetensi ? 'Edit Kompetensi' : 'Tambah Kompetensi Baru' }}
                     </h5>
-                    <button type="button" class="btn-close" wire:click="closeModal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
                 <form wire:submit.prevent="saveKompetensi">
@@ -180,7 +254,7 @@
                     </div>
                     
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" wire:click="closeModal">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <i class="bi bi-x-circle me-2"></i>
                             Batal
                         </button>
@@ -202,14 +276,14 @@
 
     <!-- Modal Konfirmasi Hapus -->
     <div class="modal fade" id="deleteModal" tabindex="-1" wire:ignore.self>
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title text-danger">
                         <i class="bi bi-exclamation-triangle me-2"></i>
                         Konfirmasi Hapus
                     </h5>
-                    <button type="button" class="btn-close" wire:click="cancelDelete"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
                 <div class="modal-body">
@@ -238,7 +312,7 @@
                 </div>
                 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" wire:click="cancelDelete">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x-circle me-2"></i>
                         Batal
                     </button>
@@ -260,18 +334,12 @@
 
 <script>
 document.addEventListener('livewire:init', () => {
-    // Handle modal show/hide
-    Livewire.on('kompetensiUpdated', () => {
-        // Refresh data if needed
-    });
-
-    // Show modal when showModal is true
+    // Handle modal show/hide with proper Bootstrap 5 integration
     Livewire.on('showModal', () => {
         const modal = new bootstrap.Modal(document.getElementById('kompetensiModal'));
         modal.show();
     });
 
-    // Hide modal when showModal is false
     Livewire.on('hideModal', () => {
         const modal = bootstrap.Modal.getInstance(document.getElementById('kompetensiModal'));
         if (modal) {
@@ -279,47 +347,19 @@ document.addEventListener('livewire:init', () => {
         }
     });
 
-    // Show delete confirmation modal
     Livewire.on('showDeleteModal', () => {
         const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
         modal.show();
     });
 
-    // Hide delete confirmation modal
     Livewire.on('hideDeleteModal', () => {
         const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
         if (modal) {
             modal.hide();
         }
     });
-});
 
-// Watch for showModal changes
-Livewire.on('$refresh', () => {
-    if (@this.showModal) {
-        const modal = new bootstrap.Modal(document.getElementById('kompetensiModal'));
-        modal.show();
-    } else {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('kompetensiModal'));
-        if (modal) {
-            modal.hide();
-        }
-    }
-
-    if (@this.confirmingDelete) {
-        const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        modal.show();
-    } else {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
-        if (modal) {
-            modal.hide();
-        }
-    }
-});
-
-// Handle modal events
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle kompetensi modal
+    // Handle modal events properly
     const kompetensiModal = document.getElementById('kompetensiModal');
     if (kompetensiModal) {
         kompetensiModal.addEventListener('hidden.bs.modal', function () {
@@ -327,12 +367,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Handle delete modal
     const deleteModal = document.getElementById('deleteModal');
     if (deleteModal) {
         deleteModal.addEventListener('hidden.bs.modal', function () {
             @this.cancelDelete();
         });
     }
+});
+
+// Handle SweetAlert notifications
+document.addEventListener('livewire:init', () => {
+    Livewire.on('swal:success', (event) => {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: event.message,
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: false
+        });
+    });
+
+    Livewire.on('swal:error', (event) => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: event.message,
+            confirmButtonText: 'OK'
+        });
+    });
 });
 </script> 

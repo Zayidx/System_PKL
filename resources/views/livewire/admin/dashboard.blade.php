@@ -1,278 +1,192 @@
 <div>
-    <div class="page-heading">
-        <h3>Dashboard Analitik</h3>
-        <p class="text-subtitle text-muted">Ringkasan data dan statistik penting dalam sistem.</p>
-    </div>
-    <div class="page-content">
-        {{-- Baris untuk Kartu Statistik Pengajuan --}}
-        <section class="row">
-            <div class="col-12">
-                <div class="row">
-                    {{-- Kartu Pengajuan Pending --}}
-                    <div class="col-6 col-lg-3 col-md-6">
-                        <div class="card">
-                            <div class="card-body px-4 py-4-5">
-                                <div class="row">
-                                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
-                                        <div class="stats-icon orange mb-2">
-                                            <i class="bi bi-clock-history"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                        <h6 class="text-muted font-semibold">Pending</h6>
-                                        <h6 class="font-extrabold mb-0">{{ $pengajuanPending }}</h6>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- Kartu Pengajuan Diterima --}}
-                    <div class="col-6 col-lg-3 col-md-6">
-                        <div class="card">
-                            <div class="card-body px-4 py-4-5">
-                                <div class="row">
-                                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
-                                        <div class="stats-icon green mb-2">
-                                            <i class="bi bi-check-circle-fill"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                        <h6 class="text-muted font-semibold">Diterima</h6>
-                                        <h6 class="font-extrabold mb-0">{{ $pengajuanDiterima }}</h6>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- Kartu Pengajuan Ditolak --}}
-                    <div class="col-6 col-lg-3 col-md-6">
-                        <div class="card">
-                            <div class="card-body px-4 py-4-5">
-                                <div class="row">
-                                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
-                                        <div class="stats-icon red mb-2">
-                                            <i class="bi bi-x-circle-fill"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                        <h6 class="text-muted font-semibold">Ditolak</h6>
-                                        <h6 class="font-extrabold mb-0">{{ $pengajuanDitolak }}</h6>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {{-- Kartu Total Pengajuan --}}
-                    <div class="col-6 col-lg-3 col-md-6">
-                        <div class="card">
-                            <div class="card-body px-4 py-4-5">
-                                <div class="row">
-                                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start">
-                                        <div class="stats-icon blue mb-2">
-                                            <i class="bi bi-journal-check"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
-                                        <h6 class="text-muted font-semibold">Total Pengajuan</h6>
-                                        <h6 class="font-extrabold mb-0">{{ $pengajuanCount }}</h6>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    {{--
+        File: resources/views/livewire/admin/dashboard.blade.php
+        Analisis Perombakan UI/UX:
+        1.  [UI/UX] Desain Ulang Kartu Statistik: Kartu dibuat lebih modern dengan ikon besar, gradien, dan layout yang lebih bersih.
+            Efek hover ditambahkan untuk interaktivitas.
+        2.  [INTERAKTIVITAS] Tombol Refresh: Menambahkan tombol refresh dengan state loading yang jelas (wire:loading)
+            untuk memberikan feedback visual kepada pengguna saat data sedang dimuat ulang.
+        3.  [UI/UX] Layout yang Ditingkatkan: Memisahkan bagian statistik, aktivitas terbaru, dan menu akses cepat
+            ke dalam kartu-kartu yang berbeda untuk kejelasan dan organisasi yang lebih baik.
+        4.  [UI/UX] Tabel Lebih Baik: Tabel pengajuan terbaru didesain ulang agar lebih rapi. Status pengajuan
+            kini menggunakan badge dengan warna yang sesuai untuk identifikasi cepat.
+        5.  [UI/UX] Menu Akses Cepat: Tombol manajemen diubah menjadi daftar tautan yang lebih terstruktur dan menarik secara visual.
+        6.  [CLEAN CODE] Kode Blade dirapikan, menggunakan Bootstrap 5 classes secara konsisten dan menghilangkan
+            struktur kolom yang terlalu kompleks pada kartu statistik.
+    --}}
+    <style>
+        .stats-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        .stats-card .card-body {
+            position: relative;
+            z-index: 2;
+        }
+        .stats-icon-wrapper {
+            position: absolute;
+            top: -10px;
+            right: -20px;
+            font-size: 5rem;
+            opacity: 0.15;
+            transform: rotate(-15deg);
+            z-index: 1;
+            color: #fff;
+        }
+        .bg-gradient-purple { background: linear-gradient(45deg, #6a11cb, #2575fc); }
+        .bg-gradient-blue { background: linear-gradient(45deg, #007bff, #00d2ff); }
+        .bg-gradient-green { background: linear-gradient(45deg, #198754, #28a745); }
+        .bg-gradient-red { background: linear-gradient(45deg, #dc3545, #ff416c); }
 
-        {{-- Baris untuk Grafik dan Daftar Terbaru --}}
-        <section class="row">
-            {{-- Kolom Grafik Tren Pengajuan --}}
-            <div class="col-12 col-lg-8">
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h4 class="card-title">Tren Pengajuan (12 Bulan Terakhir)</h4>
-                    </div>
-                    <div class="card-body">
-                        <div style="height: 350px;">
-                            <canvas id="pengajuanTrenChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {{-- Kolom Distribusi Status & User Terbaru --}}
-            <div class="col-12 col-lg-4">
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h4 class="card-title">Distribusi Status</h4>
-                    </div>
-                    <div class="card-body">
-                        <div style="height: 170px; margin-bottom: 2rem;">
-                            <canvas id="pengajuanStatusChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h4>Pengguna Terbaru</h4>
-                    </div>
-                    <div class="card-content pb-4">
-                        @forelse($latestUser as $user)
-                        <div class="recent-message d-flex px-4 py-3">
-                            <div class="avatar avatar-lg">
-                                <img src="{{ $user->foto ? asset('storage/' . $user->foto) : 'https://placehold.co/100x100/6c757d/white?text=' . strtoupper(substr($user->username, 0, 1)) }}" alt="Avatar">
-                            </div>
-                            <div class="name ms-4">
-                                <h5 class="mb-1">{{ Str::limit($user->username, 15) }}</h5>
-                                <h6 class="text-muted mb-0">{{ Str::ucfirst($user->role->name ?? 'N/A') }}</h6>
-                            </div>
-                        </div>
-                        @empty
-                        <p class="px-4">Tidak ada pengguna baru.</p>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
-        </section>
+        .management-links .list-group-item {
+            border-radius: 0.5rem !important;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.2s ease, border-left-width 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        .management-links .list-group-item:hover {
+            background-color: var(--bs-primary-bg-subtle);
+            border-left-color: var(--bs-primary);
+        }
+    </style>
 
-        {{-- Baris untuk Daftar Pengajuan Terbaru dan Perusahaan Populer --}}
-        <section class="row">
-            <div class="col-12 col-md-7">
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h4>Pengajuan Terbaru</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover table-lg">
-                                <thead>
-                                    <tr>
-                                        <th>Siswa</th>
-                                        <th>Perusahaan</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($latestPengajuan as $pengajuan)
-                                        <tr>
-                                            <td class="text-bold-500">{{ $pengajuan->siswa->nama_siswa ?? 'N/A' }}</td>
-                                            <td>{{ $pengajuan->perusahaan->nama_perusahaan ?? 'N/A' }}</td>
-                                            <td>
-                                                @php
-                                                    $statusClass = '';
-                                                    if ($pengajuan->status_pengajuan == 'pending') $statusClass = 'badge bg-light-warning';
-                                                    else if ($pengajuan->status_pengajuan == 'diterima_perusahaan') $statusClass = 'badge bg-light-success';
-                                                    else if (in_array($pengajuan->status_pengajuan, ['ditolak_admin', 'ditolak_perusahaan'])) $statusClass = 'badge bg-light-danger';
-                                                @endphp
-                                                <span class="{{ $statusClass }}">{{ str_replace('_', ' ', Str::ucfirst($pengajuan->status_pengajuan)) }}</span>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="3" class="text-center">Tidak ada data pengajuan.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
+    <div wire:init="loadStats">
+        <div class="page-heading d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+            <div>
+                <h3>Dashboard Admin</h3>
+                <p class="text-muted mb-0">Ringkasan data dan statistik penting sistem.</p>
+            </div>
+            <div class="mt-3 mt-md-0">
+                <button class="btn btn-primary" wire:click="$dispatch('refresh-dashboard')" wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="loadStats, refreshDashboard">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+                    </span>
+                    <span wire:loading wire:target="loadStats, refreshDashboard">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Memuat...
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <div class="page-content">
+            {{-- Kartu Statistik --}}
+            <section class="row">
+                <div class="col-12">
+                    <div class="row g-4">
+                        <div class="col-6 col-lg-3">
+                            <div class="card stats-card text-white bg-gradient-purple">
+                                <div class="card-body">
+                                    <div class="stats-icon-wrapper"><i class="bi bi-people-fill"></i></div>
+                                    <h6 class="text-white">Total Siswa</h6>
+                                    <h3 class="text-white font-extrabold mb-0" wire:loading.class="opacity-50" wire:target="loadStats, refreshDashboard">{{ $totalSiswa }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="card stats-card text-white bg-gradient-blue">
+                                <div class="card-body">
+                                    <div class="stats-icon-wrapper"><i class="bi bi-building"></i></div>
+                                    <h6 class="text-white">Total Perusahaan</h6>
+                                    <h3 class="text-white font-extrabold mb-0" wire:loading.class="opacity-50" wire:target="loadStats, refreshDashboard">{{ $totalPerusahaan }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="card stats-card text-white bg-gradient-green">
+                                <div class="card-body">
+                                    <div class="stats-icon-wrapper"><i class="bi bi-briefcase-fill"></i></div>
+                                    <h6 class="text-white">Siswa Aktif PKL</h6>
+                                    <h3 class="text-white font-extrabold mb-0" wire:loading.class="opacity-50" wire:target="loadStats, refreshDashboard">{{ $siswaAktifPkl }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                            <div class="card stats-card text-white bg-gradient-red">
+                                <div class="card-body">
+                                    <div class="stats-icon-wrapper"><i class="bi bi-clock-history"></i></div>
+                                    <h6 class="text-white">Pengajuan Pending</h6>
+                                    <h3 class="text-white font-extrabold mb-0" wire:loading.class="opacity-50" wire:target="loadStats, refreshDashboard">{{ $pengajuanPending }}</h3>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-12 col-md-5">
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h4>Perusahaan Terpopuler</h4>
-                    </div>
-                    <div class="card-body">
-                         <ul class="list-group list-group-flush">
-                            @forelse($topPerusahaan as $perusahaan)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span><i class="bi bi-building me-2"></i>{{ $perusahaan->nama_perusahaan }}</span>
-                                    <span class="badge bg-primary rounded-pill">{{ $perusahaan->pengajuan_count }} pengajuan</span>
-                                </li>
-                            @empty
-                                <li class="list-group-item">Tidak ada data perusahaan.</li>
-                            @endforelse
-                        </ul>
+            </section>
+
+            {{-- Aktivitas Terbaru & Akses Cepat --}}
+            <section class="row mt-4">
+                <div class="col-12 col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="bi bi-list-task me-2"></i>Pengajuan Terbaru</h4>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>NAMA SISWA</th>
+                                            <th>PERUSAHAAN TUJUAN</th>
+                                            <th class="text-center">STATUS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($latestPengajuan as $pengajuan)
+                                            <tr>
+                                                <td class="text-bold-500">{{ $pengajuan->siswa->nama_siswa ?? 'Data tidak ditemukan' }}</td>
+                                                <td>{{ $pengajuan->perusahaan->nama_perusahaan ?? 'Data tidak ditemukan' }}</td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-light-warning">{{ str_replace('_', ' ', Str::ucfirst($pengajuan->status_pengajuan)) }}</span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="3" class="text-center py-4">
+                                                    <p class="text-muted mb-0">Tidak ada data pengajuan terbaru.</p>
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+                <div class="col-12 col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="bi bi-grid-1x2-fill me-2"></i>Pusat Manajemen</h4>
+                        </div>
+                        <div class="card-body management-links">
+                            <div class="list-group list-group-flush">
+                                <a href="{{ route('admin.master.siswa') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    Manajemen Siswa <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <a href="{{ route('admin.master.guru') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    Manajemen Guru <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <a href="{{ route('admin.master.perusahaan') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    Manajemen Perusahaan <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <a href="{{ route('admin.master.jurusan') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    Manajemen Jurusan <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <a href="{{ route('admin.master.users') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    Manajemen Pengguna <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 </div>
-
-@push('scripts')
-{{-- Pastikan Chart.js sudah di-load oleh layout utama Anda --}}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener('livewire:navigated', () => {
-        // Hancurkan chart lama jika ada untuk mencegah duplikasi
-        if (window.trenChart instanceof Chart) window.trenChart.destroy();
-        if (window.statusChart instanceof Chart) window.statusChart.destroy();
-
-        // 1. Grafik Tren Pengajuan (Line Chart)
-        const trenCtx = document.getElementById('pengajuanTrenChart');
-        if (trenCtx) {
-            window.trenChart = new Chart(trenCtx.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: @json($pengajuanTren['labels']),
-                    datasets: [{
-                        label: 'Jumlah Pengajuan',
-                        data: @json($pengajuanTren['data']),
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        // 2. Grafik Distribusi Status (Doughnut Chart)
-        const statusCtx = document.getElementById('pengajuanStatusChart');
-        if (statusCtx) {
-            window.statusChart = new Chart(statusCtx.getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: @json($pengajuanPie['labels']),
-                    datasets: [{
-                        label: 'Jumlah',
-                        data: @json($pengajuanPie['data']),
-                        backgroundColor: [
-                            'rgba(255, 159, 64, 0.8)', // Orange (Pending)
-                            'rgba(75, 192, 192, 0.8)',  // Green (Diterima)
-                            'rgba(255, 99, 132, 0.8)'   // Red (Ditolak)
-                        ],
-                        borderColor: [
-                            'rgba(255, 159, 64, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(255, 99, 132, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12,
-                                padding: 15
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    });
-</script>
-@endpush

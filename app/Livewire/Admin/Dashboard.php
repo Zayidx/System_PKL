@@ -1,93 +1,80 @@
 <?php
 
-// 2. KODE UNTUK KOMPONEN LIVEWIRE
-// Ganti isi file app/Livewire/Admin/Dashboard.php dengan kode ini
-
 namespace App\Livewire\Admin;
 
-use App\Models\Guru;
+use App\Models\Pengajuan;
 use App\Models\Perusahaan;
 use App\Models\Siswa;
-use App\Models\User;
-use App\Models\Pengajuan;
-use Illuminate\Support\Carbon;
+use App\Models\Prakerin;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\On;
 
 #[Layout("components.layouts.layout-admin-dashboard")]
 #[Title("Admin Dashboard")]
 class Dashboard extends Component
 {
-    // Properti untuk menampung data statistik
-    public $pengajuanCount;
-    public $pengajuanPending;
-    public $pengajuanDiterima;
-    public $pengajuanDitolak;
-    public $pengajuanTren;
-    public $pengajuanPie;
-    public $latestPengajuan;
-    public $topPerusahaan;
-    public $latestUser;
+    // Properti untuk data statistik
+    public $totalSiswa = 0;
+    public $totalPerusahaan = 0;
+    public $siswaAktifPkl = 0;
+    public $pengajuanPending = 0;
+
+    // Properti untuk daftar data
+    public $latestPengajuan = [];
 
     /**
-     * Method mount dijalankan sekali saat komponen diinisialisasi.
-     * Kita akan mengambil semua data di sini.
+     * Mount lifecycle hook.
+     * Memuat data statistik saat komponen pertama kali di-render.
      */
     public function mount()
     {
-        // Statistik pengajuan
-        $this->pengajuanCount = Pengajuan::count();
-        $this->pengajuanPending = Pengajuan::where('status_pengajuan', 'pending')->count();
-        $this->pengajuanDiterima = Pengajuan::where('status_pengajuan', 'diterima_perusahaan')->count();
-        $this->pengajuanDitolak = Pengajuan::whereIn('status_pengajuan', ['ditolak_admin','ditolak_perusahaan'])->count();
-
-        // Pie chart distribusi status pengajuan
-        $this->pengajuanPie = [
-            'labels' => ['Pending', 'Diterima', 'Ditolak'],
-            'data' => [
-                $this->pengajuanPending,
-                $this->pengajuanDiterima,
-                $this->pengajuanDitolak,
-            ],
-        ];
-
-        // Line chart tren pengajuan per bulan (12 bulan terakhir)
-        $bulan = collect(range(0, 11))->map(function($i) {
-            return Carbon::now()->subMonths($i)->format('Y-m');
-        })->reverse()->values();
-
-        $this->pengajuanTren = [
-            'labels' => $bulan->map(fn($b) => Carbon::createFromFormat('Y-m', $b)->translatedFormat('M Y')),
-            'data' => $bulan->map(fn($b) => Pengajuan::whereYear('created_at', substr($b,0,4))->whereMonth('created_at', substr($b,5,2))->count()),
-        ];
-
-        // Data pengajuan terbaru
-        $this->latestPengajuan = Pengajuan::with(['siswa','perusahaan'])->latest('created_at')->take(5)->get();
-
-        // Perusahaan dengan pengajuan terbanyak
-        $this->topPerusahaan = Perusahaan::withCount('pengajuan')->orderByDesc('pengajuan_count')->take(5)->get();
-        
-        // User terbaru
-        $this->latestUser = User::with('role')->latest('id')->take(5)->get();
+        $this->loadStats();
     }
 
     /**
-     * Merender view dan mengirimkan data ke dalamnya.
+     * Listener untuk me-refresh data dashboard.
+     * Dipicu oleh klik tombol di view.
+     */
+    #[On('refresh-dashboard')]
+    public function refreshDashboard()
+    {
+        // Memuat ulang semua data statistik
+        $this->loadStats();
+    }
+
+    /**
+     * Fungsi utama untuk memuat semua data yang dibutuhkan oleh dashboard.
+     * Dibungkus dalam try-catch untuk penanganan error yang lebih baik.
+     */
+    public function loadStats()
+    {
+        try {
+            $this->totalSiswa = Siswa::count();
+            $this->totalPerusahaan = Perusahaan::count();
+            $this->siswaAktifPkl = Prakerin::where('status_prakerin', 'berlangsung')->count();
+            $this->pengajuanPending = Pengajuan::where('status_pengajuan', 'pending')->count();
+            
+            // Mengambil 5 pengajuan terbaru dengan relasi siswa dan perusahaan
+            $this->latestPengajuan = Pengajuan::with(['siswa', 'perusahaan'])
+                ->latest()
+                ->take(5)
+                ->get();
+        } catch (\Exception $e) {
+            // Mencatat error jika terjadi kegagalan saat mengambil data
+            Log::error('Gagal memuat data dashboard: ' . $e->getMessage());
+            // Mengirim notifikasi error ke frontend
+            $this->dispatch('swal:error', message: 'Gagal memuat data. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Render komponen view.
      */
     public function render()
     {
-        // Semua data sudah di-load di mount(), jadi kita tinggal passing ke view
-        return view('livewire.admin.dashboard', [
-            'pengajuanCount' => $this->pengajuanCount,
-            'pengajuanPending' => $this->pengajuanPending,
-            'pengajuanDiterima' => $this->pengajuanDiterima,
-            'pengajuanDitolak' => $this->pengajuanDitolak,
-            'pengajuanPie' => $this->pengajuanPie,
-            'pengajuanTren' => $this->pengajuanTren,
-            'latestPengajuan' => $this->latestPengajuan,
-            'topPerusahaan' => $this->topPerusahaan,
-            'latestUser' => $this->latestUser,
-        ]);
+        return view('livewire.admin.dashboard');
     }
 }

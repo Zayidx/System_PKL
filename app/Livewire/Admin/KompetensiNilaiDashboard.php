@@ -22,6 +22,7 @@ class KompetensiNilaiDashboard extends Component
     public $id_jurusan = '';
     public $confirmingDelete = false;
     public $kompetensiToDelete = null;
+    public $perPage = 10;
 
     protected $paginationTheme = 'bootstrap';
 
@@ -46,6 +47,11 @@ class KompetensiNilaiDashboard extends Component
     }
 
     public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPerPage()
     {
         $this->resetPage();
     }
@@ -203,7 +209,7 @@ class KompetensiNilaiDashboard extends Component
 
         $kompetensi = $query->orderBy('id_jurusan')
                            ->orderBy('nama_kompetensi')
-                           ->paginate(10);
+                           ->paginate($this->perPage);
 
         $jurusan = Jurusan::orderBy('nama_jurusan_lengkap')->get();
 

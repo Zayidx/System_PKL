@@ -88,7 +88,7 @@
         <div class="container mx-auto px-6">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 <div class="reveal-on-scroll">
-                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">{{ number_format($statPengajuan) }}</div>
+                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">54</div>
                     <div class="text-slate-500 mt-1">Lowongan Magang</div>
                 </div>
                 <div class="reveal-on-scroll transition-delay-100">
@@ -96,16 +96,12 @@
                     <div class="text-slate-500 mt-1">Perusahaan Partner</div>
                 </div>
                 <div class="reveal-on-scroll transition-delay-200">
-                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">{{ number_format($statSiswa) }}</div>
+                    <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">270</div>
                     <div class="text-slate-500 mt-1">Siswa Terdaftar</div>
                 </div>
                 <div class="reveal-on-scroll transition-delay-300">
                     <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">
-                        @if($statPengajuan > 0)
-                            {{ round(($statSuccess / $statPengajuan) * 100, 1) }}%
-                        @else
-                            0%
-                        @endif
+                        100%
                     </div>
                     <div class="text-slate-500 mt-1">Tingkat Keberhasilan</div>
                 </div>
