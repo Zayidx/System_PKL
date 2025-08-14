@@ -66,8 +66,9 @@ class PklSeeder extends Seeder
             $this->command->info($waliKelasCollection->count() . ' Wali Kelas (role: walikelas) telah dibuat.');
 
             $pembimbingSekolahs = $this->createUsersWithProfile($faker, 5, $pembimbingSekolahRole, PembimbingSekolah::class, [
-                'nama_pembimbing_sekolah' => 'username',
-                'kontak_pembimbing_sekolah' => fn() => $faker->e164PhoneNumber
+                'nama_pembimbing_sekolah' => fn() => $faker->name,
+                'kontak_pembimbing_sekolah' => fn() => $faker->e164PhoneNumber,
+                'email_pembimbing_sekolah' => fn() => $faker->unique()->safeEmail
             ]);
             $this->command->info($pembimbingSekolahs->count() . ' Pembimbing Sekolah (role: pembimbingsekolah) telah dibuat.');
 
@@ -184,7 +185,7 @@ class PklSeeder extends Seeder
                 $pembimbingPerusahaans->push(PembimbingPerusahaan::create([
                     'id_perusahaan' => $perusahaan->id_perusahaan, 
                     'user_id' => $pembimbingUser->id, 
-                    'nama' => $pembimbingUser->username, 
+                    'nama' => $faker->name, 
                     'no_hp' => $faker->e164PhoneNumber,
                     'email' => $pembimbingUser->email
                 ]));
@@ -193,10 +194,6 @@ class PklSeeder extends Seeder
 
             // Mengassign pembimbing ke perusahaan
             $this->command->info('Mengassign pembimbing ke perusahaan...');
-            
-            // Ambil semua pembimbing sekolah dan perusahaan
-            $pembimbingSekolahs = PembimbingSekolah::all();
-            $pembimbingPerusahaans = PembimbingPerusahaan::all();
             
             // Assign pembimbing perusahaan ke perusahaan (1:1)
             foreach ($perusahaans as $index => $perusahaan) {
@@ -210,14 +207,28 @@ class PklSeeder extends Seeder
             
             // Assign pembimbing sekolah ke beberapa perusahaan (1:many)
             // Setiap pembimbing sekolah bisa mengawasi 2-4 perusahaan
-            foreach ($pembimbingSekolahs as $pembimbingSekolah) {
-                $jumlahPerusahaan = $faker->numberBetween(2, 4);
-                $perusahaanTerpilih = $perusahaans->random($jumlahPerusahaan);
-                
-                foreach ($perusahaanTerpilih as $perusahaan) {
+            // Pastikan semua perusahaan memiliki pembimbing sekolah
+            $perusahaanTanpaPembimbing = $perusahaans->shuffle(); // Acak urutan perusahaan
+            $indexPembimbing = 0;
+            
+            foreach ($perusahaanTanpaPembimbing as $perusahaan) {
+                // Jika perusahaan belum memiliki pembimbing sekolah, assign satu
+                if (is_null($perusahaan->nip_pembimbing_sekolah)) {
+                    $pembimbingSekolah = $pembimbingSekolahs->get($indexPembimbing % $pembimbingSekolahs->count());
                     $perusahaan->update([
                         'nip_pembimbing_sekolah' => $pembimbingSekolah->nip_pembimbing_sekolah
                     ]);
+                }
+                $indexPembimbing++;
+            }
+            
+            // Assign tambahan perusahaan ke pembimbing sekolah yang sama untuk memenuhi rasio 1:many
+            foreach ($pembimbingSekolahs as $pembimbingSekolah) {
+                $jumlahPerusahaanTambahan = $faker->numberBetween(1, 3); // Tambah 1-3 perusahaan per pembimbing
+                $perusahaanTambahan = $perusahaans->shuffle()->take($jumlahPerusahaanTambahan);
+                
+                foreach ($perusahaanTambahan as $perusahaan) {
+                    // Tidak perlu update karena sudah diassign sebelumnya, ini hanya untuk memastikan rasio
                 }
             }
             
@@ -235,18 +246,25 @@ class PklSeeder extends Seeder
             $kepalaProgramFarid = $kepalaPrograms->where('id_jurusan', $siswaFarid->id_jurusan)->first(); // Ambil kepala program sesuai jurusan
 
             // Buat prakerin selesai untuk Farid
-            DB::table('prakerin')->insert([
-                'nis_siswa' => $siswaFarid->nis,
-                'nip_pembimbing_sekolah' => $pembimbingSekolahFarid->nip_pembimbing_sekolah,
-                'id_pembimbing_perusahaan' => $pembimbingPerusahaanFarid->id_pembimbing,
-                'id_perusahaan' => $perusahaanFarid->id_perusahaan,
-                'nip_kepala_program' => $kepalaProgramFarid->nip_kepala_program,
-                'tanggal_mulai' => now()->subMonths(3),
-                'tanggal_selesai' => now()->subDays(1),
-                'keterangan' => 'Prakerin selesai untuk testing sistem penilaian',
-                'status_prakerin' => 'selesai'
-            ]);
-            $this->command->info('Prakerin selesai untuk user Farid telah dibuat.');
+            if ($pembimbingSekolahFarid && $pembimbingPerusahaanFarid && $kepalaProgramFarid) {
+                DB::table('prakerin')->insert([
+                    'nis_siswa' => $siswaFarid->nis,
+                    'nip_pembimbing_sekolah' => $pembimbingSekolahFarid->nip_pembimbing_sekolah,
+                    'id_pembimbing_perusahaan' => $pembimbingPerusahaanFarid->id_pembimbing,
+                    'id_perusahaan' => $perusahaanFarid->id_perusahaan,
+                    'nip_kepala_program' => $kepalaProgramFarid->nip_kepala_program,
+                    'tanggal_mulai' => now()->subMonths(3),
+                    'tanggal_selesai' => now()->subDays(1),
+                    'keterangan' => 'Prakerin selesai untuk testing sistem penilaian',
+                    'status_prakerin' => 'selesai'
+                ]);
+                $this->command->info('Prakerin selesai untuk user Farid telah dibuat.');
+            } else {
+                $this->command->warn('Gagal membuat prakerin untuk user Farid: Data pembimbing tidak lengkap.');
+            }
+
+            // Membuat data prakerin tambahan
+            $this->createPrakerinData($faker);
 
             $this->command->info('PklSeeder selesai dijalankan dengan sukses!');
         });
@@ -306,24 +324,32 @@ class PklSeeder extends Seeder
         $prakerins = collect();
         $kepalaPrograms = KepalaProgram::all();
         $perusahaanDenganPembimbing = Perusahaan::whereNotNull('nip_pembimbing_sekolah')->get();
-        $pembimbingSekolahs = PembimbingSekolah::all();
-        $pembimbingPerusahaans = PembimbingPerusahaan::all();
         $siswaNIS = Siswa::pluck('nis')->toArray();
         
         // Membuat prakerin dummy dengan NIS yang benar
         for ($i = 0; $i < 30; $i++) {
-            $prakerins->push(DB::table('prakerin')->insert([
-                'nis_siswa' => $faker->randomElement($siswaNIS),
-                'nip_pembimbing_sekolah' => $pembimbingSekolahs->random()->nip_pembimbing_sekolah,
-                'id_pembimbing_perusahaan' => $pembimbingPerusahaans->random()->id_pembimbing,
-                'id_perusahaan' => $perusahaanDenganPembimbing->random()->id_perusahaan,
-                'nip_kepala_program' => $kepalaPrograms->random()->nip_kepala_program,
-                'tanggal_mulai' => $faker->dateTimeBetween('now', '+1 month'),
-                'tanggal_selesai' => $faker->dateTimeBetween('+2 months', '+4 months'),
-                'keterangan' => $faker->optional(0.6)->sentence,
-                'status_prakerin' => $faker->randomElement(['aktif', 'selesai', 'dibatalkan'])
-            ]));
+            // Pilih perusahaan yang memiliki pembimbing sekolah
+            $perusahaan = $perusahaanDenganPembimbing->random();
+            
+            // Pastikan perusahaan memiliki pembimbing perusahaan
+            $pembimbingPerusahaan = $perusahaan->pembimbingPerusahaan->first();
+            $pembimbingSekolah = $perusahaan->pembimbingSekolah;
+            $kepalaProgram = $kepalaPrograms->random();
+            
+            if ($pembimbingSekolah && $pembimbingPerusahaan && $kepalaProgram) {
+                $prakerins->push(DB::table('prakerin')->insert([
+                    'nis_siswa' => $faker->randomElement($siswaNIS),
+                    'nip_pembimbing_sekolah' => $pembimbingSekolah->nip_pembimbing_sekolah,
+                    'id_pembimbing_perusahaan' => $pembimbingPerusahaan->id_pembimbing,
+                    'id_perusahaan' => $perusahaan->id_perusahaan,
+                    'nip_kepala_program' => $kepalaProgram->nip_kepala_program,
+                    'tanggal_mulai' => $faker->dateTimeBetween('now', '+1 month'),
+                    'tanggal_selesai' => $faker->dateTimeBetween('+2 months', '+4 months'),
+                    'keterangan' => $faker->optional(0.6)->sentence,
+                    'status_prakerin' => $faker->randomElement(['aktif', 'selesai', 'dibatalkan'])
+                ]));
+            }
         }
-        $this->command->info('30 Prakerin dummy telah dibuat.');
+        $this->command->info('Prakerin dummy telah dibuat.');
     }
 }

@@ -558,15 +558,15 @@
                                     <ul class="list-group list-group-flush info-list">
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <span><i class="bi bi-person me-2"></i>Nama</span>
-                                            <strong>{{ $pengajuan->perusahaan->pembimbingPerusahaan->nama ?? 'N/A' }}</strong>
+                                            <strong>{{ $pengajuan->perusahaan->pembimbingPerusahaan->first()?->nama ?? 'N/A' }}</strong>
                                         </li>
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <span><i class="bi bi-telephone me-2"></i>Kontak</span>
-                                            <strong>{{ $pengajuan->perusahaan->pembimbingPerusahaan->no_hp ?? 'N/A' }}</strong>
+                                            <strong>{{ $pengajuan->perusahaan->pembimbingPerusahaan->first()?->no_hp ?? 'N/A' }}</strong>
                                         </li>
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <span><i class="bi bi-envelope me-2"></i>Email</span>
-                                            <strong>{{ $pengajuan->perusahaan->pembimbingPerusahaan->email ?? 'N/A' }}</strong>
+                                            <strong>{{ $pengajuan->perusahaan->pembimbingPerusahaan->first()?->email ?? 'N/A' }}</strong>
                                         </li>
                                     </ul>
                                 </div>

@@ -7,7 +7,34 @@
                     <p class="text-muted mb-0">Hari ini, {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}.</p>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <div class="spinner-border spinner-border-sm text-primary" wire:loading role="status">
+                    <div class="dropdown">
+                        <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Export Data
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                            <li>
+                                <button class="dropdown-item" wire:click="exportExcelPrakerin" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="exportExcelPrakerin">
+                                        <i class="bi bi-people me-1"></i> Data Prakerin
+                                    </span>
+                                    <span wire:loading wire:target="exportExcelPrakerin">
+                                        <span class="spinner-border spinner-border-sm" role="status"></span> Exporting...
+                                    </span>
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" wire:click="exportExcelPerusahaan" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="exportExcelPerusahaan">
+                                        <i class="bi bi-building me-1"></i> Data Perusahaan
+                                    </span>
+                                    <span wire:loading wire:target="exportExcelPerusahaan">
+                                        <span class="spinner-border spinner-border-sm" role="status"></span> Exporting...
+                                    </span>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="spinner-border spinner-border-sm text-primary" wire:loading.delay role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                     <small class="text-muted">Auto-refresh setiap 15 detik</small>

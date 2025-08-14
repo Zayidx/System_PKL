@@ -101,13 +101,13 @@
                                         <td class="text-center">
                                             @if($p->status_pengajuan === 'pending')
                                                 <div class="btn-group btn-group-sm">
-                                                    <button class="btn btn-success" wire:click="confirmAction('approve', {{ $p->id_pengajuan }})" data-bs-toggle="tooltip" title="Setujui Pengajuan">
-                                                        <span wire:loading.remove wire:target="confirmAction('approve', {{ $p->id_pengajuan }})"><i class="bi bi-check-lg"></i></span>
-                                                        <span wire:loading wire:target="confirmAction('approve', {{ $p->id_pengajuan }})" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    <button class="btn btn-success" wire:click="approvePengajuan({{ $p->id_pengajuan }})" wire:loading.attr="disabled" data-bs-toggle="tooltip" title="Setujui Pengajuan">
+                                                        <span wire:loading.remove wire:target="approvePengajuan({{ $p->id_pengajuan }})"><i class="bi bi-check-lg"></i></span>
+                                                        <span wire:loading wire:target="approvePengajuan({{ $p->id_pengajuan }})" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                                     </button>
-                                                    <button class="btn btn-danger" wire:click="confirmAction('decline', {{ $p->id_pengajuan }})" data-bs-toggle="tooltip" title="Tolak Pengajuan">
-                                                        <span wire:loading.remove wire:target="confirmAction('decline', {{ $p->id_pengajuan }})"><i class="bi bi-x-lg"></i></span>
-                                                        <span wire:loading wire:target="confirmAction('decline', {{ $p->id_pengajuan }})" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                    <button class="btn btn-danger" wire:click="declinePengajuan({{ $p->id_pengajuan }})" wire:loading.attr="disabled" data-bs-toggle="tooltip" title="Tolak Pengajuan">
+                                                        <span wire:loading.remove wire:target="declinePengajuan({{ $p->id_pengajuan }})"><i class="bi bi-x-lg"></i></span>
+                                                        <span wire:loading wire:target="declinePengajuan({{ $p->id_pengajuan }})" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                                     </button>
                                                 </div>
                                             @else
@@ -139,16 +139,6 @@
 </div>
 @push('scripts')
 <script>
-    document.addEventListener('livewire:init', () => {
-        Livewire.on('action:confirmed', (event) => {
-            if (event.type === 'approve') {
-                @this.call('approvePengajuan', event.id);
-            } else if (event.type === 'decline') {
-                @this.call('declinePengajuan', event.id);
-            }
-        });
-    });
-
     // Inisialisasi tooltip setelah render
     document.addEventListener('livewire:navigated', () => {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))

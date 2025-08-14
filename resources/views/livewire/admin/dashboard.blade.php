@@ -113,7 +113,7 @@
                                 <div class="card-body">
                                     <div class="stats-icon-wrapper"><i class="bi bi-clock-history"></i></div>
                                     <h6 class="text-white">Pengajuan Pending</h6>
-                                    <h3 class="text-white font-extrabold mb-0" wire:loading.class="opacity-50" wire:target="loadStats, refreshDashboard">{{ $pengajuanPending }}</h3>
+                                    <h3 class="text-white sfont-extrabold mb-0" wire:loading.class="opacity-50" wire:target="loadStats, refreshDashboard">{{ $pengajuanPending }}</h3>
                                 </div>
                             </div>
                         </div>

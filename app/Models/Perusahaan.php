@@ -41,9 +41,9 @@ class Perusahaan extends Model
     }
 
     // Relasi ke model PembimbingPerusahaan
-    public function pembimbingPerusahaan(): BelongsTo
+    public function pembimbingPerusahaan(): HasMany
     {
-        return $this->belongsTo(PembimbingPerusahaan::class, 'id_pembimbing_perusahaan', 'id_pembimbing');
+        return $this->hasMany(PembimbingPerusahaan::class, 'id_perusahaan', 'id_perusahaan');
     }
 
     // Relasi ke model KontakPerusahaan

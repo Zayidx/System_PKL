@@ -53,6 +53,12 @@ class StatusPengajuanSiswaDashboard extends Component
         $this->resetPage();
     }
 
+    public function confirmAction($type, $id)
+    {
+        // Dispatch event ke JavaScript untuk konfirmasi
+        $this->dispatch('action:confirmed', ['type' => $type, 'id' => $id]);
+    }
+
     public function approvePengajuan($id)
     {
         $pengajuan = Pengajuan::with(['siswa.user', 'perusahaan'])->findOrFail($id);

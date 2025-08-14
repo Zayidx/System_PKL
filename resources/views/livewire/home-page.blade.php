@@ -101,7 +101,7 @@
                 </div>
                 <div class="reveal-on-scroll transition-delay-300">
                     <div class="text-4xl md:text-5xl font-bold text-blue-500 stat-number">
-                        100%
+                        100
                     </div>
                     <div class="text-slate-500 mt-1">Tingkat Keberhasilan</div>
                 </div>
