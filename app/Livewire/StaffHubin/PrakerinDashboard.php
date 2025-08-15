@@ -23,6 +23,7 @@ class PrakerinDashboard extends Component
     }
 
     public function render()
+    
     {
         $kelasList = Kelas::withCount(['siswa as total_siswa', 'siswa as prakerin_count' => function($query) {
                 $query->whereHas('prakerin');

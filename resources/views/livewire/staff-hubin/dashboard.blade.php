@@ -7,37 +7,115 @@
                     <p class="text-muted mb-0">Hari ini, {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}.</p>
                 </div>
                 <div class="d-flex align-items-center gap-2">
+                    <!-- Tampilkan pesan error jika ada -->
+                    @if (session()->has('error'))
+                        <div class="alert alert-danger alert-sm py-1 px-2 mb-0 me-2">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+                    
+                    <!-- Tombol Export Prakerin dengan Dropdown Periode -->
+                    <!-- Tombol Export Prakerin dengan Dropdown Periode -->
                     <div class="dropdown">
-                        <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-file-earmark-excel me-1"></i> Export Data
+                        <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="exportPrakerinDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Export Prakerin
                         </button>
-                        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                        <ul class="dropdown-menu" aria-labelledby="exportPrakerinDropdown">
                             <li>
-                                <button class="dropdown-item" wire:click="exportExcelPrakerin" wire:loading.attr="disabled">
-                                    <span wire:loading.remove wire:target="exportExcelPrakerin">
-                                        <i class="bi bi-people me-1"></i> Data Prakerin
+                                <button class="dropdown-item" wire:click="exportExcelPrakerin('all')" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="exportExcelPrakerin('all')">
+                                        <i class="bi bi-clock-history me-1"></i> Semua Data
                                     </span>
-                                    <span wire:loading wire:target="exportExcelPrakerin">
+                                    <span wire:loading wire:target="exportExcelPrakerin('all')">
                                         <span class="spinner-border spinner-border-sm" role="status"></span> Exporting...
                                     </span>
                                 </button>
                             </li>
                             <li>
-                                <button class="dropdown-item" wire:click="exportExcelPerusahaan" wire:loading.attr="disabled">
-                                    <span wire:loading.remove wire:target="exportExcelPerusahaan">
-                                        <i class="bi bi-building me-1"></i> Data Perusahaan
+                                <button class="dropdown-item" wire:click="exportExcelPrakerin('today')" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="exportExcelPrakerin('today')">
+                                        <i class="bi bi-calendar-day me-1"></i> Hari Ini
                                     </span>
-                                    <span wire:loading wire:target="exportExcelPerusahaan">
+                                    <span wire:loading wire:target="exportExcelPrakerin('today')">
                                         <span class="spinner-border spinner-border-sm" role="status"></span> Exporting...
                                     </span>
                                 </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" wire:click="exportExcelPrakerin('3days')" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="exportExcelPrakerin('3days')">
+                                        <i class="bi bi-calendar3 me-1"></i> 3 Hari Terakhir
+                                    </span>
+                                    <span wire:loading wire:target="exportExcelPrakerin('3days')">
+                                        <span class="spinner-border spinner-border-sm" role="status"></span> Exporting...
+                                    </span>
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" wire:click="exportExcelPrakerin('7days')" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="exportExcelPrakerin('7days')">
+                                        <i class="bi bi-calendar-week me-1"></i> 7 Hari Terakhir
+                                    </span>
+                                    <span wire:loading wire:target="exportExcelPrakerin('7days')">
+                                        <span class="spinner-border spinner-border-sm" role="status"></span> Exporting...
+                                    </span>
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" wire:click="exportExcelPrakerin('1month')" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="exportExcelPrakerin('1month')">
+                                        <i class="bi bi-calendar-month me-1"></i> 1 Bulan Terakhir
+                                    </span>
+                                    <span wire:loading wire:target="exportExcelPrakerin('1month')">
+                                        <span class="spinner-border spinner-border-sm" role="status"></span> Exporting...
+                                    </span>
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item" wire:click="exportExcelPrakerin('1year')" wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="exportExcelPrakerin('1year')">
+                                        <i class="bi bi-calendar-check me-1"></i> 1 Tahun Terakhir
+                                    </span>
+                                    <span wire:loading wire:target="exportExcelPrakerin('1year')">
+                                        <span class="spinner-border spinner-border-sm" role="status"></span> Exporting...
+                                    </span>
+                                </button>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <div class="dropdown-item">
+                                    <div class="d-flex flex-column gap-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="date" class="form-control form-control-sm" wire:model="startDate" placeholder="Tanggal Awal">
+                                            <span>s/d</span>
+                                            <input type="date" class="form-control form-control-sm" wire:model="endDate" placeholder="Tanggal Akhir">
+                                        </div>
+                                        <button class="btn btn-primary btn-sm w-100" wire:click="exportExcelPrakerin('custom')" wire:loading.attr="disabled">
+                                            <span wire:loading.remove wire:target="exportExcelPrakerin('custom')">
+                                                Export Periode
+                                            </span>
+                                            <span wire:loading wire:target="exportExcelPrakerin('custom')">
+                                                <span class="spinner-border spinner-border-sm" role="status"></span> Exporting...
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
                             </li>
                         </ul>
                     </div>
+                    
+                    <!-- Tombol Export Perusahaan -->
+                    <button class="btn btn-info btn-sm" type="button" wire:click="exportExcelPerusahaan" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="exportExcelPerusahaan">
+                            <i class="bi bi-building me-1"></i> Export Perusahaan
+                        </span>
+                        <span wire:loading wire:target="exportExcelPerusahaan">
+                            <span class="spinner-border spinner-border-sm" role="status"></span> Exporting...
+                        </span>
+                    </button>
                     <div class="spinner-border spinner-border-sm text-primary" wire:loading.delay role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <small class="text-muted">Auto-refresh setiap 15 detik</small>
                 </div>
             </div>
         </div>

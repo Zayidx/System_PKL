@@ -30,6 +30,10 @@ class Dashboard extends Component
     public $search = '';
     public $filterStatus = '';
     public $filterTanggal = '';
+    
+    // Properti untuk tanggal custom
+    public $startDate = '';
+    public $endDate = '';
 
     public function mount()
     {
@@ -126,13 +130,69 @@ class Dashboard extends Component
         };
     }
 
-    public function exportExcelPrakerin()
+    public function exportExcelPrakerin($period = 'all')
     {
-        // Ambil semua data siswa dengan informasi prakerin lengkap
-        $siswaData = Siswa::with(['kelas', 'prakerin.perusahaan', 'prakerin.pembimbingSekolah', 'prakerin.pembimbingPerusahaan'])
+        // Validasi tanggal untuk periode custom
+        if ($period === 'custom') {
+            if (empty($this->startDate) || empty($this->endDate)) {
+                session()->flash('error', 'Tanggal awal dan akhir harus diisi untuk export periode kustom.');
+                return;
+            }
+            
+            if (Carbon::parse($this->startDate)->greaterThan(Carbon::parse($this->endDate))) {
+                session()->flash('error', 'Tanggal awal tidak boleh lebih besar dari tanggal akhir.');
+                return;
+            }
+        }
+
+        // Buat query dasar untuk siswa dengan informasi prakerin lengkap
+        $query = Siswa::with(['kelas', 'prakerin.perusahaan', 'prakerin.pembimbingSekolah', 'prakerin.pembimbingPerusahaan'])
             ->whereHas('prakerin')
-            ->orderBy('nama_siswa')
-            ->get();
+            ->orderBy('nama_siswa');
+
+        // Terapkan filter berdasarkan periode menggunakan tanggal mulai prakerin
+        switch ($period) {
+            case 'today':
+                $query->whereHas('prakerin', function ($q) {
+                    $q->whereDate('tanggal_mulai', Carbon::today());
+                });
+                break;
+            case '3days':
+                $query->whereHas('prakerin', function ($q) {
+                    $q->where('tanggal_mulai', '>=', Carbon::now()->subDays(3));
+                });
+                break;
+            case '7days':
+                $query->whereHas('prakerin', function ($q) {
+                    $q->where('tanggal_mulai', '>=', Carbon::now()->subDays(7));
+                });
+                break;
+            case '1month':
+                $query->whereHas('prakerin', function ($q) {
+                    $q->where('tanggal_mulai', '>=', Carbon::now()->subMonth());
+                });
+                break;
+            case '1year':
+                $query->whereHas('prakerin', function ($q) {
+                    $q->where('tanggal_mulai', '>=', Carbon::now()->subYear());
+                });
+                break;
+            case 'custom':
+                // Filter berdasarkan tanggal custom
+                if (!empty($this->startDate) && !empty($this->endDate)) {
+                    $query->whereHas('prakerin', function ($q) {
+                        $q->whereBetween('tanggal_mulai', [Carbon::parse($this->startDate)->startOfDay(), Carbon::parse($this->endDate)->endOfDay()]);
+                    });
+                }
+                break;
+            case 'all':
+            default:
+                // Tidak perlu filter tambahan
+                break;
+        }
+
+        // Ambil data siswa
+        $siswaData = $query->get();
 
         // Format data untuk Excel
         $data = [];
@@ -178,34 +238,69 @@ class Dashboard extends Component
             $prakerinCount = 0;
             if ($siswa->prakerin) {
                 foreach ($siswa->prakerin as $prakerin) {
-                    // Perbaiki cara menampilkan pembimbing sekolah
-                    $pembimbingSekolahNama = '-';
-                    if (!is_null($prakerin->pembimbingSekolah) && isset($prakerin->pembimbingSekolah->nama_pembimbing_sekolah)) {
-                        $pembimbingSekolahNama = $prakerin->pembimbingSekolah->nama_pembimbing_sekolah;
+                    // Filter berdasarkan periode jika diperlukan
+                    $shouldInclude = true;
+                    if ($period !== 'all' && $period !== 'custom') {
+                        $prakerinDate = Carbon::parse($prakerin->tanggal_mulai);
+                        switch ($period) {
+                            case 'today':
+                                $shouldInclude = $prakerinDate->isToday();
+                                break;
+                            case '3days':
+                                $shouldInclude = $prakerinDate >= Carbon::now()->subDays(3);
+                                break;
+                            case '7days':
+                                $shouldInclude = $prakerinDate >= Carbon::now()->subDays(7);
+                                break;
+                            case '1month':
+                                $shouldInclude = $prakerinDate >= Carbon::now()->subMonth();
+                                break;
+                            case '1year':
+                                $shouldInclude = $prakerinDate >= Carbon::now()->subYear();
+                                break;
+                        }
+                    } else if ($period === 'custom') {
+                        // Untuk periode custom, filter berdasarkan tanggal
+                        if (!empty($this->startDate) && !empty($this->endDate)) {
+                            $prakerinDate = Carbon::parse($prakerin->tanggal_mulai);
+                            $startDate = Carbon::parse($this->startDate)->startOfDay();
+                            $endDate = Carbon::parse($this->endDate)->endOfDay();
+                            $shouldInclude = $prakerinDate >= $startDate && $prakerinDate <= $endDate;
+                        } else {
+                            $shouldInclude = true; // Jika tanggal tidak diisi, tampilkan semua
+                        }
                     }
 
-                    // Perbaiki cara menampilkan pembimbing perusahaan
-                    $pembimbingPerusahaanNama = '-';
-                    if (!is_null($prakerin->pembimbingPerusahaan) && isset($prakerin->pembimbingPerusahaan->nama)) {
-                        $pembimbingPerusahaanNama = $prakerin->pembimbingPerusahaan->nama;
-                    }
+                    if ($shouldInclude) {
+                        // Perbaiki cara menampilkan pembimbing sekolah
+                        $pembimbingSekolahNama = '-';
+                        if (!is_null($prakerin->pembimbingSekolah) && isset($prakerin->pembimbingSekolah->nama_pembimbing_sekolah)) {
+                            $pembimbingSekolahNama = $prakerin->pembimbingSekolah->nama_pembimbing_sekolah;
+                        }
 
-                    // Perbaiki cara menampilkan perusahaan
-                    $namaPerusahaan = '-';
-                    if (!is_null($prakerin->perusahaan)) {
-                        $namaPerusahaan = $prakerin->perusahaan->nama_perusahaan ?? '-';
-                    }
+                        // Perbaiki cara menampilkan pembimbing perusahaan
+                        $pembimbingPerusahaanNama = '-';
+                        if (!is_null($prakerin->pembimbingPerusahaan) && isset($prakerin->pembimbingPerusahaan->nama)) {
+                            $pembimbingPerusahaanNama = $prakerin->pembimbingPerusahaan->nama;
+                        }
 
-                    $rowData = array_merge($rowData, [
-                        $namaPerusahaan,
-                        $pembimbingSekolahNama,
-                        $pembimbingPerusahaanNama,
-                        $prakerin->tanggal_mulai ? Carbon::parse($prakerin->tanggal_mulai)->format('d/m/Y') : '-',
-                        $prakerin->tanggal_selesai ? Carbon::parse($prakerin->tanggal_selesai)->format('d/m/Y') : '-',
-                        ucfirst($prakerin->status_prakerin) ?? '-'
-                    ]);
-                    
-                    $prakerinCount++;
+                        // Perbaiki cara menampilkan perusahaan
+                        $namaPerusahaan = '-';
+                        if (!is_null($prakerin->perusahaan)) {
+                            $namaPerusahaan = $prakerin->perusahaan->nama_perusahaan ?? '-';
+                        }
+
+                        $rowData = array_merge($rowData, [
+                            $namaPerusahaan,
+                            $pembimbingSekolahNama,
+                            $pembimbingPerusahaanNama,
+                            $prakerin->tanggal_mulai ? Carbon::parse($prakerin->tanggal_mulai)->format('d/m/Y') : '-',
+                            $prakerin->tanggal_selesai ? Carbon::parse($prakerin->tanggal_selesai)->format('d/m/Y') : '-',
+                            ucfirst($prakerin->status_prakerin) ?? '-'
+                        ]);
+                        
+                        $prakerinCount++;
+                    }
                 }
             }
 
@@ -222,10 +317,30 @@ class Dashboard extends Component
         // Gabungkan header dan data
         $exportData = array_merge([$headers], $data);
 
-        // Buat file Excel
-        $filename = 'data_prakerin_siswa_' . Carbon::now()->format('Y-m-d_H-i-s') . '.xlsx';
+        // Buat file Excel dengan nama yang mencerminkan periode
+        $periodLabel = match($period) {
+            'today' => 'hari_ini',
+            '3days' => '3_hari_terakhir',
+            '7days' => '7_hari_terakhir',
+            '1month' => '1_bulan_terakhir',
+            '1year' => '1_tahun_terakhir',
+            'custom' => 'periode_' . ($this->startDate ?? 'start') . '_sampai_' . ($this->endDate ?? 'end'),
+            default => 'semua_data'
+        };
+        
+        $filename = 'data_prakerin_siswa_' . $periodLabel . '_' . Carbon::now()->format('Y-m-d_H-i-s') . '.xlsx';
+        
+        // Reset tanggal setelah export selesai (hanya untuk periode custom)
+        if ($period === 'custom') {
+            $this->reset(['startDate', 'endDate']);
+        }
         
         return Excel::download(new \App\Exports\DataExport($exportData), $filename);
+    }
+
+    public function resetCustomDates()
+    {
+        $this->reset(['startDate', 'endDate']);
     }
 
     public function exportExcelPerusahaan()
@@ -269,13 +384,16 @@ class Dashboard extends Component
                 $pembimbingPerusahaanNama = $perusahaan->pembimbingPerusahaan->pluck('nama')->implode(', ');
             }
 
+            // Pastikan nilai numerik diformat dengan benar
+            $jumlahSiswaFormatted = (int)$jumlahSiswa;
+
             $data[] = [
                 $index + 1,
                 $perusahaan->nama_perusahaan ?? '-',
                 $perusahaan->alamat_perusahaan ?? '-',
                 $perusahaan->email_perusahaan ?? '-',
                 $perusahaan->kontak_perusahaan ?? '-',
-                $jumlahSiswa,
+                $jumlahSiswaFormatted,
                 $pembimbingSekolahNama,
                 $pembimbingPerusahaanNama
             ];

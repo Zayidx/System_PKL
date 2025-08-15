@@ -6,9 +6,11 @@ use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class DataExport implements FromArray, WithHeadings, WithStyles, WithColumnWidths
+class DataExport implements FromArray, WithHeadings, WithStyles, WithColumnWidths, WithColumnFormatting
 {
     protected $data;
     protected $headers;
@@ -85,5 +87,21 @@ class DataExport implements FromArray, WithHeadings, WithStyles, WithColumnWidth
         }
         
         return $widths;
+    }
+
+    public function columnFormats(): array
+    {
+        $formatting = [];
+        $columns = range('A', 'Z');
+        
+        // Temukan kolom "Jumlah Siswa Diterima" jika ada
+        $jumlahSiswaIndex = array_search('Jumlah Siswa Diterima', $this->headers);
+        
+        if ($jumlahSiswaIndex !== false && isset($columns[$jumlahSiswaIndex])) {
+            // Format kolom jumlah siswa sebagai angka
+            $formatting[$columns[$jumlahSiswaIndex]] = NumberFormat::FORMAT_NUMBER;
+        }
+        
+        return $formatting;
     }
 }
