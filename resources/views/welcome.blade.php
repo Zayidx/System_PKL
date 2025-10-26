@@ -54,51 +54,54 @@
     </style>
 </head>
 <body class="antialiased">
+    @php
+        $homepageUrl = route('homepage');
+    @endphp
 
     <!-- Header -->
     <header id="header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="text-white text-2xl font-bold flex items-center gap-2">
+            <a href="{{ $homepageUrl }}" class="text-white text-2xl font-bold flex items-center gap-2">
                 <i class="fas fa-graduation-cap"></i>
                 <span>MagangSMK</span>
             </a>
             <ul class="hidden lg:flex items-center space-x-8 text-white font-medium">
-                <li><a href="#beranda" class="hover:text-sky-200 transition-colors">Beranda</a></li>
-                <li><a href="#fitur" class="hover:text-sky-200 transition-colors">Fitur</a></li>
-                <li><a href="#perusahaan" class="hover:text-sky-200 transition-colors">Perusahaan</a></li>
-                <li><a href="#kontak" class="hover:text-sky-200 transition-colors">Kontak</a></li>
+                <li><a href="{{ $homepageUrl }}#beranda" class="hover:text-sky-200 transition-colors">Beranda</a></li>
+                <li><a href="{{ $homepageUrl }}#fitur" class="hover:text-sky-200 transition-colors">Fitur</a></li>
+                <li><a href="{{ $homepageUrl }}#perusahaan" class="hover:text-sky-200 transition-colors">Perusahaan</a></li>
+                <li><a href="{{ $homepageUrl }}#kontak" class="hover:text-sky-200 transition-colors">Kontak</a></li>
             </ul>
             <div class="hidden lg:flex items-center space-x-4">
-                <a href="#" class="text-white font-medium px-5 py-2 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Masuk</a>
-                <a href="#" class="bg-white text-blue-500 font-semibold px-5 py-2.5 rounded-full hover:bg-sky-100 transition-all duration-300 shadow-lg hover:shadow-none">Daftar</a>
+                <a href="{{ route('login') }}" class="text-white font-medium px-5 py-2 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Masuk</a>
+                <a href="{{ route('register') }}" class="bg-white text-blue-500 font-semibold px-5 py-2.5 rounded-full hover:bg-sky-100 transition-all duration-300 shadow-lg hover:shadow-none">Daftar</a>
             </div>
-            <button id="mobile-menu-button" class="lg:hidden text-white text-2xl">
+            <button id="mobile-menu-button" type="button" class="lg:hidden text-white text-2xl" aria-controls="mobile-menu" aria-expanded="false" aria-label="Buka menu navigasi">
                 <i class="fas fa-bars"></i>
             </button>
         </nav>
     </header>
     
     <!-- Mobile Menu -->
-    <div id="mobile-menu" class="hidden lg:hidden fixed top-0 left-0 w-full h-full bg-blue-500 z-50">
+    <div id="mobile-menu" class="hidden lg:hidden fixed top-0 left-0 w-full h-full bg-blue-500 z-50 overflow-y-auto" aria-hidden="true">
         <div class="container mx-auto px-6 py-4 flex flex-col h-full">
              <div class="flex justify-between items-center mb-12">
-                 <a href="#" class="text-white text-2xl font-bold flex items-center gap-2">
+                 <a href="{{ $homepageUrl }}" class="text-white text-2xl font-bold flex items-center gap-2">
                     <i class="fas fa-graduation-cap"></i>
                     <span>MagangSMK</span>
                 </a>
-                <button id="mobile-menu-close" class="text-white text-3xl">
+                <button id="mobile-menu-close" type="button" class="text-white text-3xl" aria-label="Tutup menu navigasi">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <ul class="flex flex-col items-center space-y-8 text-white text-xl font-medium">
-                <li><a href="#beranda" class="mobile-link">Beranda</a></li>
-                <li><a href="#fitur" class="mobile-link">Fitur</a></li>
-                <li><a href="#perusahaan" class="mobile-link">Perusahaan</a></li>
-                <li><a href="#kontak" class="mobile-link">Kontak</a></li>
+                <li><a href="{{ $homepageUrl }}#beranda" class="mobile-link">Beranda</a></li>
+                <li><a href="{{ $homepageUrl }}#fitur" class="mobile-link">Fitur</a></li>
+                <li><a href="{{ $homepageUrl }}#perusahaan" class="mobile-link">Perusahaan</a></li>
+                <li><a href="{{ $homepageUrl }}#kontak" class="mobile-link">Kontak</a></li>
             </ul>
             <div class="mt-auto flex flex-col items-center space-y-4 pb-8">
-                <a href="#" class="w-full text-center text-white font-medium px-6 py-3 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Masuk</a>
-                <a href="#" class="w-full text-center bg-white text-blue-500 font-semibold px-6 py-3 rounded-full hover:bg-sky-100 transition-all duration-300">Daftar</a>
+                <a href="{{ route('login') }}" class="mobile-link w-full text-center text-white font-medium px-6 py-3 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Masuk</a>
+                <a href="{{ route('register') }}" class="mobile-link w-full text-center bg-white text-blue-500 font-semibold px-6 py-3 rounded-full hover:bg-sky-100 transition-all duration-300">Daftar</a>
             </div>
         </div>
     </div>
@@ -272,13 +275,17 @@
         document.addEventListener('DOMContentLoaded', function() {
             // --- Header Scroll Effect ---
             const header = document.getElementById('header');
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 50) {
-                    header.classList.add('bg-blue-500/90', 'backdrop-blur-sm', 'shadow-lg');
-                } else {
-                    header.classList.remove('bg-blue-500/90', 'backdrop-blur-sm', 'shadow-lg');
-                }
-            });
+            if (header) {
+                const applyHeaderState = () => {
+                    if (window.scrollY > 50) {
+                        header.classList.add('bg-blue-500/90', 'backdrop-blur-sm', 'shadow-lg');
+                    } else {
+                        header.classList.remove('bg-blue-500/90', 'backdrop-blur-sm', 'shadow-lg');
+                    }
+                };
+                window.addEventListener('scroll', applyHeaderState);
+                applyHeaderState();
+            }
 
             // --- Mobile Menu Toggle ---
             const mobileMenuButton = document.getElementById('mobile-menu-button');
@@ -286,20 +293,26 @@
             const mobileMenu = document.getElementById('mobile-menu');
             const mobileLinks = document.querySelectorAll('.mobile-link');
 
-            const openMenu = () => {
-                mobileMenu.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            };
-            const closeMenu = () => {
-                mobileMenu.classList.add('hidden');
-                document.body.style.overflow = '';
-            };
+            if (mobileMenuButton && mobileMenu && mobileMenuClose) {
+                const openMenu = () => {
+                    mobileMenu.classList.remove('hidden');
+                    mobileMenu.setAttribute('aria-hidden', 'false');
+                    mobileMenuButton.setAttribute('aria-expanded', 'true');
+                    document.body.style.overflow = 'hidden';
+                };
+                const closeMenu = () => {
+                    mobileMenu.classList.add('hidden');
+                    mobileMenu.setAttribute('aria-hidden', 'true');
+                    mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    document.body.style.overflow = '';
+                };
 
-            mobileMenuButton.addEventListener('click', openMenu);
-            mobileMenuClose.addEventListener('click', closeMenu);
-            mobileLinks.forEach(link => {
-                link.addEventListener('click', closeMenu);
-            });
+                mobileMenuButton.addEventListener('click', openMenu);
+                mobileMenuClose.addEventListener('click', closeMenu);
+                mobileLinks.forEach(link => {
+                    link.addEventListener('click', closeMenu);
+                });
+            }
 
             // --- Animate on Scroll ---
             const scrollElements = document.querySelectorAll('.reveal-on-scroll');

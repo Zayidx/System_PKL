@@ -5,7 +5,7 @@
             <h1 class="h3 mb-0 text-gray-800">
                 <i class="bi bi-clipboard-data me-2"></i>Daftar Penilaian PKL
             </h1>
-            <a href="{{ route('admin.kompetensi') }}" class="btn btn-secondary">
+            <a href="{{ route('admin.master.kompetensi') }}" class="btn btn-secondary">
                 <i class="bi bi-arrow-left me-2"></i>Kembali ke Kompetensi
             </a>
         </div>
@@ -131,7 +131,7 @@
                                     </td>
                                     <td class="text-center">
                                         @if($item->jumlah_kompetensi > 0)
-                                            <a href="{{ route('admin.penilaian-pkl.detail', $item->id_penilaian) }}" 
+                                            <a href="{{ route('admin.master.penilaian-pkl.detail', $item->id_penilaian) }}" 
                                                class="btn btn-sm btn-primary">
                                                 <i class="bi bi-eye me-1"></i>Detail Nilai
                                             </a>

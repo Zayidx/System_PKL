@@ -5,7 +5,7 @@
             <h1 class="h3 mb-0 text-gray-800">
                 <i class="bi bi-clipboard-data me-2"></i>Detail Nilai PKL
             </h1>
-            <a href="{{ route('admin.penilaian-pkl') }}" class="btn btn-secondary">
+            <a href="{{ route('admin.master.penilaian-pkl') }}" class="btn btn-secondary">
                 <i class="bi bi-arrow-left me-2"></i>Kembali
             </a>
         </div>
@@ -205,7 +205,7 @@
                     <button onclick="window.print()" class="btn btn-primary me-2">
                         <i class="bi bi-printer me-2"></i>Cetak Laporan
                     </button>
-                    <a href="{{ route('admin.penilaian-pkl') }}" class="btn btn-secondary">
+                    <a href="{{ route('admin.master.penilaian-pkl') }}" class="btn btn-secondary">
                         <i class="bi bi-arrow-left me-2"></i>Kembali ke Daftar Penilaian
                     </a>
                 </div>

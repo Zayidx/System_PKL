@@ -65,7 +65,7 @@
                             Manajemen Kompetensi PKL
                         </h5>
                         <div class="d-flex flex-column flex-sm-row gap-2">
-                            <a href="{{ route('admin.penilaian-pkl') }}" class="btn btn-info btn-sm">
+                            <a href="{{ route('admin.master.penilaian-pkl') }}" class="btn btn-info btn-sm">
                                 <i class="bi bi-clipboard-data me-2"></i>
                                 <span class="d-none d-sm-inline">Lihat Penilaian PKL</span>
                                 <span class="d-sm-none">Penilaian</span>
