@@ -19,7 +19,7 @@ Sistem penilaian PKL yang otomatis mengirim form penilaian ke email perusahaan s
 
 ### **3. Dashboard Nilai**
 - ✅ **Siswa:** Melihat nilai PKL mereka
-- ✅ **Staff Hubin:** Monitoring nilai semua siswa
+- ✅ **Staf Hubin:** Monitoring nilai semua siswa
 - ✅ **Detail:** Grafik dan statistik nilai
 - ✅ **Export:** Fitur cetak nilai
 
@@ -89,7 +89,7 @@ class NilaiSiswa extends Component
             ->whereHas('pembimbingPerusahaan.penilaian')
             ->paginate($this->perPage);
             
-        return view('livewire.user.nilai-siswa', [
+        return view('livewire.pengguna.nilai-siswa', [
             'prakerinSelesai' => $prakerinSelesai
         ]);
     }
@@ -97,7 +97,7 @@ class NilaiSiswa extends Component
 ```
 
 #### **NilaiSiswaDashboard Component**
-**File:** `app/Livewire/StaffHubin/NilaiSiswaDashboard.php`
+**File:** `app/Livewire/StafHubin/DasborNilaiSiswa.php`
 
 ```php
 class NilaiSiswaDashboard extends Component
@@ -109,7 +109,7 @@ class NilaiSiswaDashboard extends Component
             ->where('id_kelas', $this->id_kelas)
             ->paginate($this->perPage);
             
-        return view('livewire.staff-hubin.nilai-siswa-dashboard', [
+        return view('livewire.staf-hubin.nilai-siswa-dashboard', [
             'siswaList' => $siswaList
         ]);
     }
@@ -207,7 +207,7 @@ Detail Modal with Grafik
 - ✅ **Detail Modal:** Grafik dan breakdown nilai
 - ✅ **Export:** Fitur cetak nilai
 
-### **Untuk Staff Hubin:**
+### **Untuk Staf Hubin:**
 - ✅ **Monitoring Kelas:** Nilai semua siswa per kelas
 - ✅ **Statistik:** Rata-rata, tertinggi, terendah
 - ✅ **Filter & Search:** Pencarian berdasarkan nama/NIS
@@ -291,15 +291,15 @@ $token = \Str::random(64);
 
 ### **1. User Routes**
 ```php
-Route::prefix('user')->name('user.')->middleware('role:user')->group(function () {
+Route::prefix('pengguna')->name('pengguna.')->middleware('role:user')->group(function () {
     Route::get('/nilai', NilaiSiswa::class)->name('nilai');
 });
 ```
 
-### **2. Staff Hubin Routes**
+### **2. Staf Hubin Routes**
 ```php
-Route::prefix('staffhubin')->name('staffhubin.')->middleware('role:staffhubin')->group(function () {
-    Route::get('/nilai/kelas/{id_kelas}', NilaiSiswaDashboard::class)->name('nilai.siswa');
+Route::prefix('staf-hubin')->name('staf-hubin.')->middleware('role:staffhubin')->group(function () {
+    Route::get('/nilai/kelas/{id_kelas}', DasborNilaiSiswa::class)->name('nilai.kelas');
 });
 ```
 
@@ -340,7 +340,7 @@ Route::post('/penilaian/submit/{token}', [PenilaianController::class, 'submitPen
 
 ### **1. Tombol "Cek Nilai"**
 - ✅ **Riwayat Prakerin:** Tombol di prakerin selesai
-- ✅ **Staff Hubin Dashboard:** Tombol di status siswa
+- ✅ **Staf Hubin Dashboard:** Tombol di status siswa
 - ✅ **Direct Link:** Navigasi langsung ke halaman nilai
 
 ### **2. Real-time Updates**

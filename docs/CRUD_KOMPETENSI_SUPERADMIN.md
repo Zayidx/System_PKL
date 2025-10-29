@@ -2,7 +2,7 @@
 
 ## **🎯 FITUR YANG DIBUAT**
 
-### **1. Komponen Livewire: `Admin/KompetensiNilaiDashboard`**
+### **1. Komponen Livewire: `Administrator/DasborKompetensiNilai`**
 
 #### **✅ Fitur Utama:**
 - **CRUD Lengkap:** Create, Read, Update, Delete kompetensi
@@ -24,9 +24,9 @@
 #### **✅ Route:**
 ```php
 // routes/web.php
-Route::prefix('admin')->name('admin.')->middleware('role:superadmin')->group(function () {
-    Route::prefix('master-data')->name('master.')->group(function () {
-        Route::get('/kompetensi', KompetensiNilaiDashboard::class)->name('kompetensi');
+Route::prefix('administrator')->name('administrator.')->middleware('role:superadmin')->group(function () {
+    Route::prefix('data-induk')->name('data.')->group(function () {
+        Route::get('/kompetensi', DasborKompetensiNilai::class)->name('kompetensi');
     });
 });
 ```
@@ -34,8 +34,8 @@ Route::prefix('admin')->name('admin.')->middleware('role:superadmin')->group(fun
 #### **✅ Sidebar Menu:**
 ```html
 <!-- resources/views/components/layouts/partials/sidebar-admin-dashboard.blade.php -->
-<li class="submenu-item {{ Request::routeIs('admin.master.kompetensi') ? 'active' : '' }}">
-    <a href="{{ route('admin.master.kompetensi') }}" wire:navigate class="submenu-link">
+<li class="submenu-item {{ Request::routeIs('administrator.data.kompetensi') ? 'active' : '' }}">
+    <a href="{{ route('administrator.data.kompetensi') }}" wire:navigate class="submenu-link">
         <i class="bi bi-list-check me-2"></i>
         Pengelolaan Kompetensi PKL
     </a>
@@ -46,7 +46,7 @@ Route::prefix('admin')->name('admin.')->middleware('role:superadmin')->group(fun
 
 ### **1. Akses Halaman**
 ```
-URL: http://192.168.18.94:8000/admin/master-data/kompetensi
+URL: http://192.168.18.94:8000/administrator/data-induk/kompetensi
 Login: superadmin@sekolah.sch.id / password
 ```
 
@@ -119,7 +119,7 @@ Login: superadmin@sekolah.sch.id / password
 
 ### **1. Komponen Livewire**
 ```php
-// app/Livewire/Admin/KompetensiNilaiDashboard.php
+// app/Livewire/Administrator/DasborKompetensiNilai.php
 class KompetensiNilaiDashboard extends Component
 {
     use WithPagination;

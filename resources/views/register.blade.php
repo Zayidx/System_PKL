@@ -76,7 +76,7 @@
     </div>
     
     <!-- FORM DAFTAR -->
-    <form method="POST" action="{{ route('register.proses') }}">
+    <form method="POST" action="{{ route('daftar.proses') }}">
       @csrf
       <input type="text" name="name" placeholder="Nama Lengkap" required>
       <input type="email" name="email" placeholder="Email" required>
@@ -86,7 +86,7 @@
     </form>
 
     <div class="text-link">
-      Sudah punya akun? <a href="{{ route('login') }}">Masuk</a>
+      Sudah punya akun? <a href="{{ route('masuk') }}">Masuk</a>
     </div>
   </div>
 </body>

@@ -106,12 +106,12 @@ Fitur ini memungkinkan siswa untuk memperpanjang prakerin di perusahaan yang sud
    - Method untuk menangani modal perpanjangan
    - Section untuk menampilkan prakerin selesai
 
-3. **resources/views/livewire/user/riwayat-prakerin.blade.php**
+3. **resources/views/livewire/pengguna/riwayat-prakerin.blade.php**
    - Menambahkan modal perpanjangan
    - Menambahkan tombol perpanjangan di tabel
    - Form input tanggal dan keterangan
 
-4. **resources/views/livewire/user/dashboard.blade.php**
+4. **resources/views/livewire/pengguna/dashboard.blade.php**
    - Menambahkan section prakerin selesai
    - Menambahkan modal perpanjangan
    - Tombol perpanjangan di dashboard

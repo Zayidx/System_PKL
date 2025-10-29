@@ -95,11 +95,11 @@ private function dispatchPrakerinCreatedEvent($prakerin)
 
 ### 3. **Livewire Components dengan Polling**
 
-#### **PrakerinDashboard Component**
-**File:** `app/Livewire/StaffHubin/PrakerinDashboard.php`
+#### **Dasbor Prakerin Component**
+**File:** `app/Livewire/StafHubin/DasborPrakerin.php`
 
 ```php
-class PrakerinDashboard extends Component
+class DasborPrakerin extends Component
 {
     use WithPagination;
 
@@ -122,18 +122,18 @@ class PrakerinDashboard extends Component
             ->orderBy('nama_kelas')
             ->paginate($this->perPage);
 
-        return view('livewire.staff-hubin.prakerin-dashboard', [
+        return view('livewire.staf-hubin.dasbor-prakerin', [
             'kelasList' => $kelasList
         ]);
     }
 }
 ```
 
-#### **StaffHubin Dashboard Component**
-**File:** `app/Livewire/StaffHubin/Dashboard.php`
+#### **Dasbor Staf Hubin Component**
+**File:** `app/Livewire/StafHubin/DasborUtama.php`
 
 ```php
-class Dashboard extends Component
+class DasborUtama extends Component
 {
     // Properties untuk statistik
     public $statPengajuan, $statPending, $statDiterima, $statDitolak;
@@ -159,8 +159,8 @@ class Dashboard extends Component
 
 ### 4. **View dengan Polling**
 
-#### **Prakerin Dashboard View**
-**File:** `resources/views/livewire/staff-hubin/prakerin-dashboard.blade.php`
+#### **Dasbor Prakerin View**
+**File:** `resources/views/livewire/staf-hubin/dasbor-prakerin.blade.php`
 
 ```blade
 <div wire:poll.10s>
@@ -179,8 +179,8 @@ class Dashboard extends Component
 </div>
 ```
 
-#### **StaffHubin Dashboard View**
-**File:** `resources/views/livewire/staff-hubin/dashboard.blade.php`
+#### **Dasbor Staf Hubin View**
+**File:** `resources/views/livewire/staf-hubin/dasbor-utama.blade.php`
 
 ```blade
 <div class="container-fluid py-2" x-data="dashboardChart()" wire:poll.15s>
@@ -288,7 +288,7 @@ Polling (10-15s) → Component Refresh → UI Update
 3. Prakerin akan dibuat otomatis
 4. Email konfirmasi dikirim ke siswa
 
-### **Untuk Staff Hubin:**
+### **Untuk Staf Hubin:**
 1. Buka dashboard staff hubin
 2. Sistem akan auto-refresh setiap 15 detik
 3. Prakerin baru akan muncul otomatis

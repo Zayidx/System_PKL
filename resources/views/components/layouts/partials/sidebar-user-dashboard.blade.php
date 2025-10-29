@@ -6,25 +6,25 @@
 <ul class="menu">
     <li class="sidebar-title">Menu Pengguna</li>
 
-    <li class="sidebar-item {{ Request::routeIs('user.dashboard') ? 'active' : '' }}">
+    <li class="sidebar-item {{ Request::routeIs('pengguna.dasbor') ? 'active' : '' }}">
         {{-- Arahkan ke rute dashboard pengguna yang benar --}}
-        <a href="{{ route('user.dashboard') }}" wire:navigate class='sidebar-link'>
+        <a href="{{ route('pengguna.dasbor') }}" wire:navigate class='sidebar-link'>
             <i class="bi bi-grid-fill"></i>
             <span>Dashboard</span>
         </a>
     </li>
 
-    <li class="sidebar-item {{ Request::routeIs('user.pengajuan*') ? 'active' : '' }}">
+    <li class="sidebar-item {{ Request::routeIs('pengguna.pengajuan*') ? 'active' : '' }}">
         {{-- Arahkan ke rute pengajuan pengguna yang benar --}}
-        <a href="{{ route('user.pengajuan') }}" wire:navigate class='sidebar-link'>
+        <a href="{{ route('pengguna.pengajuan') }}" wire:navigate class='sidebar-link'>
             <i class="bi bi-send-fill"></i>
             <span>Pengajuan Magang</span>
         </a>
     </li>
 
-    <li class="sidebar-item {{ Request::routeIs('user.riwayat-prakerin') ? 'active' : '' }}">
+    <li class="sidebar-item {{ Request::routeIs('pengguna.riwayat-prakerin') ? 'active' : '' }}">
         {{-- Menu Riwayat Prakerin --}}
-        <a href="{{ route('user.riwayat-prakerin') }}" wire:navigate class='sidebar-link'>
+        <a href="{{ route('pengguna.riwayat-prakerin') }}" wire:navigate class='sidebar-link'>
             <i class="bi bi-clock-history"></i>
             <span>Riwayat Prakerin</span>
         </a>
@@ -32,7 +32,7 @@
     
     {{-- Tambahkan menu lain untuk user di sini jika ada --}}
     {{-- 
-    <li class="sidebar-item {{ Request::routeIs('user.profile') ? 'active' : '' }}">
+    <li class="sidebar-item {{ Request::routeIs('pengguna.profil') ? 'active' : '' }}">
         <a href="#" wire:navigate class='sidebar-link'>
             <i class="bi bi-person-fill"></i>
             <span>Profil Saya</span>
@@ -40,5 +40,5 @@
     </li>
     --}}
     
-    <livewire:auth.logout>
+    <livewire:autentikasi.keluar>
 </ul>

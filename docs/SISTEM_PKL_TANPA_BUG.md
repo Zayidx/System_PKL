@@ -136,7 +136,7 @@ php artisan tinker --execute="
 \$user = \App\Models\User::where('email', 'farid0236@gmail.com')->first();
 \Illuminate\Support\Facades\Auth::login(\$user);
 \$prakerin = \App\Models\Prakerin::where('nis_siswa', \$user->siswa->nis)->where('status_prakerin', 'selesai')->first();
-\$component = new \App\Livewire\User\RiwayatPrakerin();
+\$component = new \App\Livewire\Pengguna\RiwayatPrakerin();
 \$component->kirimFormPenilaian(\$prakerin->id_prakerin);
 echo 'Method selesai';
 "

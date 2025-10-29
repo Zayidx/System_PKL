@@ -9,7 +9,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('perusahaan', function (Blueprint $table) {
-            // PERBAIKAN: Menggunakan increments() agar konsisten.
+            // Gunakan increments() agar konsisten dengan primary key lain.
             $table->increments('id_perusahaan');
             $table->string('nama_perusahaan', 100);
             $table->text('alamat_perusahaan');
@@ -23,9 +23,9 @@ return new class extends Migration
         });
 
         Schema::create('pembimbing_perusahaan', function (Blueprint $table) {
-            // PERBAIKAN: Menggunakan increments() agar konsisten.
+            // Gunakan increments() agar konsisten dengan primary key lain.
             $table->increments('id_pembimbing');
-            // PERBAIKAN: Tipe data disesuaikan dengan primary key di 'perusahaan'.
+            // Tipe data diselaraskan dengan primary key di 'perusahaan'.
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->unsignedInteger('id_perusahaan');
             $table->string('nama', 75);
@@ -38,7 +38,7 @@ return new class extends Migration
 
         Schema::create('kontak_perusahaan', function (Blueprint $table) {
             $table->increments('id_kontak');
-            // PERBAIKAN: Tipe data disesuaikan dengan primary key di 'perusahaan'.
+            // Tipe data diselaraskan dengan primary key di 'perusahaan'.
             $table->unsignedInteger('id_perusahaan');
             $table->string('kontak_perusahaan', 17);
 
@@ -46,7 +46,7 @@ return new class extends Migration
         });
 
         Schema::table('siswa', function (Blueprint $table) {
-            // PERBAIKAN: Tipe data disesuaikan dengan primary key di 'perusahaan'.
+            // Tipe data diselaraskan dengan primary key di 'perusahaan'.
             $table->unsignedInteger('id_perusahaan')->nullable();
             $table->foreign('id_perusahaan')->references('id_perusahaan')->on('perusahaan')->onDelete('set null');
         });

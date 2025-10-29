@@ -5,11 +5,11 @@
 ### **1. Sweet Alert untuk Login Berhasil**
 
 #### **✅ Implementasi:**
-- **File Modified:** `app/Livewire/Auth/Login.php`
+- **File Modified:** `app/Livewire/Autentikasi/Masuk.php`
 - **Layouts Updated:** 
   - `resources/views/components/layouts/layout-admin-dashboard.blade.php`
   - `resources/views/components/layouts/layout-user-dashboard.blade.php`
-  - `resources/views/components/layouts/layout-staff-hubin-dashboard.blade.php`
+  - `resources/views/components/layouts/layout-staf-hubin-dashboard.blade.php`
 
 #### **🔧 Cara Kerja:**
 1. **Login Success Detection:** Saat user berhasil login, sistem menyimpan data role ke session
@@ -33,7 +33,7 @@ Swal.fire({
 
 #### **🎨 Role Display Names:**
 - `admin/superadmin` → "Administrator"
-- `staffhubin` → "Staff Hubin"  
+- `staffhubin` → "Staf Hubin"  
 - `user` → "Siswa"
 - `default` → "User"
 
@@ -122,11 +122,11 @@ php artisan tinker --execute="
 
 #### **✅ Komponen Livewire:**
 - **Student:** `app/Livewire/User/NilaiSiswa.php`
-- **Staff Hubin:** `app/Livewire/StaffHubin/NilaiSiswaDashboard.php`
+- **Staf Hubin:** `app/Livewire/StafHubin/DasborNilaiSiswa.php`
 
 #### **📱 UI Features:**
 - **Student Dashboard:** Tombol "Cek Nilai" di riwayat prakerin
-- **Staff Hubin:** Tombol "Cek Nilai PKL" di status prakerin siswa
+- **Staf Hubin:** Tombol "Cek Nilai PKL" di status prakerin siswa
 - **Modal View:** Tampilan detail nilai dengan chart
 - **Statistics:** Rata-rata nilai, jumlah kompetensi, status penilaian
 

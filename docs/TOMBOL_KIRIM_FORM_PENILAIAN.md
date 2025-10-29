@@ -5,7 +5,7 @@
 ### **1. Tombol Kirim Form Penilaian di Riwayat Prakerin**
 
 #### **✅ Implementasi:**
-- **File Modified:** `resources/views/livewire/user/riwayat-prakerin.blade.php`
+- **File Modified:** `resources/views/livewire/pengguna/riwayat-prakerin.blade.php`
 - **Component Updated:** `app/Livewire/User/RiwayatPrakerin.php`
 
 #### **🔧 Cara Kerja:**
@@ -108,7 +108,7 @@ console.log('Login success data:', loginData);
 #### **📱 Layouts yang Diperbaiki:**
 - `resources/views/components/layouts/layout-admin-dashboard.blade.php`
 - `resources/views/components/layouts/layout-user-dashboard.blade.php`
-- `resources/views/components/layouts/layout-staff-hubin-dashboard.blade.php`
+- `resources/views/components/layouts/layout-staf-hubin-dashboard.blade.php`
 
 ### **3. Testing & Debugging**
 

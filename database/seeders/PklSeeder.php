@@ -40,7 +40,7 @@ class PklSeeder extends Seeder
             $waliKelasRole = Role::firstOrCreate(['name' => 'walikelas'], ['keterangan' => 'Wali Kelas']);
             $pembimbingPerusahaanRole = Role::firstOrCreate(['name' => 'pembimbingperusahaan'], ['keterangan' => 'Pembimbing Perusahaan']);
             $pembimbingSekolahRole = Role::firstOrCreate(['name' => 'pembimbingsekolah'], ['keterangan' => 'Pembimbing dari Sekolah']);
-            $staffHubinRole = Role::firstOrCreate(['name' => 'staffhubin'], ['keterangan' => 'Staff Hubin']);
+            $staffHubinRole = Role::firstOrCreate(['name' => 'staffhubin'], ['keterangan' => 'Staf Hubin']);
             $kepalaSekolahRole = Role::firstOrCreate(['name' => 'kepalasekolah'], ['keterangan' => 'Kepala Sekolah']);
             $kepalaProgramRole = Role::firstOrCreate(['name' => 'kepalaprogram'], ['keterangan' => 'Kepala Program']);
 
@@ -72,8 +72,8 @@ class PklSeeder extends Seeder
             ]);
             $this->command->info($pembimbingSekolahs->count() . ' Pembimbing Sekolah (role: pembimbingsekolah) telah dibuat.');
 
-            // Membuat akun Staff Hubin statis
-            $this->command->info('Membuat akun Staff Hubin statis (vanjirgua@gmail.com)...');
+            // Membuat akun Staf Hubin statis
+            $this->command->info('Membuat akun Staf Hubin statis (vanjirgua@gmail.com)...');
             $staffHubinUserStatis = User::firstOrCreate(
                 ['email' => 'vanjirgua@gmail.com'],
                 [
@@ -87,10 +87,10 @@ class PklSeeder extends Seeder
                 ['nama_staff' => $staffHubinUserStatis->username]
             );
 
-            // Membuat Staff Hubin Faker
+            // Membuat Staf Hubin Faker
             $staffHubins = $this->createUsersWithProfile($faker, 1, $staffHubinRole, StaffHubin::class, ['nama_staff' => 'username']);
             $staffHubins->push($staffHubinStatis); // Menambahkan staff hubin statis ke koleksi
-            $this->command->info($staffHubins->count() . ' Staff Hubin (role: staffhubin) telah dibuat.');
+            $this->command->info($staffHubins->count() . ' Staf Hubin (role: staffhubin) telah dibuat.');
 
 
             $kepalaSekolahs = $this->createUsersWithProfile($faker, 1, $kepalaSekolahRole, KepalaSekolah::class, ['nama_kepala_sekolah' => 'username', 'jabatan' => 'Kepala Sekolah', 'nip_kepsek' => fn() => $faker->numerify('19#########-####-##-###')]);

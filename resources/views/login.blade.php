@@ -118,7 +118,7 @@
       <p>Masukkan email dan password Anda untuk melanjutkan</p>
     </div>
 
-    <form method="POST" action="{{ route('login.proses') }}">
+    <form method="POST" action="{{ route('masuk.proses') }}">
       @csrf
       <div class="login-body">
         <div class="form-group">
@@ -138,7 +138,7 @@
         <div class="or-divider"><span>atau</span></div>
 
         <div class="register-link">
-          <a href="{{ route('register') }}">Daftar Akun Baru</a>
+          <a href="{{ route('daftar') }}">Daftar Akun Baru</a>
         </div>
       </div>
     </form>

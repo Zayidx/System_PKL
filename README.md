@@ -94,7 +94,7 @@ Sistem manajemen prakerin untuk sekolah menengah kejuruan yang memungkinkan sisw
 - ✅ Validasi data otomatis
 
 ### **5. Dashboard Monitoring**
-- ✅ Dashboard khusus untuk setiap role (Siswa, Staff Hubin, Admin)
+- ✅ Dashboard khusus untuk setiap role (Siswa, Staf Hubin, Admin)
 - ✅ Statistik real-time
 - ✅ Filter dan pencarian data
 - ✅ Export data ke PDF

@@ -55,7 +55,7 @@
 </head>
 <body class="antialiased">
     @php
-        $homepageUrl = route('homepage');
+        $homepageUrl = route('beranda');
     @endphp
 
     <!-- Header -->
@@ -72,8 +72,8 @@
                 <li><a href="{{ $homepageUrl }}#kontak" class="hover:text-sky-200 transition-colors">Kontak</a></li>
             </ul>
             <div class="hidden lg:flex items-center space-x-4">
-                <a href="{{ route('login') }}" class="text-white font-medium px-5 py-2 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Masuk</a>
-                <a href="{{ route('register') }}" class="bg-white text-blue-500 font-semibold px-5 py-2.5 rounded-full hover:bg-sky-100 transition-all duration-300 shadow-lg hover:shadow-none">Daftar</a>
+                <a href="{{ route('masuk') }}" class="text-white font-medium px-5 py-2 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Masuk</a>
+                <a href="{{ route('daftar') }}" class="bg-white text-blue-500 font-semibold px-5 py-2.5 rounded-full hover:bg-sky-100 transition-all duration-300 shadow-lg hover:shadow-none">Daftar</a>
             </div>
             <button id="mobile-menu-button" type="button" class="lg:hidden text-white text-2xl" aria-controls="mobile-menu" aria-expanded="false" aria-label="Buka menu navigasi">
                 <i class="fas fa-bars"></i>
@@ -100,8 +100,8 @@
                 <li><a href="{{ $homepageUrl }}#kontak" class="mobile-link">Kontak</a></li>
             </ul>
             <div class="mt-auto flex flex-col items-center space-y-4 pb-8">
-                <a href="{{ route('login') }}" class="mobile-link w-full text-center text-white font-medium px-6 py-3 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Masuk</a>
-                <a href="{{ route('register') }}" class="mobile-link w-full text-center bg-white text-blue-500 font-semibold px-6 py-3 rounded-full hover:bg-sky-100 transition-all duration-300">Daftar</a>
+                <a href="{{ route('masuk') }}" class="mobile-link w-full text-center text-white font-medium px-6 py-3 rounded-full border-2 border-white hover:bg-white hover:text-blue-500 transition-all duration-300">Masuk</a>
+                <a href="{{ route('daftar') }}" class="mobile-link w-full text-center bg-white text-blue-500 font-semibold px-6 py-3 rounded-full hover:bg-sky-100 transition-all duration-300">Daftar</a>
             </div>
         </div>
     </div>

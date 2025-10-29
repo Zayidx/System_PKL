@@ -5,7 +5,7 @@
 ### **1. Penyesuaian Status di Dashboard User**
 
 #### **✅ Implementasi:**
-- **File Modified:** `resources/views/livewire/user/dashboard.blade.php`
+- **File Modified:** `resources/views/livewire/pengguna/dashboard.blade.php`
 - **Component Updated:** `app/Livewire/User/Dashboard.php`
 
 #### **🔧 Perubahan Status yang Diterapkan:**
@@ -69,7 +69,7 @@
 ### **2. Tombol Kirim Form Penilaian di Dashboard**
 
 #### **✅ Implementasi:**
-- **File Modified:** `resources/views/livewire/user/dashboard.blade.php`
+- **File Modified:** `resources/views/livewire/pengguna/dashboard.blade.php`
 - **Component Updated:** `app/Livewire/User/Dashboard.php`
 
 #### **🔧 Cara Kerja:**
@@ -140,7 +140,7 @@ Mail::to($prakerin->perusahaan->email_perusahaan)
         <i class="bi bi-envelope me-2"></i>
         Kirim Form Penilaian
     </button>
-    <a href="{{ route('user.riwayat-prakerin') }}" class="btn btn-outline-secondary btn-sm">
+    <a href="{{ route('pengguna.riwayat-prakerin') }}" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-list-ul me-2"></i>
         Lihat Riwayat
     </a>

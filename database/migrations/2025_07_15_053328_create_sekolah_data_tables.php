@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('kontak_guru', 17);
         });
 
-        // PERBAIKAN TOTAL PADA TABEL KEPALA PROGRAM
+        // Penyesuaian total pada tabel kepala program
         Schema::create('kepala_program', function (Blueprint $table) {
             $table->increments('nip_kepala_program');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
@@ -47,7 +47,7 @@ return new class extends Migration
             $table->string('nama_staff', 60);
         });
 
-        // PERBAIKAN KRITIS PADA TABEL KEPALA SEKOLAH
+        // Penyesuaian kritis pada tabel kepala sekolah
         Schema::create('kepala_sekolah', function (Blueprint $table) {
             $table->tinyIncrements('id_kepsek');
             // BARU: Tambahkan foreign key ke tabel users
